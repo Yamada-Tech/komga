@@ -28,6 +28,7 @@ import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOO
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOK_WEBPUB
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.CLAIM
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.CLIENT_SETTINGS
+import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.APP_LOGO
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.COLLECTIONS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.COLLECTION_POSTER
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.COLLECTION_SERIES
@@ -340,6 +341,7 @@ class OpenApiConfiguration(
         listOf(
           CLAIM,
           SERVER_SETTINGS,
+          APP_LOGO,
           TASKS,
           HISTORY,
           FILE_SYSTEM,
@@ -408,6 +410,8 @@ class OpenApiConfiguration(
     const val COMICRACK = "ComicRack"
 
     const val CLIENT_SETTINGS = "Client settings"
+
+    const val APP_LOGO = "Application Logo"
   }
 
   private val tags =
@@ -447,5 +451,6 @@ class OpenApiConfiguration(
       Tag().name(MIHON),
       Tag().name(COMICRACK),
       Tag().name(CLIENT_SETTINGS).description("Store and retrieve global and per-user settings. Those settings are not used by Komga itself, but can be stored for convenience by client applications."),
+      Tag().name(APP_LOGO).description("Upload and retrieve the custom application logo."),
     )
 }

@@ -1001,7 +1001,11 @@
     "label_task_pool_size": "Task threads",
     "label_thumbnail_size": "Thumbnails size",
     "requires_restart": "Requires restart to take effect",
-    "server_settings": "Server Settings"
+    "server_settings": "Server Settings",
+    "logo_section_title": "Application Logo",
+    "label_logo_upload": "Select logo image",
+    "button_logo_upload": "Upload",
+    "button_logo_delete": "Reset to default"
   },
   "settings_user": {
     "change_password": "Change password",

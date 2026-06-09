@@ -2,9 +2,7 @@
   <div class="ma-3">
     <v-container style="max-width: 550px">
       <v-row align="center" justify="center" class="ma-3">
-        <v-img src="../assets/logo.svg"
-               :max-width="logoWidth"
-        />
+        <app-logo :max-width="logoWidth"/>
       </v-row>
 
       <form novalidate @submit.prevent="performLogin">
@@ -144,9 +142,11 @@ import urls from '@/functions/urls'
 import {socialButtons} from '@/types/social'
 import {convertErrorCodes} from '@/functions/error-codes'
 import {CLIENT_SETTING} from '@/types/komga-clientsettings'
+import AppLogo from '@/components/AppLogo.vue'
 
 export default Vue.extend({
   name: 'LoginView',
+  components: {AppLogo},
   data: function () {
     return {
       urls,
