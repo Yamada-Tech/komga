@@ -97,6 +97,8 @@ class SecurityConfiguration(
             "/opds/v2/auth",
             // KOReader user creation
             "/koreader/users/create",
+            // custom application logo (needed on the login page before authentication)
+            "/api/v1/logo",
           ).permitAll()
 
         // all other endpoints are restricted to authenticated users

@@ -21,7 +21,7 @@
     <v-navigation-drawer app v-model="drawerVisible" :right="$vuetify.rtl">
       <v-list-item @click="$router.push({name: 'home'})" inactive class="pb-2">
         <v-list-item-avatar>
-          <v-img src="../assets/logo.svg"/>
+          <app-logo/>
         </v-list-item-avatar>
 
         <v-list-item-content>
@@ -383,11 +383,13 @@ import {LibraryDto} from '@/types/komga-libraries'
 import {BookSearch, SearchConditionAnyOfBook, SearchConditionMediaStatus, SearchOperatorIs} from '@/types/komga-search'
 import LibrariesActionsMenu from '@/components/menus/LibrariesActionsMenu.vue'
 import ReorderLibraries from '@/components/ReorderLibraries.vue'
+import AppLogo from '@/components/AppLogo.vue'
 
 export default Vue.extend({
   name: 'HomeView',
   components: {
     ReorderLibraries,
+    AppLogo,
     LibrariesActionsMenu,
     ToasterNotification,
     LibraryActionsMenu,

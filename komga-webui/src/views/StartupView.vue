@@ -1,18 +1,18 @@
 <template>
   <div class="pa-6">
     <v-row align="center" justify="center">
-      <v-img src="../assets/logo.svg"
-             :max-width="logoWidth"
-      />
+      <app-logo :max-width="logoWidth"/>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import AppLogo from '@/components/AppLogo.vue'
 
 export default Vue.extend({
   name: 'StartupView',
+  components: {AppLogo},
   computed: {
     logoWidth(): number {
       let l = 100

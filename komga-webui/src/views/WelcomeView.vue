@@ -1,9 +1,7 @@
 <template>
   <div class="pa-6">
     <v-row align="center" justify="center">
-      <v-img src="../assets/logo.svg"
-             max-width="400"
-      />
+      <app-logo max-width="400"/>
     </v-row>
     <v-row align="center" justify="center">
       <div class="text-center">
@@ -17,9 +15,11 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import AppLogo from '@/components/AppLogo.vue'
 
 export default Vue.extend({
   name: 'WelcomeView',
+  components: {AppLogo},
   computed: {
     isAdmin (): boolean {
       return this.$store.getters.meAdmin

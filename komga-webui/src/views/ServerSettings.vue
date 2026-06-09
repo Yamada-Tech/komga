@@ -181,6 +181,39 @@
       </v-col>
     </v-row>
 
+    <v-divider class="my-4"/>
+
+    <v-row>
+      <v-col><span class="text-h6">{{ $t('server_settings.logo_section_title') }}</span></v-col>
+    </v-row>
+    <v-row align="center">
+      <v-col cols="auto">
+        <app-logo max-width="100" :key="logoKey"/>
+      </v-col>
+      <v-col cols="auto">
+        <v-file-input
+          v-model="logoFile"
+          accept="image/*"
+          :label="$t('server_settings.label_logo_upload')"
+          prepend-icon="mdi-image"
+          show-size
+          truncate-length="30"
+          hide-details
+          style="min-width: 300px"
+        />
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" :disabled="!logoFile" @click="uploadLogo">
+          {{ $t('server_settings.button_logo_upload') }}
+        </v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="error" @click="deleteLogo">
+          {{ $t('server_settings.button_logo_delete') }}
+        </v-btn>
+      </v-col>
+    </v-row>
+
     <confirmation-dialog
       v-model="dialogRegenerateThumbnails"
       :title="$t('server_settings.dialog_regenerate_thumbnails.title')"
@@ -200,12 +233,13 @@ import Vue from 'vue'
 import {helpers, maxValue, minValue, required} from 'vuelidate/lib/validators'
 import ConfirmationDialog from '@/components/dialogs/ConfirmationDialog.vue'
 import FileBrowserDialog from '@/components/dialogs/FileBrowserDialog.vue'
+import AppLogo from '@/components/AppLogo.vue'
 
 const contextPath = helpers.regex('contextPath', /^\/[-a-zA-Z0-9_\/]*[a-zA-Z0-9]$/)
 
 export default Vue.extend({
   name: 'ServerSettings',
-  components: {FileBrowserDialog, ConfirmationDialog},
+  components: {FileBrowserDialog, ConfirmationDialog, AppLogo},
   data: () => ({
     form: {
       deleteEmptyCollections: false,
@@ -223,6 +257,8 @@ export default Vue.extend({
     existingSettings: {} as SettingsDto,
     dialogRegenerateThumbnails: false,
     modalFileBrowserKepubify: false,
+    logoFile: null as File | null,
+    logoKey: Date.now(),
   }),
   validations: {
     form: {
@@ -352,6 +388,30 @@ export default Vue.extend({
     },
     regenerateThumbnails(forBiggerResultOnly: boolean) {
       this.$komgaBooks.regenerateThumbnails(forBiggerResultOnly)
+    },
+    async uploadLogo() {
+      if (!this.logoFile) return
+      try {
+        await this.$komgaLogo.uploadLogo(this.logoFile)
+        this.logoFile = null
+        this.logoKey = Date.now()
+      } catch (e) {
+        this.$eventHub.$emit('notification', {
+          message: e.message || 'Failed to upload logo',
+          timeout: 5000,
+        })
+      }
+    },
+    async deleteLogo() {
+      try {
+        await this.$komgaLogo.deleteLogo()
+        this.logoKey = Date.now()
+      } catch (e) {
+        this.$eventHub.$emit('notification', {
+          message: e.message || 'Failed to delete logo',
+          timeout: 5000,
+        })
+      }
     },
   },
 })
