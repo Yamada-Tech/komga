@@ -8,7 +8,6 @@ import org.gotson.komga.domain.model.Book
 import org.gotson.komga.domain.model.BookConversionException
 import org.gotson.komga.domain.model.BookWithMedia
 import org.gotson.komga.domain.model.DomainEvent
-import org.gotson.komga.domain.model.HistoricalEvent
 import org.gotson.komga.domain.model.Library
 import org.gotson.komga.domain.model.Media
 import org.gotson.komga.domain.model.MediaNotReadyException
@@ -16,7 +15,6 @@ import org.gotson.komga.domain.model.MediaType
 import org.gotson.komga.domain.model.MediaUnsupportedException
 import org.gotson.komga.domain.model.restoreHashFrom
 import org.gotson.komga.domain.persistence.BookRepository
-import org.gotson.komga.domain.persistence.HistoricalEventRepository
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.persistence.MediaRepository
 import org.gotson.komga.language.notEquals
@@ -47,7 +45,6 @@ class BookConverter(
   private val libraryRepository: LibraryRepository,
   private val transactionTemplate: TransactionTemplate,
   private val eventPublisher: ApplicationEventPublisher,
-  private val historicalEventRepository: HistoricalEventRepository,
 ) {
   private val convertibleTypes = listOf(MediaType.RAR_4.type, MediaType.RAR_5.type)
 
@@ -150,7 +147,6 @@ class BookConverter(
 
     if (book.path.deleteIfExists()) {
       logger.info { "Deleted old file: ${book.path}" }
-      historicalEventRepository.insert(HistoricalEvent.BookFileDeleted(book, "File was deleted after conversion to CBZ"))
     }
 
     val mediaWithHashes = convertedMedia.copy(pages = convertedMedia.pages.restoreHashFrom(media.pages))
@@ -160,7 +156,6 @@ class BookConverter(
       mediaRepository.update(mediaWithHashes)
     }
 
-    historicalEventRepository.insert(HistoricalEvent.BookConverted(convertedBook, book))
     eventPublisher.publishEvent(DomainEvent.BookUpdated(convertedBook))
   }
 
