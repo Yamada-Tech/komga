@@ -16,3 +16,11 @@ data class TopSeriesReadingStatDto(
   val seriesId: String,
   val totalProgressEvents: Int,
 )
+
+data class TopSeriesReadingStatAggregateDto(
+  val seriesId: String,
+  val uniqueReaders: Int,
+  val completedBooks: Int,
+  val progressEvents: Int,
+  val lastReadAt: LocalDateTime?,
+)
