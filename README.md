@@ -60,3 +60,18 @@ Thanks to [Chromatic](https://www.chromatic.com/) for providing the visual testi
 ## Credits
 
 The Komga icon is based on an icon made by [Freepik](https://www.freepik.com/home) from www.flaticon.com
+
+## Windows 11 Portable Build (No-Installation Method)
+For Windows 11 users who want to build and run the custom Komga server instantly without registering system-wide environment variables or installing native installers.
+
+1. Setup Required Tools (Portable/ZIP Versions)
+Download JDK 21 (Windows/x64 ZIP) from jdk.java.net/21 and extract it. Rename and place the folder exactly at: C:\tools\jdk (Ensure C:\tools\jdk\bin\java.exe exists).
+Download Node.js (Windows Binary .zip 64-bit) from nodejs.org and extract it. Move all internal files directly under: C:\tools\node (Ensure C:\tools\node\node.exe and npm.cmd exist directly in this directory).
+2. Execute Automated Compilation
+Download this repository as a ZIP and extract it anywhere (e.g., your Desktop).
+Double-click the build.cmd file located in the root directory.
+The script will automatically bind local portable tools, compile the Vue 2 frontend UI, and package the executable backend.
+3. Launch the Server
+Once completed, navigate to the build/distributions/ directory.
+Extract the generated KomgaCustom-windows-portable.zip to your preferred location.
+Double-click run-komga.bat inside the extracted folder to launch the server. It will automatically open your browser at http://localhost:25600.
