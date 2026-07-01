@@ -77,7 +77,7 @@ export default Vue.extend({
           )
         this.seriesList = cards.filter((it): it is TrendingSeries => it !== undefined)
       } catch (e) {
-        this.$warn('Unable to load trending series', e)
+        this.$warn('Unable to load trending series data for dashboard. This can happen due to network, permission, or temporary API availability issues.', e)
       }
     },
     toTrendingSeriesCard(series: SeriesDto, stats: TopSeriesReadingStatAggregateDto): TrendingSeries {

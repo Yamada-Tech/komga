@@ -17,7 +17,7 @@ export default class KomgaReadingStatsService {
       })).data
     } catch (e) {
       let msg = 'An error occurred while trying to retrieve top series by period'
-      if (e.response.data.message) {
+      if (e.response?.data?.message) {
         msg += `: ${e.response.data.message}`
       }
       throw new Error(msg)
