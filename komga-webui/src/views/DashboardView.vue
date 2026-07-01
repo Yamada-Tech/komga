@@ -54,6 +54,8 @@
       >
       </empty-state>
 
+      <dashboard-trending-series/>
+
       <template v-for="(section, i) in sections">
         <horizontal-scroller
           v-bind:key="i"
@@ -163,6 +165,7 @@ import {
   RecommendedViewSection,
 } from '@/types/komga-clientsettings'
 import EditRecommendedDialog from '@/components/dialogs/EditRecommendedDialog.vue'
+import DashboardTrendingSeries from '@/components/dashboard/DashboardTrendingSeries.vue'
 
 interface SectionConfig {
   loader: PageLoader<any> | undefined,
@@ -179,6 +182,7 @@ enum SectionType {
 export default Vue.extend({
   name: 'DashboardView',
   components: {
+    DashboardTrendingSeries,
     EditRecommendedDialog,
     HorizontalScroller,
     EmptyState,
