@@ -69,6 +69,7 @@ class ReadingStatsController(
       }
 
   @GetMapping("api/v1/reading-stats/series/top-by-period")
+  @PreAuthorize("isAuthenticated()")
   @Operation(
     summary = "Get top series by period",
     description = "Returns series ranked by weighted reading activity over weekly, monthly, or yearly period.",

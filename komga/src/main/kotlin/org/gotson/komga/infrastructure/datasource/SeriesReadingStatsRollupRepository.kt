@@ -27,6 +27,8 @@ class SeriesReadingStatsRollupRepository(
       """
       SELECT
         series_id,
+        -- Daily unique_readers cannot be merged exactly across days without event-level DISTINCT user counting.
+        -- We use MAX(unique_readers) as a stable engagement signal for ranking.
         MAX(unique_readers) AS unique_readers,
         SUM(completed_books) AS completed_books,
         SUM(progress_events) AS progress_events,

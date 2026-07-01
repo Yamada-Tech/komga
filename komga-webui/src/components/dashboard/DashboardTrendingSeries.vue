@@ -4,7 +4,7 @@
       <v-icon color="orange" class="mr-2">mdi-fire</v-icon>
       <div class="title font-weight-bold">みんなが読んでるマンガ</div>
       <v-spacer/>
-      <span class="caption text--secondary">直近1週間のアクティブ作品</span>
+      <span class="caption text--secondary">{{ periodSubtitle }}</span>
     </div>
 
     <v-slide-group show-arrows>
@@ -28,7 +28,7 @@
           <v-card-text class="px-2 pt-0 pb-2 caption text--secondary d-flex align-center"
                        :aria-label="readerCountLabel(series.uniqueReaders)">
             <v-icon size="16" class="mr-1">mdi-account-group</v-icon>
-            <span>{{ series.uniqueReaders }} 人が閲覧中</span>
+            <span>{{ series.uniqueReaders }} 人が読んでいます</span>
           </v-card-text>
         </v-card>
       </v-slide-item>
@@ -54,8 +54,22 @@ export default Vue.extend({
   name: 'DashboardTrendingSeries',
   data: () => {
     return {
+      period: 'weekly',
       seriesList: [] as TrendingSeries[],
     }
+  },
+  computed: {
+    periodSubtitle(): string {
+      switch (this.period) {
+        case 'monthly':
+          return '直近1か月のアクティブ作品'
+        case 'yearly':
+          return '直近1年のアクティブ作品'
+        case 'weekly':
+        default:
+          return '直近1週間のアクティブ作品'
+      }
+    },
   },
   async mounted() {
     await this.loadTrendingSeries()
@@ -63,11 +77,11 @@ export default Vue.extend({
   methods: {
     seriesThumbnailUrl,
     readerCountLabel(count: number): string {
-      return `${count} 人が閲覧中`
+      return `${count} 人が読んでいます`
     },
     async loadTrendingSeries() {
       try {
-        const ranked = await this.$komgaReadingStats.getTopSeriesByPeriod('weekly', 12)
+        const ranked = await this.$komgaReadingStats.getTopSeriesByPeriod(this.period, 12)
         const cards =
           await Promise.all(
             ranked.map(async (it: TopSeriesReadingStatAggregateDto) => {
