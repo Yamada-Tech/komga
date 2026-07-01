@@ -54,6 +54,7 @@ import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.SYN
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.TASKS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.USERS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.USER_SESSION
+import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.READING_STATS
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -412,6 +413,8 @@ class OpenApiConfiguration(
     const val CLIENT_SETTINGS = "Client settings"
 
     const val APP_LOGO = "Application Logo"
+
+    const val READING_STATS = "Reading Stats"
   }
 
   private val tags =
@@ -452,5 +455,6 @@ class OpenApiConfiguration(
       Tag().name(COMICRACK),
       Tag().name(CLIENT_SETTINGS).description("Store and retrieve global and per-user settings. Those settings are not used by Komga itself, but can be stored for convenience by client applications."),
       Tag().name(APP_LOGO).description("Upload and retrieve the custom application logo."),
+      Tag().name(READING_STATS).description("Aggregate reading statistics for popularity and trend analysis."),
     )
 }
