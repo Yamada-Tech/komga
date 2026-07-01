@@ -111,7 +111,7 @@ class SeriesReadingStatDailyDao(
       .orderBy(DSL.sum(s.PROGRESS_EVENTS).desc())
       .limit(limit)
       .fetch()
-      .map { it.value1() to it.value2() }
+      .mapNotNull { r -> r.value1()?.let { id -> id to (r.value2() ?: 0) } }
 
   override fun deleteBySeriesId(seriesId: String) {
     dslRW.deleteFrom(s).where(s.SERIES_ID.eq(seriesId)).execute()
