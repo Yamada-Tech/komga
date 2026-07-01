@@ -342,7 +342,6 @@ class SeriesLifecycle(
     if (series.path.exists() && series.path.listDirectoryEntries().isEmpty())
       if (series.path.deleteIfExists()) {
         logger.info { "Deleted directory: ${series.path}" }
-        historicalEventRepository.insert(HistoricalEvent.SeriesFolderDeleted(series, "Folder was deleted because it was empty"))
       }
 
     softDeleteMany(listOf(series))
