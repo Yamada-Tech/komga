@@ -1,4 +1,7 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.api.tasks.Sync
+import org.gradle.api.tasks.bundling.Zip
 import org.jreleaser.model.Active
 import org.jreleaser.model.Distribution.DistributionType.SINGLE_JAR
 import org.jreleaser.model.api.common.Apply
@@ -55,6 +58,90 @@ allprojects {
 tasks.wrapper {
   gradleVersion = "8.14.3"
   distributionType = Wrapper.DistributionType.ALL
+}
+
+val portableRootDir = layout.buildDirectory.dir("portable")
+val portableStageDir = portableRootDir.map { it.dir("stage") }
+val portableAppImageDir = portableRootDir.map { it.dir("app-image") }
+val portableInputDir = portableRootDir.map { it.dir("input") }
+val runKomgaBatFile = portableRootDir.map { it.file("run-komga.bat") }
+val komgaBootJarFile = project(":komga").layout.buildDirectory.file("libs/komga-${project.version}.jar")
+
+val shadowJar by tasks.registering {
+  group = "build"
+  description = "Build frontend and backend executable JAR for portable packaging"
+  dependsOn(":komga:prepareThymeLeaf", ":komga:bootJar")
+}
+
+val generateRunKomgaBat by tasks.registering {
+  group = "distribution"
+  description = "Generate launcher for portable Windows package"
+  outputs.file(runKomgaBatFile)
+  doLast {
+    runKomgaBatFile.get().asFile.apply {
+      parentFile.mkdirs()
+      writeText(
+        """
+        |@echo off
+        |cd /d "%~dp0"
+        |start "" "http://localhost:25600"
+        |start "" ".\KomgaCustom.exe"
+        """.trimMargin(),
+      )
+    }
+  }
+}
+
+val createWindowsPortableAppImage by tasks.registering(Exec::class) {
+  group = "distribution"
+  description = "Create Windows app image used in portable ZIP"
+  dependsOn(shadowJar)
+  onlyIf { Os.isFamily(Os.FAMILY_WINDOWS) }
+  inputs.file(komgaBootJarFile)
+  outputs.dir(portableAppImageDir)
+  doFirst {
+    delete(portableAppImageDir, portableInputDir)
+    val inputDir = portableInputDir.get().asFile.apply { mkdirs() }
+    copy {
+      from(komgaBootJarFile)
+      into(inputDir)
+    }
+    commandLine(
+      "jpackage",
+      "--type",
+      "app-image",
+      "--name",
+      "KomgaCustom",
+      "--input",
+      inputDir.absolutePath,
+      "--main-jar",
+      komgaBootJarFile.get().asFile.name,
+      "--dest",
+      portableAppImageDir.get().asFile.absolutePath,
+    )
+  }
+}
+
+val preparePortableLayout by tasks.registering(Sync::class) {
+  group = "distribution"
+  description = "Prepare files for portable ZIP"
+  dependsOn(shadowJar, generateRunKomgaBat, createWindowsPortableAppImage)
+  into(portableStageDir)
+  from(runKomgaBatFile)
+  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    from(portableAppImageDir.map { it.dir("KomgaCustom") })
+  } else {
+    from(komgaBootJarFile)
+  }
+}
+
+tasks.register<Zip>("createPortableZip") {
+  group = "distribution"
+  description = "Create a Windows portable ZIP distribution"
+  dependsOn(preparePortableLayout)
+  from(portableStageDir)
+  destinationDirectory.set(layout.buildDirectory.dir("distributions"))
+  archiveFileName.set("komga-portable-${project.version}.zip")
 }
 
 jreleaser {
