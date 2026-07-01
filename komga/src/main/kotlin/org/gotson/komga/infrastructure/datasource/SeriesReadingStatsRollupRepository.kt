@@ -35,6 +35,7 @@ class SeriesReadingStatsRollupRepository(
       WHERE day >= :from AND day <= :to
       GROUP BY series_id
       ORDER BY
+        -- Heavier weight to broad engagement, then completion, then raw progress volume.
         (MAX(unique_readers) * 100 + SUM(completed_books) * 50 + SUM(progress_events)) DESC,
         MAX(last_read_at) DESC
       LIMIT :limit

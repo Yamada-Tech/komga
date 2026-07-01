@@ -81,8 +81,8 @@ class ReadingStatsController(
     val to = LocalDate.now()
     val from =
       when (period.lowercase()) {
-        "monthly" -> to.minusMonths(1).plusDays(1)
-        "yearly" -> to.minusYears(1).plusDays(1)
+        "monthly" -> to.minusMonths(1)
+        "yearly" -> to.minusYears(1)
         else -> to.minusDays(6)
       }
 

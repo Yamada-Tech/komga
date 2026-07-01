@@ -1,4 +1,4 @@
-import {AxiosInstance} from 'axios'
+import axios, {AxiosInstance} from 'axios'
 import {TopSeriesReadingStatAggregateDto} from '@/types/komga-reading-stats'
 
 const API_READING_STATS = '/api/v1/reading-stats'
@@ -17,8 +17,10 @@ export default class KomgaReadingStatsService {
       })).data
     } catch (e) {
       let msg = 'An error occurred while trying to retrieve top series by period'
-      if (e.response?.data?.message) {
+      if (axios.isAxiosError(e) && e.response?.data?.message) {
         msg += `: ${e.response.data.message}`
+      } else if (e instanceof Error && e.message) {
+        msg += `: ${e.message}`
       }
       throw new Error(msg)
     }
