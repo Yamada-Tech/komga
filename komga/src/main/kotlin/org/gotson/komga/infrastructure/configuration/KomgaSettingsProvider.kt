@@ -41,6 +41,13 @@ class KomgaSettingsProvider(
       field = value
     }
 
+  var showSidebarHistory: Boolean =
+    serverSettingsDao.getSettingByKey(Settings.SHOW_SIDEBAR_HISTORY.name, Boolean::class.java) ?: true
+    set(value) {
+      serverSettingsDao.saveSetting(Settings.SHOW_SIDEBAR_HISTORY.name, value)
+      field = value
+    }
+
   var rememberMeKey: String =
     serverSettingsDao.getSettingByKey(Settings.REMEMBER_ME_KEY.name, String::class.java)
       ?: getRandomRememberMeKey().also { rememberMeKey = it }
@@ -133,6 +140,7 @@ private enum class Settings {
   DELETE_EMPTY_READLISTS,
   SHOW_SIDEBAR_IMPORT,
   SHOW_SIDEBAR_MEDIA,
+  SHOW_SIDEBAR_HISTORY,
   REMEMBER_ME_KEY,
   REMEMBER_ME_DURATION,
   THUMBNAIL_SIZE,

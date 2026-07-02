@@ -997,6 +997,7 @@
     "label_kobo_proxy": "Proxy Kobo Sync requests to Kobo Store",
     "label_sidebar_show_import": "Show Import menu in sidebar",
     "label_sidebar_show_media": "Show Media menu in sidebar",
+    "label_sidebar_show_history": "Show History menu in sidebar",
     "label_rememberme_duration": "Remember me duration (in days)",
     "label_server_context_path": "Base URL",
     "label_server_port": "Server Port",
