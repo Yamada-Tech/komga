@@ -163,6 +163,20 @@
           </template>
         </v-text-field>
 
+        <div class="text-h6 mt-6 mb-2">{{ $t('server_settings.sidebar_section_title') }}</div>
+        <v-checkbox
+          v-model="form.showSidebarImport"
+          @change="$v.form.showSidebarImport.$touch()"
+          :label="$t('server_settings.label_sidebar_show_import')"
+          hide-details
+        />
+        <v-checkbox
+          v-model="form.showSidebarMedia"
+          @change="$v.form.showSidebarMedia.$touch()"
+          :label="$t('server_settings.label_sidebar_show_media')"
+          hide-details
+        />
+
       </v-col>
     </v-row>
     <v-row>
@@ -244,6 +258,8 @@ export default Vue.extend({
     form: {
       deleteEmptyCollections: false,
       deleteEmptyReadLists: false,
+      showSidebarImport: true,
+      showSidebarMedia: true,
       rememberMeDurationDays: 365,
       renewRememberMeKey: false,
       thumbnailSize: ThumbnailSizeDto.DEFAULT,
@@ -264,6 +280,8 @@ export default Vue.extend({
     form: {
       deleteEmptyCollections: {},
       deleteEmptyReadLists: {},
+      showSidebarImport: {},
+      showSidebarMedia: {},
       rememberMeDurationDays: {
         minValue: minValue(1),
         required,
@@ -355,6 +373,10 @@ export default Vue.extend({
         this.$_.merge(newSettings, {deleteEmptyCollections: this.form.deleteEmptyCollections})
       if (this.$v.form?.deleteEmptyReadLists?.$dirty)
         this.$_.merge(newSettings, {deleteEmptyReadLists: this.form.deleteEmptyReadLists})
+      if (this.$v.form?.showSidebarImport?.$dirty)
+        this.$_.merge(newSettings, {showSidebarImport: this.form.showSidebarImport})
+      if (this.$v.form?.showSidebarMedia?.$dirty)
+        this.$_.merge(newSettings, {showSidebarMedia: this.form.showSidebarMedia})
       if (this.$v.form?.rememberMeDurationDays?.$dirty)
         this.$_.merge(newSettings, {rememberMeDurationDays: this.form.rememberMeDurationDays})
       if (this.$v.form?.renewRememberMeKey?.$dirty)
@@ -381,6 +403,10 @@ export default Vue.extend({
 
       await this.$komgaSettings.updateSettings(newSettings)
       await this.refreshSettings()
+      this.$eventHub.$emit('server-settings-changed', {
+        showSidebarImport: this.form.showSidebarImport,
+        showSidebarMedia: this.form.showSidebarMedia,
+      })
 
       if (thumbnailSizeHasChanged) {
         this.dialogRegenerateThumbnails = true

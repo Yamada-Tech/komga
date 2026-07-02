@@ -1,6 +1,8 @@
 export interface SettingsDto {
   deleteEmptyCollections: boolean,
   deleteEmptyReadLists: boolean,
+  showSidebarImport: boolean,
+  showSidebarMedia: boolean,
   rememberMeDurationDays: number,
   thumbnailSize: ThumbnailSizeDto,
   taskPoolSize: number,
@@ -20,6 +22,8 @@ export interface SettingMultiSource<T> {
 export interface SettingsUpdateDto {
   deleteEmptyCollections?: boolean,
   deleteEmptyReadLists?: boolean,
+  showSidebarImport?: boolean,
+  showSidebarMedia?: boolean,
   rememberMeDurationDays?: number,
   renewRememberMeKey?: boolean,
   thumbnailSize?: ThumbnailSizeDto,
