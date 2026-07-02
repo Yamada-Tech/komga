@@ -18,6 +18,8 @@ class SettingsUpdateDto {
 
   var showSidebarMedia: Boolean? = null
 
+  var showSidebarHistory: Boolean? = null
+
   @get:Positive
   var rememberMeDurationDays: Long? = null
 

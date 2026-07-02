@@ -176,6 +176,12 @@
           :label="$t('server_settings.label_sidebar_show_media')"
           hide-details
         />
+        <v-checkbox
+          v-model="form.showSidebarHistory"
+          @change="$v.form.showSidebarHistory.$touch()"
+          :label="$t('server_settings.label_sidebar_show_history')"
+          hide-details
+        />
 
       </v-col>
     </v-row>
@@ -260,6 +266,7 @@ export default Vue.extend({
       deleteEmptyReadLists: false,
       showSidebarImport: true,
       showSidebarMedia: true,
+      showSidebarHistory: true,
       rememberMeDurationDays: 365,
       renewRememberMeKey: false,
       thumbnailSize: ThumbnailSizeDto.DEFAULT,
@@ -282,6 +289,7 @@ export default Vue.extend({
       deleteEmptyReadLists: {},
       showSidebarImport: {},
       showSidebarMedia: {},
+      showSidebarHistory: {},
       rememberMeDurationDays: {
         minValue: minValue(1),
         required,
@@ -377,6 +385,8 @@ export default Vue.extend({
         this.$_.merge(newSettings, {showSidebarImport: this.form.showSidebarImport})
       if (this.$v.form?.showSidebarMedia?.$dirty)
         this.$_.merge(newSettings, {showSidebarMedia: this.form.showSidebarMedia})
+      if (this.$v.form?.showSidebarHistory?.$dirty)
+        this.$_.merge(newSettings, {showSidebarHistory: this.form.showSidebarHistory})
       if (this.$v.form?.rememberMeDurationDays?.$dirty)
         this.$_.merge(newSettings, {rememberMeDurationDays: this.form.rememberMeDurationDays})
       if (this.$v.form?.renewRememberMeKey?.$dirty)
@@ -406,6 +416,7 @@ export default Vue.extend({
       this.$eventHub.$emit('server-settings-changed', {
         showSidebarImport: this.form.showSidebarImport,
         showSidebarMedia: this.form.showSidebarMedia,
+        showSidebarHistory: this.form.showSidebarHistory,
       })
 
       if (thumbnailSizeHasChanged) {

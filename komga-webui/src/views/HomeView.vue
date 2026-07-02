@@ -208,7 +208,7 @@
             </v-list-group>
           </v-list-group>
 
-          <v-list-item :to="{name: 'history'}" v-if="isAdmin">
+          <v-list-item :to="{name: 'history'}" v-if="isAdmin && showSidebarHistory">
             <v-list-item-icon>
               <v-icon>mdi-clock-time-four-outline</v-icon>
             </v-list-item-icon>
@@ -386,7 +386,7 @@ import LibrariesActionsMenu from '@/components/menus/LibrariesActionsMenu.vue'
 import ReorderLibraries from '@/components/ReorderLibraries.vue'
 import AppLogo from '@/components/AppLogo.vue'
 
-type SidebarVisibilitySettings = Partial<Pick<SettingsDto, 'showSidebarImport' | 'showSidebarMedia'>>
+type SidebarVisibilitySettings = Partial<Pick<SettingsDto, 'showSidebarImport' | 'showSidebarMedia' | 'showSidebarHistory'>>
 
 export default Vue.extend({
   name: 'HomeView',
@@ -413,6 +413,7 @@ export default Vue.extend({
       showReorder: false,
       showSidebarImport: true,
       showSidebarMedia: true,
+      showSidebarHistory: true,
     }
   },
   async created() {
@@ -510,11 +511,13 @@ export default Vue.extend({
       } catch (e) {
         this.showSidebarImport = true
         this.showSidebarMedia = true
+        this.showSidebarHistory = true
       }
     },
     updateSidebarVisibilitySettings(settings: SidebarVisibilitySettings = {}) {
       this.showSidebarImport = typeof settings.showSidebarImport === 'boolean' ? settings.showSidebarImport : true
       this.showSidebarMedia = typeof settings.showSidebarMedia === 'boolean' ? settings.showSidebarMedia : true
+      this.showSidebarHistory = typeof settings.showSidebarHistory === 'boolean' ? settings.showSidebarHistory : true
     },
     checkRoute(to) {
       this.expandSettings = to.path.includes('/settings/')
