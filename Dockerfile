@@ -31,10 +31,10 @@ RUN ./gradlew :komga:bootJar -x test --no-daemon
 FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app
 
-COPY --from=backend /build/komga/build/libs/*.jar app.jar
+COPY --from=backend /build/komga/build/libs/komga-*.jar app.jar
 
 VOLUME ["/config", "/data"]
 
 EXPOSE 25600
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]
