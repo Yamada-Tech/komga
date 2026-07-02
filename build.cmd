@@ -25,7 +25,8 @@ echo Starting Gradle compilation...
 echo.
 
 :: Execute main build tasks without clean to prevent folder lock errors
-call gradlew.bat shadowJar createPortableZip
+:: Also exclude generateGitProperties to allow ZIP download execution
+call gradlew.bat shadowJar createPortableZip -x generateGitProperties
 if %ERRORLEVEL% neq 0 (
     echo.
     echo [ERROR] Build failed. Please check the compilation logs above.
