@@ -374,6 +374,7 @@
 import ReusableDialogs from '@/components/ReusableDialogs.vue'
 import LibraryActionsMenu from '@/components/menus/LibraryActionsMenu.vue'
 import SearchBox from '@/components/SearchBox.vue'
+import {SettingsDto} from '@/types/komga-settings'
 import {Theme} from '@/types/themes'
 import Vue from 'vue'
 import {LIBRARIES_ALL} from '@/types/library'
@@ -384,6 +385,8 @@ import {BookSearch, SearchConditionAnyOfBook, SearchConditionMediaStatus, Search
 import LibrariesActionsMenu from '@/components/menus/LibrariesActionsMenu.vue'
 import ReorderLibraries from '@/components/ReorderLibraries.vue'
 import AppLogo from '@/components/AppLogo.vue'
+
+type SidebarVisibilitySettings = Partial<Pick<SettingsDto, 'showSidebarImport' | 'showSidebarMedia'>>
 
 export default Vue.extend({
   name: 'HomeView',
@@ -509,7 +512,7 @@ export default Vue.extend({
         this.showSidebarMedia = true
       }
     },
-    updateSidebarVisibilitySettings(settings: { showSidebarImport?: unknown, showSidebarMedia?: unknown } = {}) {
+    updateSidebarVisibilitySettings(settings: SidebarVisibilitySettings = {}) {
       this.showSidebarImport = typeof settings.showSidebarImport === 'boolean' ? settings.showSidebarImport : true
       this.showSidebarMedia = typeof settings.showSidebarMedia === 'boolean' ? settings.showSidebarMedia : true
     },
