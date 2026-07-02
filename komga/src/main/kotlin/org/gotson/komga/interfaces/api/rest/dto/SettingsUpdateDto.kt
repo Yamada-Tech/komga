@@ -14,6 +14,10 @@ class SettingsUpdateDto {
 
   var deleteEmptyReadLists: Boolean? = null
 
+  var showSidebarImport: Boolean? = null
+
+  var showSidebarMedia: Boolean? = null
+
   @get:Positive
   var rememberMeDurationDays: Long? = null
 
