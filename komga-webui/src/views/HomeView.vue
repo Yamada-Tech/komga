@@ -509,9 +509,9 @@ export default Vue.extend({
         this.showSidebarMedia = true
       }
     },
-    updateSidebarVisibilitySettings(settings: { showSidebarImport?: boolean, showSidebarMedia?: boolean }) {
-      this.showSidebarImport = settings.showSidebarImport ?? true
-      this.showSidebarMedia = settings.showSidebarMedia ?? true
+    updateSidebarVisibilitySettings(settings: { showSidebarImport?: unknown, showSidebarMedia?: unknown } = {}) {
+      this.showSidebarImport = typeof settings.showSidebarImport === 'boolean' ? settings.showSidebarImport : true
+      this.showSidebarMedia = typeof settings.showSidebarMedia === 'boolean' ? settings.showSidebarMedia : true
     },
     checkRoute(to) {
       this.expandSettings = to.path.includes('/settings/')
