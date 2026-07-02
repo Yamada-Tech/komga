@@ -27,6 +27,20 @@ class KomgaSettingsProvider(
       field = value
     }
 
+  var showSidebarImport: Boolean =
+    serverSettingsDao.getSettingByKey(Settings.SHOW_SIDEBAR_IMPORT.name, Boolean::class.java) ?: true
+    set(value) {
+      serverSettingsDao.saveSetting(Settings.SHOW_SIDEBAR_IMPORT.name, value)
+      field = value
+    }
+
+  var showSidebarMedia: Boolean =
+    serverSettingsDao.getSettingByKey(Settings.SHOW_SIDEBAR_MEDIA.name, Boolean::class.java) ?: true
+    set(value) {
+      serverSettingsDao.saveSetting(Settings.SHOW_SIDEBAR_MEDIA.name, value)
+      field = value
+    }
+
   var rememberMeKey: String =
     serverSettingsDao.getSettingByKey(Settings.REMEMBER_ME_KEY.name, String::class.java)
       ?: getRandomRememberMeKey().also { rememberMeKey = it }
@@ -117,6 +131,8 @@ class KomgaSettingsProvider(
 private enum class Settings {
   DELETE_EMPTY_COLLECTIONS,
   DELETE_EMPTY_READLISTS,
+  SHOW_SIDEBAR_IMPORT,
+  SHOW_SIDEBAR_MEDIA,
   REMEMBER_ME_KEY,
   REMEMBER_ME_DURATION,
   THUMBNAIL_SIZE,

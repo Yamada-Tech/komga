@@ -51,6 +51,8 @@ class SettingsControllerTest(
   fun `given admin user when retrieving settings then settings are returned`() {
     komgaSettingsProvider.deleteEmptyCollections = true
     komgaSettingsProvider.deleteEmptyReadLists = false
+    komgaSettingsProvider.showSidebarImport = false
+    komgaSettingsProvider.showSidebarMedia = true
     komgaSettingsProvider.rememberMeDuration = 5.days
     komgaSettingsProvider.thumbnailSize = ThumbnailSize.LARGE
     komgaSettingsProvider.taskPoolSize = 4
@@ -63,6 +65,8 @@ class SettingsControllerTest(
         status { isOk() }
         jsonPath("deleteEmptyCollections") { value(true) }
         jsonPath("deleteEmptyReadLists") { value(false) }
+        jsonPath("showSidebarImport") { value(false) }
+        jsonPath("showSidebarMedia") { value(true) }
         jsonPath("rememberMeDurationDays") { value(5) }
         jsonPath("thumbnailSize") { value("LARGE") }
         jsonPath("taskPoolSize") { value(4) }
@@ -80,6 +84,8 @@ class SettingsControllerTest(
   fun `given admin user when updating settings then settings are updated`() {
     komgaSettingsProvider.deleteEmptyCollections = true
     komgaSettingsProvider.deleteEmptyReadLists = true
+    komgaSettingsProvider.showSidebarImport = true
+    komgaSettingsProvider.showSidebarMedia = true
     komgaSettingsProvider.rememberMeDuration = 5.days
     komgaSettingsProvider.thumbnailSize = ThumbnailSize.LARGE
     komgaSettingsProvider.taskPoolSize = 4
@@ -93,6 +99,8 @@ class SettingsControllerTest(
       """
       {
         "deleteEmptyCollections": false,
+        "showSidebarImport": false,
+        "showSidebarMedia": false,
         "rememberMeDurationDays": 15,
         "renewRememberMeKey": true,
         "thumbnailSize": "MEDIUM",
@@ -112,6 +120,8 @@ class SettingsControllerTest(
 
     assertThat(komgaSettingsProvider.deleteEmptyCollections).isFalse
     assertThat(komgaSettingsProvider.deleteEmptyReadLists).isTrue
+    assertThat(komgaSettingsProvider.showSidebarImport).isFalse
+    assertThat(komgaSettingsProvider.showSidebarMedia).isFalse
     assertThat(komgaSettingsProvider.rememberMeDuration).isEqualTo(15.days)
     assertThat(komgaSettingsProvider.rememberMeKey).isNotEqualTo(rememberMeKey)
     assertThat(komgaSettingsProvider.thumbnailSize).isEqualTo(ThumbnailSize.MEDIUM)
@@ -125,6 +135,8 @@ class SettingsControllerTest(
   fun `given admin user when deleting settings then deletable settings are deleted`() {
     komgaSettingsProvider.deleteEmptyCollections = true
     komgaSettingsProvider.deleteEmptyReadLists = true
+    komgaSettingsProvider.showSidebarImport = false
+    komgaSettingsProvider.showSidebarMedia = false
     komgaSettingsProvider.rememberMeDuration = 5.days
     komgaSettingsProvider.thumbnailSize = ThumbnailSize.LARGE
     komgaSettingsProvider.taskPoolSize = 4
@@ -157,6 +169,8 @@ class SettingsControllerTest(
 
     assertThat(komgaSettingsProvider.deleteEmptyCollections).isTrue
     assertThat(komgaSettingsProvider.deleteEmptyReadLists).isTrue
+    assertThat(komgaSettingsProvider.showSidebarImport).isFalse
+    assertThat(komgaSettingsProvider.showSidebarMedia).isFalse
     assertThat(komgaSettingsProvider.rememberMeDuration).isEqualTo(5.days)
     assertThat(komgaSettingsProvider.rememberMeKey).isEqualTo(rememberMeKey)
     assertThat(komgaSettingsProvider.thumbnailSize).isEqualTo(ThumbnailSize.LARGE)

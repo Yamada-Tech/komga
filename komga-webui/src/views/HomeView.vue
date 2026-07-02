@@ -134,7 +134,7 @@
           </v-list-group>
 
           <!--   IMPORT     -->
-          <v-list-group v-if="isAdmin"
+          <v-list-group v-if="isAdmin && showSidebarImport"
                         prepend-icon="mdi-import"
                         no-action
                         v-model="expandImport"
@@ -153,7 +153,7 @@
           </v-list-group>
 
           <!--   MEDIA MANAGEMENT     -->
-          <v-list-group v-if="isAdmin"
+          <v-list-group v-if="isAdmin && showSidebarMedia"
                         no-action
                         v-model="expandMediaManagement"
           >
@@ -374,6 +374,7 @@
 import ReusableDialogs from '@/components/ReusableDialogs.vue'
 import LibraryActionsMenu from '@/components/menus/LibraryActionsMenu.vue'
 import SearchBox from '@/components/SearchBox.vue'
+import {SettingsDto} from '@/types/komga-settings'
 import {Theme} from '@/types/themes'
 import Vue from 'vue'
 import {LIBRARIES_ALL} from '@/types/library'
@@ -384,6 +385,8 @@ import {BookSearch, SearchConditionAnyOfBook, SearchConditionMediaStatus, Search
 import LibrariesActionsMenu from '@/components/menus/LibrariesActionsMenu.vue'
 import ReorderLibraries from '@/components/ReorderLibraries.vue'
 import AppLogo from '@/components/AppLogo.vue'
+
+type SidebarVisibilitySettings = Partial<Pick<SettingsDto, 'showSidebarImport' | 'showSidebarMedia'>>
 
 export default Vue.extend({
   name: 'HomeView',
@@ -408,10 +411,13 @@ export default Vue.extend({
       expandAccount: false,
       expandUnpinned: false,
       showReorder: false,
+      showSidebarImport: true,
+      showSidebarMedia: true,
     }
   },
   async created() {
     if (this.isAdmin) {
+      this.loadSidebarVisibilitySettings()
       this.$actuator.getInfo()
         .then(x => this.$store.commit('setActuatorInfo', x))
       this.$komgaBooks.getBooksList({
@@ -426,7 +432,11 @@ export default Vue.extend({
       this.$komgaReleases.getReleases()
         .then(x => this.$store.commit('setReleases', x))
     }
+    this.$eventHub.$on('server-settings-changed', this.updateSidebarVisibilitySettings)
     this.checkRoute(this.$route)
+  },
+  beforeDestroy() {
+    this.$eventHub.$off('server-settings-changed', this.updateSidebarVisibilitySettings)
   },
   watch: {
     $route(to, from) {
@@ -493,6 +503,19 @@ export default Vue.extend({
     },
   },
   methods: {
+    async loadSidebarVisibilitySettings() {
+      try {
+        const settings = await this.$komgaSettings.getSettings()
+        this.updateSidebarVisibilitySettings(settings)
+      } catch (e) {
+        this.showSidebarImport = true
+        this.showSidebarMedia = true
+      }
+    },
+    updateSidebarVisibilitySettings(settings: SidebarVisibilitySettings = {}) {
+      this.showSidebarImport = typeof settings.showSidebarImport === 'boolean' ? settings.showSidebarImport : true
+      this.showSidebarMedia = typeof settings.showSidebarMedia === 'boolean' ? settings.showSidebarMedia : true
+    },
     checkRoute(to) {
       this.expandSettings = to.path.includes('/settings/')
       this.expandMediaManagement = to.path.includes('/media-management/')
