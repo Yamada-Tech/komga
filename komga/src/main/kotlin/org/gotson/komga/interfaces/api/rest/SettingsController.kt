@@ -44,6 +44,7 @@ class SettingsController(
       komgaSettingsProvider.deleteEmptyReadLists,
       komgaSettingsProvider.showSidebarImport,
       komgaSettingsProvider.showSidebarMedia,
+      komgaSettingsProvider.showSidebarHistory,
       komgaSettingsProvider.rememberMeDuration.inWholeDays,
       komgaSettingsProvider.thumbnailSize.toDto(),
       komgaSettingsProvider.taskPoolSize,
@@ -66,6 +67,7 @@ class SettingsController(
     newSettings.deleteEmptyReadLists?.let { komgaSettingsProvider.deleteEmptyReadLists = it }
     newSettings.showSidebarImport?.let { komgaSettingsProvider.showSidebarImport = it }
     newSettings.showSidebarMedia?.let { komgaSettingsProvider.showSidebarMedia = it }
+    newSettings.showSidebarHistory?.let { komgaSettingsProvider.showSidebarHistory = it }
     newSettings.rememberMeDurationDays?.let { komgaSettingsProvider.rememberMeDuration = it.days }
     if (newSettings.renewRememberMeKey == true) komgaSettingsProvider.renewRememberMeKey()
     newSettings.thumbnailSize?.let { komgaSettingsProvider.thumbnailSize = it.toDomain() }

@@ -5,6 +5,7 @@ data class SettingsDto(
   val deleteEmptyReadLists: Boolean,
   val showSidebarImport: Boolean,
   val showSidebarMedia: Boolean,
+  val showSidebarHistory: Boolean,
   val rememberMeDurationDays: Long,
   val thumbnailSize: ThumbnailSizeDto,
   val taskPoolSize: Int,
