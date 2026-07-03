@@ -233,6 +233,13 @@
         </v-btn>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col>
+        <div class="caption text--secondary">
+          {{ $t('server_settings.logo_upload_guidance') }}
+        </div>
+      </v-col>
+    </v-row>
 
     <confirmation-dialog
       v-model="dialogRegenerateThumbnails"
