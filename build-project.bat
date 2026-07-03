@@ -1,15 +1,18 @@
 @echo off
-set "PATH=C:\tools\node;%PATH%"
+:: Ensure portable environment paths
+set "PATH=C:\tools\node;C:\tools\jdk\bin;%PATH%"
 
 echo [1/3] Building Frontend assets...
-cd webui
+:: Move securely to the webui subdirectory using script-relative path
+cd /d "%~dp0komga-webui"
 call npm install
 call npm run build
 if %ERRORLEVEL% neq 0 (
     echo ERROR: Frontend build failed.
     exit /b %ERRORLEVEL%
 )
-cd ..
+:: Return back to the repository root
+cd /d "%~dp0"
 
 echo [2/3] Building Backend JAR...
 call gradlew.bat bootJar --no-daemon -Dorg.gradle.jvmargs="-Xmx1536m" -PgitProperties.failOnNoGitDirectory=false
