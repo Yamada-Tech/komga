@@ -33,9 +33,18 @@ class SeriesReadingStatDailyDao(
   ) {
     // Convert local-time day boundaries to UTC for comparison against stored UTC timestamps
     val dayStart = day.atStartOfDay(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
-    val dayEnd = day.plusDays(1).atStartOfDay(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
+    val dayEnd =
+      day
+        .plusDays(1)
+        .atStartOfDay(ZoneId.systemDefault())
+        .withZoneSameInstant(ZoneOffset.UTC)
+        .toLocalDateTime()
 
-    val dayCondition = re.SERIES_ID.eq(seriesId).and(re.CREATED_AT.ge(dayStart)).and(re.CREATED_AT.lt(dayEnd))
+    val dayCondition =
+      re.SERIES_ID
+        .eq(seriesId)
+        .and(re.CREATED_AT.ge(dayStart))
+        .and(re.CREATED_AT.lt(dayEnd))
 
     val uniqueReaders =
       dslRW

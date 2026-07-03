@@ -69,8 +69,9 @@ class LogoController(
     if (!contentDetector.isImage(mediaType))
       throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
 
-    val extension = file.originalFilename?.substringAfterLast('.', "")?.ifBlank { null }
-      ?: mediaType.substringAfterLast('/', "").ifBlank { "png" }
+    val extension =
+      file.originalFilename?.substringAfterLast('.', "")?.ifBlank { null }
+        ?: mediaType.substringAfterLast('/', "").ifBlank { "png" }
 
     logoDir.createDirectories()
     // Remove any existing logo files

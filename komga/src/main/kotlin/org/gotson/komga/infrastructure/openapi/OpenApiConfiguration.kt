@@ -20,6 +20,7 @@ import io.swagger.v3.oas.models.servers.ServerVariables
 import io.swagger.v3.oas.models.tags.Tag
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.ANNOUNCEMENTS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.API_KEYS
+import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.APP_LOGO
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOKS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOK_FONTS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOK_IMPORT
@@ -28,7 +29,6 @@ import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOO
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOK_WEBPUB
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.CLAIM
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.CLIENT_SETTINGS
-import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.APP_LOGO
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.COLLECTIONS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.COLLECTION_POSTER
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.COLLECTION_SERIES
@@ -42,6 +42,7 @@ import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.LIB
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.MANAGEMENT
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.MIHON
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.OAUTH2
+import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.READING_STATS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.READLISTS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.READLIST_BOOKS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.READLIST_POSTER
@@ -54,7 +55,6 @@ import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.SYN
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.TASKS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.USERS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.USER_SESSION
-import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.READING_STATS
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
