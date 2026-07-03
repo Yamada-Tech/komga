@@ -1008,6 +1008,7 @@
     "sidebar_section_title": "Sidebar Visibility",
     "logo_section_title": "Application Logo",
     "label_logo_upload": "Select logo image",
+    "logo_upload_guidance": "Recommended size: 512x512 pixels. The top-left menu logo will be cropped into a circle. To prevent text cutting, please ensure your design is centered within a square or pre-cropped into a circle.",
     "button_logo_upload": "Upload",
     "button_logo_delete": "Reset to default"
   },
