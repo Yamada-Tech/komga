@@ -24,8 +24,8 @@ COPY res/ res/
 # Embed the built frontend into the Spring Boot static resources directory
 COPY --from=frontend /app/komga-webui/dist/ komga/src/main/resources/public/
 
-# Build the executable jar (skip tests to keep the image build fast)
-RUN ./gradlew :komga:bootJar -x test --no-daemon
+# Build the executable jar with embedded frontend
+RUN ./gradlew :komga:bootJar --no-daemon
 
 # Stage 3 – Runtime image
 FROM eclipse-temurin:21-jre-alpine AS runtime
@@ -34,6 +34,7 @@ WORKDIR /app
 COPY --from=backend /build/komga/build/libs/komga-*.jar app.jar
 
 VOLUME ["/config", "/data"]
+ENV KOMGA_CONFIGDIR="/config"
 
 EXPOSE 25600
 
