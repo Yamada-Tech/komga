@@ -28,7 +28,7 @@
             const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
             const logoUrl = `${normalizedBaseUrl}api/v1/logo`
 
-            fetch(logoUrl, {method: 'HEAD', cache: 'no-store'})
+            fetch(logoUrl, {method: 'HEAD'})
                 .then((response) => {
                     if (!response.ok) return
                     const cacheTag = response.headers.get('etag') || response.headers.get('last-modified')
