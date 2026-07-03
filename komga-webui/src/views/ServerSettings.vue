@@ -233,6 +233,13 @@
         </v-btn>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col>
+        <div class="caption text--secondary">
+          Recommended size: 512x512 pixels. The top-left menu logo will be cropped into a circle. To prevent text cutting, please ensure your design is centered within a square or pre-cropped into a circle.
+        </div>
+      </v-col>
+    </v-row>
 
     <confirmation-dialog
       v-model="dialogRegenerateThumbnails"
