@@ -33,9 +33,12 @@ function locationsToR2Location(location: Locations): R2Location {
   }
 }
 
-export function r2ProgressionToReadingPosition(progression?: R2Progression, bookId: string): ReadingPosition | undefined {
+export function r2ProgressionToReadingPosition(bookId: string, progression?: R2Progression): ReadingPosition | undefined {
+  if (!progression) return undefined
+
   try {
     return {
+      bookId,
       created: progression.modified,
       href: `${urls.originNoSlash}/api/v1/books/${bookId}/resource/${progression.locator.href}`,
       type: progression.locator.type,
