@@ -1,9 +1,14 @@
-import { ReadingPosition } from '@d-i-t-a/reader'
+import { ReadingPosition } from '@/types/custom'
 import { R2Progression } from '@/types/readium'
 import urls from '@/functions/urls'
 
 export function r2ProgressionToReadingPosition(progression: R2Progression | undefined = undefined, bookId: string): ReadingPosition | undefined {
   if (!progression) return undefined
+
+  const rawFragment = progression.locator.locations.fragment
+  const safeFragment = Array.isArray(rawFragment) 
+    ? rawFragment[0] 
+    : (typeof rawFragment === 'string' ? rawFragment : undefined)
 
   return {
     created: progression.modified,
@@ -11,7 +16,7 @@ export function r2ProgressionToReadingPosition(progression: R2Progression | unde
     type: progression.locator.type,
     title: progression.locator.title,
     locations: {
-      fragment: Array.isArray(progression.locator.locations.fragment) ? progression.locator.locations.fragment[0] : (typeof progression.locator.locations.fragment === 'string' ? progression.locator.locations.fragment : undefined),
+      fragment: safeFragment,
       position: progression.locator.locations.position,
       progression: progression.locator.locations.progression,
       totalProgression: progression.locator.locations.totalProgression,
