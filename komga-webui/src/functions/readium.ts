@@ -11,7 +11,7 @@ export function r2ProgressionToReadingPosition(progression: R2Progression | unde
     type: progression.locator.type,
     title: progression.locator.title,
     locations: {
-      fragment: progression.locator.locations.fragment ? progression.locator.locations.fragment : undefined,
+      fragment: Array.isArray(progression.locator.locations.fragment) ? progression.locator.locations.fragment[0] : (typeof progression.locator.locations.fragment === 'string' ? progression.locator.locations.fragment : undefined),
       position: progression.locator.locations.position,
       progression: progression.locator.locations.progression,
       totalProgression: progression.locator.locations.totalProgression,
