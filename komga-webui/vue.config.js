@@ -1,7 +1,5 @@
 // vue.config.js
 module.exports = {
-  // with './' the dev server cannot load any arbitrary path
-  // with '/' the prod build generates some url(/fonts…) calls in the css chunks, which doesn't work with a servlet context path
   publicPath: process.env.NODE_ENV === 'production' ? './' : '/',
 
   pluginOptions: {
@@ -20,7 +18,18 @@ module.exports = {
     },
   },
 
-  // custom rule for readium and r2d2bc css that needs to be made available, but untouched
+  chainWebpack: (config) => {
+    if (config.plugins.has('fork-ts-checker')) {
+      config.plugin('fork-ts-checker').tap((args) => {
+        if (args && args[0]) {
+          args[0].typescript = args[0].typescript || {};
+          args[0].typescript.memoryLimit = 8192;
+        }
+        return args;
+      });
+    }
+  },
+
   configureWebpack: {
     module: {
       rules: [
