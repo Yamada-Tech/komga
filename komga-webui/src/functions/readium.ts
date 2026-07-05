@@ -1,4 +1,4 @@
-import { ReadingPosition } from '@/types/custom'
+import { ReadingPosition } from '@d-i-t-a/reader'
 import { R2Progression } from '@/types/readium'
 import urls from '@/functions/urls'
 
