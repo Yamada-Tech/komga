@@ -1,4 +1,3 @@
-// vue.config.js
 module.exports = {
   publicPath: process.env.NODE_ENV === 'production' ? './' : '/',
 
@@ -19,20 +18,9 @@ module.exports = {
   },
 
   chainWebpack: (config) => {
-<<<<<<< HEAD
     if (config.plugins.has('fork-ts-checker')) {
-      config.plugin('fork-ts-checker').tap((args) => {
-        if (args && args[0]) {
-          args[0].typescript = args[0].typescript || {};
-          args[0].typescript.memoryLimit = 8192;
-        }
-        return args;
-      });
-=======
-    // Completely remove the fork-ts-checker plugin during production build
-    if (process.env.NODE_ENV === 'production') {
+      // Completely remove the fork-ts-checker plugin to prevent out of memory errors on Windows
       config.plugins.delete('fork-ts-checker');
->>>>>>> 211e277f (fix: resolve webui build OOM by removing fork-ts-checker, update build script and readium functions)
     }
   },
 
