@@ -19,7 +19,7 @@ exit /b %ERRORLEVEL%
 
 echo \[2/3\] Packaging Windows Desktop Application (.exe)...  
 :: Execute Conveyor to compile komga-tray and output the standalone exe  
-call conveyor.exe make unzipped-wm-dir  
+call conveyor.exe make windows-app 
 if %ERRORLEVEL% neq 0 (  
 echo ERROR: Conveyor packaging failed.  
 exit /b %ERRORLEVEL%  
