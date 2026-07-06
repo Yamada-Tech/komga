@@ -287,6 +287,7 @@
   },
   "dashboard": {
     "trending": "Manga del momento",
+    "trending_count": "Letto da {count} persone",
     "keep_reading": "Continua a leggere",
     "on_deck": "Primo Piano",
     "recently_added_books": "Fumetti aggiunti di recente",

@@ -287,6 +287,7 @@
   },
   "dashboard": {
     "trending": "Популярна ґа́нґа",
+    "trending_count": "Читають: {count}",
     "keep_reading": "Продовжуйте читати",
     "on_deck": "На палубі",
     "recently_added_books": "Нещодавно додані книги",

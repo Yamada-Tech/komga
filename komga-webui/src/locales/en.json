@@ -287,6 +287,7 @@
   },
   "dashboard": {
     "trending": "Trending Manga",
+    "trending_count": "Read by {count} people",
     "keep_reading": "Keep Reading",
     "on_deck": "On Deck",
     "recently_added_books": "Recently Added Books",

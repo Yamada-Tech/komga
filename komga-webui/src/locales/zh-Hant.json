@@ -287,6 +287,7 @@
   },
   "dashboard": {
     "trending": "熱門漫畫",
+    "trending_count": "已有 {count} 人閱讀",
     "keep_reading": "繼續閱讀",
     "on_deck": "導覽",
     "recently_added_books": "最近新增的書籍",

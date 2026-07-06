@@ -20,10 +20,9 @@
             class="grey lighten-2"
           />
           <v-card-subtitle class="px-2 pt-2 pb-1 text-truncate">{{ series.title }}</v-card-subtitle>
-          <v-card-text class="px-2 pt-0 pb-2 caption text--secondary d-flex align-center"
+          <v-card-text class="px-2 pt-0 pb-2 caption text--secondary"
                        :aria-label="readerCountLabel(series.uniqueReaders)">
-            <v-icon size="16" class="mr-1">mdi-account-group</v-icon>
-            <span>{{ series.uniqueReaders }} 人が読んでいます</span>
+            {{ $t('dashboard.trending_count', { count: series.uniqueReaders }) }}
           </v-card-text>
         </v-card>
       </v-slide-item>
@@ -59,7 +58,7 @@ export default Vue.extend({
   methods: {
     seriesThumbnailUrl,
     readerCountLabel(count: number): string {
-      return `${count} 人が読んでいます`
+      return this.$t('dashboard.trending_count', {count}).toString()
     },
     async loadTrendingSeries() {
       try {
