@@ -58,7 +58,7 @@ export default Vue.extend({
   methods: {
     seriesThumbnailUrl,
     readerCountLabel(count: number): string {
-      return this.$t('dashboard.trending_count', {count}).toString()
+      return this.$t('dashboard.trending_count', { count }).toString()
     },
     async loadTrendingSeries() {
       try {
