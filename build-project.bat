@@ -1,5 +1,5 @@
 @echo off
-set "PATH=C:\tools\jdk\bin;%PATH%"
+set "PATH=C:\tools\node;C:\tools\jdk\bin;%PATH%"
 set NODE_OPTIONS=--max-old-space-size=4096
 
 if exist "%~dp0backend_build.log" del "%~dp0backend_build.log"
