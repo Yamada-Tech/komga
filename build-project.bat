@@ -1,5 +1,6 @@
 @echo off  
 set "PATH=C:\\tools\\node;C:\\tools\\jdk\\bin;C:\\tools\\conveyor\\bin;%PATH%"  
+set "CONVEYOR_AGREE_TO_LICENSE=1"
 set NODE\_OPTIONS=--max-old-space-size=4096
 
 if exist "%~dp0backend\_build.log" del "%~dp0backend\_build.log"  
