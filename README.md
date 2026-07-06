@@ -64,29 +64,31 @@ The Komga icon is based on an icon made by [Freepik](https://www.freepik.com/hom
 
 
 
-## 🎨 Yamada-Tech Custom Features
+## Yamada-Tech Custom Features
 
-This custom fork includes tailored optimization features for premium, streamlined self-hosting, focusing on interactive user engagement, minimalist administrative control, and lightweight container virtualization.
+This custom fork includes tailored optimization features for premium, streamlined self-hosting, focusing on interactive user engagement, minimalist administrative control, and lightweight container virtualization. 
 
-### 🚀 1. Interactive "Trending Manga" Carousel (みんなが読んでるマンガ)
-- **Append-Only Tracking:** Replaced the state-based table with a resilient `READING_EVENT` event-driven log base to capture dynamic reader progress.
-- **Daily Aggregation Metric:** Introduces `SERIES_READING_STATS_DAILY` to calculate statistics (unique readers, progress spikes, completions) efficiently.
-- **Visual Engagement UI:** A beautiful horizontal-scrolling section right at the top of the main Dashboard. It dynamically renders the **First Volume's Thumbnail / Cover Art** of active series to entice other users to join in and "read together" based on weighted vibe scores.
+### 1. Interactive "Trending Manga" Carousel
 
-### ⚙️ 2. Dynamic Sidebar Component Toggle (サイドバー表示の動的切替)
-- **Administrative Switches:** Extended the core `ServerSettings.vue` and backend configuration (`KomgaSettingsProvider`) with boolean flags.
-- **On/Off Menu Visibility Control:** Administrators can now toggle checkbox options inside the server settings dashboard to show/hide cluttering menus instantly from the layout.
-- **Supported Toggles:**
-  - **Import Menu** (インポートメニューの非表示)
-  - **Media Analysis Menu** (メディア分析・重複等の非表示)
-  - **Server System History** (バックエンド処理履歴の非表示)
-- **Upgrade-Proof Resilience:** Safely built via conditional rendering parameters (`v-if`), ensuring hassle-free upstream synchronization with official branch updates without triggering layout code conflicts.
+*   **Append-Only Tracking:** Replaced the traditional state-based database architecture with a resilient `READING_EVENT` event-driven log base to capture real-time, dynamic reader progress. 
+*   **Daily Aggregation Metric:** Introduces the `SERIES_READING_STATS_DAILY` processing table to efficiently calculate engagement analytics (unique readers, velocity spikes, and completion frequencies). 
+*   **Visual Engagement UI:** A beautiful, responsive horizontal-scrolling showcase positioned directly at the peak of the main Dashboard. It dynamically renders active series cover arts to promote concurrent reading milestones based on aggregated user vibe scores. 
 
-### 📦 3. Optimized Multi-Stage Docker Environment (Synology NAS Optimization)
-- **Ultra-Lightweight Build:** Stripped out all legacy JUnit backend test cases, Vue frontend test fixtures, and official CI/CD automation workflows, shrinking the initial codebase footprint dramatically.
-- **Instant Local Containerization:** Bundled with a specialized multi-stage `Dockerfile` configured to compile the Vue 2 assets directly inside a secure container layer before injection into the Spring Boot runner core.
-- **NAS Container Manager Ready:** Tailored for effortless x86_64 host compilation on standard Synology NAS systems (e.g., DS718+) for seamless persistent storage mounting (`/config`, `/data`).
+### 2. Dynamic Sidebar Component Toggle
 
+*   **Administrative Switches:** Extended the core administrative template (`ServerSettings.vue`) and backend internal runtime configuration bindings (`KomgaSettingsProvider`) with dedicated boolean controls. 
+*   **On/Off Menu Visibility Control:** Systems administrators can now check/uncheck display parameters inside the management dashboard to hide or show complex navigation trees instantly. 
+*   **Supported Toggles:**
+    *   Import Menu
+    *   Media Analysis Menu
+    *   Server System History 
+*   **Upgrade-Proof Resilience:** Safely structured via highly decoupled conditional layout renderers (`v-if`), ensuring seamless upstream synchronization with official repository updates without inducing client-side presentation conflicts. 
+
+### 3. Infrastructure & Lifecycle Automation
+
+*   **Streamlined Gradle-Vite Pipeline:** Integrated backend server assembly and frontend WebUI compilation into a single, cohesive command execution path (`:komga:prepareThymeLeaf`), eliminating fragmented manual directory cloning operations. 
+*   **NTFS Asset Compilation Patch:** Bypasses recursive background file-scanning constraints unique to Windows developer environments by enforcing modular webpack plugin exclusion rules, dropping memory load by several gigabytes. 
+*   **Low-Footprint Runtime Target:** Formulated to pack fully-independent executable JAR payloads directly into optimized deployment layers, guaranteeing minimal resource utilization when mounted inside high-efficiency host nodes like Synology NAS equipment.
 
 
 
