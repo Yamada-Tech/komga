@@ -9,7 +9,7 @@ echo \[1/3\] Building Frontend and Backend via Official Gradle Route...
 cd /d "%~dp0"
 
 :: Execute official Komga tasks to compile and bundle frontend properly into the template classpath  
-call gradlew.bat :komga:prepareThymeLeaf :komga:bootJar --no-daemon --console=plain -Dorg.gradle.jvmargs="-Xmx2560m" -PgitProperties.failOnNoGitDirectory=false 2>&1 | powershell -Command "$Input | Tee-Object -FilePath '%~dp0backend\_build.log'"
+call gradlew.bat :komga:prepareThymeLeaf :komga:bootJar --no-daemon --console=plain -Dorg.gradle.jvmargs="-Xmx2560m" -PgitProperties.failOnNoGitDirectory=false 2>&1 | powershell -Command "$Input | Tee-Object -FilePath '%~dp0backend_build.log'"
 
 if %ERRORLEVEL% neq 0 (  
 echo ERROR: Gradle build failed. Please check backend\_build.log  
