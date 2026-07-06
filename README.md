@@ -87,6 +87,9 @@ This custom fork includes tailored optimization features for premium, streamline
 - **Instant Local Containerization:** Bundled with a specialized multi-stage `Dockerfile` configured to compile the Vue 2 assets directly inside a secure container layer before injection into the Spring Boot runner core.
 - **NAS Container Manager Ready:** Tailored for effortless x86_64 host compilation on standard Synology NAS systems (e.g., DS718+) for seamless persistent storage mounting (`/config`, `/data`).
 
+
+
+
 ### Windows Local Build Setup Guide
 
 This guide details the system prerequisites and execution workflow required to successfully run the local build pipeline on Windows 11. 
@@ -108,8 +111,6 @@ This guide details the system prerequisites and execution workflow required to s
         build-project.bat
         
     
-    コードは注意してご使用ください。
-    
      
 3.  After the pipeline outputs `BUILD SUCCESSFUL`, execute the fully-bundled independent execution artifact to initialize the web application:
     
@@ -117,8 +118,6 @@ This guide details the system prerequisites and execution workflow required to s
     
         java -jar "komga/build/libs/komga-1.24.4.jar"
         
-    
-    コードは注意してご使用ください。
     
      
 4.  Access `http://localhost:25600` via your web browser to confirm the working status of the user interface.
