@@ -19,6 +19,7 @@ module.exports = {
   },
 
   chainWebpack: (config) => {
+<<<<<<< HEAD
     if (config.plugins.has('fork-ts-checker')) {
       config.plugin('fork-ts-checker').tap((args) => {
         if (args && args[0]) {
@@ -27,6 +28,11 @@ module.exports = {
         }
         return args;
       });
+=======
+    // Completely remove the fork-ts-checker plugin during production build
+    if (process.env.NODE_ENV === 'production') {
+      config.plugins.delete('fork-ts-checker');
+>>>>>>> 211e277f (fix: resolve webui build OOM by removing fork-ts-checker, update build script and readium functions)
     }
   },
 
