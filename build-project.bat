@@ -1,27 +1,21 @@
 @echo off
-:: Ensure portable environment paths
-set "PATH=C:\tools\node;C:\tools\jdk\bin;%PATH%"
+set "PATH=C:\tools\jdk\bin;%PATH%"
+set NODE_OPTIONS=--max-old-space-size=4096
 
-echo [1/3] Building Frontend assets...
-:: Move securely to the webui subdirectory using script-relative path
-cd /d "%~dp0komga-webui"
-call npm install
-call npm run build
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: Frontend build failed.
-    exit /b %ERRORLEVEL%
-)
-:: Return back to the repository root
+if exist "%~dp0backend_build.log" del "%~dp0backend_build.log"
+if exist "%~dp0komga\build\libs\*.jar" del "%~dp0komga\build\libs\*.jar"
+
+echo [1/2] Building Frontend and Backend via Official Gradle Route...
 cd /d "%~dp0"
 
-echo [2/3] Building Backend JAR...
-call gradlew.bat bootJar --no-daemon -Dorg.gradle.jvmargs="-Xmx1536m" -PgitProperties.failOnNoGitDirectory=false
+call gradlew.bat :komga:prepareThymeLeaf :komga:bootJar --no-daemon --console=plain -Dorg.gradle.jvmargs="-Xmx2560m" -PgitProperties.failOnNoGitDirectory=false > "%~dp0backend_build.log" 2>&1
+
 if %ERRORLEVEL% neq 0 (
-    echo ERROR: Backend JAR build failed.
+    echo ERROR: Gradle build failed. Please check backend_build.log
     exit /b %ERRORLEVEL%
 )
 
-echo [3/3] Building Docker image...
+echo [2/2] Building Docker image...
 docker build -t yamada-tech/komga:latest .
 if %ERRORLEVEL% neq 0 (
     echo ERROR: Docker build failed.
