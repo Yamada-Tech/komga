@@ -286,6 +286,7 @@
     "year": "年"
   },
   "dashboard": {
+    "trending": "みんなが読んでるマンガ",
     "keep_reading": "読書を続ける",
     "on_deck": "次に読む",
     "recently_added_books": "最近追加された書籍",
