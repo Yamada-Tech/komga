@@ -21,7 +21,7 @@ if %ERRORLEVEL% neq 0 (
 copy /y "%~dp0komga\build\libs\komga-*.jar" "%~dp0dist\" >nul
 
 echo [2/3] Packaging Windows Desktop Application (.exe) into dist/ folder...
-call conveyor.exe -o "%~dp0dist" make windows-app
+call conveyor.exe make -o "%~dp0dist" windows-app
 if %ERRORLEVEL% neq 0 (
     echo ERROR: Conveyor packaging failed.
     exit /b %ERRORLEVEL%
