@@ -16,7 +16,7 @@ echo \[1/3\] Building Frontend and Backend via Official Gradle Route...
 call gradlew.bat :komga:prepareThymeLeaf :komga:bootJar :komga-tray:jar --no-daemon --console=plain -Dorg.gradle.jvmargs="-Xmx2560m" -PgitProperties.failOnNoGitDirectory=false 2>&1 | powershell -Command "$Input | Tee-Object -FilePath '%~dp0backend\_build.log'"
 
 if %ERRORLEVEL% neq 0 (  
-echo ERROR: Gradle build failed. Please check backend\_build.log  
+echo ERROR: Gradle build failed. Please check backend_build.log  
 exit /b %ERRORLEVEL%  
 )
 
