@@ -24,7 +24,7 @@ setlocal enabledelayedexpansion
 for %%f in ("%~dp0complete\komga-*.jar") do (
     set "fname=%%~nf"
     set "ver=!fname:komga-=!"
-    ren "%%f" "komga-docker-!ver!-custom.jar"
+    ren "%%f" "komga-!ver!-custom.jar"
 )
 
 echo Checking local environment for Docker / WSL capabilities...
