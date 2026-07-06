@@ -1,0 +1,13 @@
+# Stage 1 – Runtime image
+FROM eclipse-temurin:21-jre-alpine AS runtime
+WORKDIR /app
+
+# Copy the pre-compiled, fully-bundled fat JAR directly from your local build directory
+COPY komga/build/libs/komga-*.jar app.jar
+
+VOLUME ["/config", "/data"]
+ENV KOMGA_CONFIGDIR="/config"
+
+EXPOSE 25600
+
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]
