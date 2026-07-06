@@ -4,5 +4,5 @@ VOLUME /config
 VOLUME /data
 ENV KOMGA_CONFIG_DIR=/config
 EXPOSE 25600
-COPY complete/komga-docker-*-custom.jar app.jar
+COPY complete/komga-*-custom.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
