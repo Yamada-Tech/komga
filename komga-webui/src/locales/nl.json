@@ -285,6 +285,7 @@
   },
   "dashboard": {
     "trending": "Populaire manga",
+    "trending_count": "Gelezen door {count} mensen",
     "keep_reading": "Blijf lezen",
     "on_deck": "Eerste Ongelezen",
     "recently_added_books": "Recent Toegevoegde Boeken",

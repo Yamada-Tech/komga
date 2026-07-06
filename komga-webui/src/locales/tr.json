@@ -281,6 +281,7 @@
   },
   "dashboard": {
     "trending": "Popüler Mangalar",
+    "trending_count": "{count} kişi tarafından okundu",
     "keep_reading": "Okumaya Devam Edin",
     "on_deck": "Okumaya Başlayın",
     "recently_added_books": "Yeni Eklenen Kitaplar",

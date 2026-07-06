@@ -281,6 +281,7 @@
   },
   "dashboard": {
     "trending": "Popularne manga",
+    "trending_count": "Przeczytane przez {count} osób",
     "keep_reading": "Kontynuuj czytanie",
     "on_deck": "Na stosie",
     "recently_added_books": "Ostatnio dodane tomy",

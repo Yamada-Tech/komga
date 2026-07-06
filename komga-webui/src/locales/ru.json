@@ -283,6 +283,7 @@
   },
   "dashboard": {
     "trending": "Популярная манга",
+    "trending_count": "Читают: {count}",
     "keep_reading": "Продолжить Чтение",
     "on_deck": "Текущее",
     "recently_added_books": "Недавно добавленные книги",
