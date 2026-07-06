@@ -286,6 +286,7 @@
     "year": "year"
   },
   "dashboard": {
+    "trending": "Trending Manga",
     "keep_reading": "Keep Reading",
     "on_deck": "On Deck",
     "recently_added_books": "Recently Added Books",
