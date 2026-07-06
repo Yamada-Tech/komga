@@ -90,34 +90,29 @@ This custom fork includes tailored optimization features for premium, streamline
 
 
 
-### Windows Local Build Setup Guide
+## Windows Local Build Setup Guide
 
 This guide details the system prerequisites and execution workflow required to successfully run the local build pipeline on Windows 11. 
 
-### 1\. System Prerequisites
+### 1.System Prerequisites
 
 **Important:** Do NOT use the standard executable installers (`.msi` or `.exe`). You must download the **ZIP / Archive distributions** of the following runtimes and extract them manually to ensure they match the hardcoded script paths. 
 
 *   **Java Development Kit (JDK):** **Strictly requires JDK 21.** Download the compressed ZIP archive (e.g., from Adoptium Eclipse Temurin or Oracle) and extract it so the binaries reside at `C:\tools\jdk\bin`. Compilation will fail on lower or higher major versions. 
 *   **Node.js & npm:** Download the Windows Binary ZIP archive (`.zip`) from the official Node.js downloads page. Extract the contents directly under `C:\tools\node` so that `npm.cmd` and `node.exe` are located right inside that directory. 
 
-### 2\. Build & Execution Workflow
+### 2.Build & Execution Workflow
 
-1.  Open your standard Windows Command Prompt (`cmd`). 
+1.  Open your standard Windows Command Prompt (`cmd`).
+   
 2.  Run the pre-configured orchestration script from the repository root:
     
     cmd
-    
         build-project.bat
-        
     
-     
 3.  After the pipeline outputs `BUILD SUCCESSFUL`, execute the fully-bundled independent execution artifact to initialize the web application:
     
     cmd
-    
         java -jar "komga/build/libs/komga-1.24.4.jar"
-        
     
-     
 4.  Access `http://localhost:25600` via your web browser to confirm the working status of the user interface.
