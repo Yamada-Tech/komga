@@ -54,7 +54,7 @@
       >
       </empty-state>
 
-      <dashboard-trending-series/>
+      <dashboard-trending-series v-if="trendingEnabled"/>
 
       <template v-for="(section, i) in sections">
         <horizontal-scroller
@@ -321,6 +321,9 @@ export default Vue.extend({
     },
     selectedOneshots(): boolean {
       return this.selectedBooks.every(b => b.oneshot)
+    },
+    trendingEnabled(): boolean {
+      return this.hasSection(RecommendedViewSection.TRENDING)
     },
   },
   methods: {

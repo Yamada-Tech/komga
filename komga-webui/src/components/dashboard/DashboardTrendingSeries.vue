@@ -1,11 +1,6 @@
 <template>
   <v-container fluid v-if="seriesList.length > 0">
-    <div class="d-flex align-center mb-3">
-      <v-icon color="orange" class="mr-2">mdi-fire</v-icon>
-      <div class="title font-weight-bold">みんなが読んでるマンガ</div>
-      <v-spacer/>
-      <span class="caption text--secondary">{{ periodSubtitle }}</span>
-    </div>
+    <h2 class="text-h5">{{ $t('dashboard.trending') }}</h2>
 
     <v-slide-group show-arrows>
       <v-slide-item
@@ -57,19 +52,6 @@ export default Vue.extend({
       period: 'weekly',
       seriesList: [] as TrendingSeries[],
     }
-  },
-  computed: {
-    periodSubtitle(): string {
-      switch (this.period) {
-        case 'monthly':
-          return '直近1か月のアクティブ作品'
-        case 'yearly':
-          return '直近1年のアクティブ作品'
-        case 'weekly':
-        default:
-          return '直近1週間のアクティブ作品'
-      }
-    },
   },
   async mounted() {
     await this.loadTrendingSeries()

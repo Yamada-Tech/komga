@@ -137,10 +137,12 @@ export enum RecommendedViewSection {
   RECENTLY_ADDED_SERIES = 'RECENTLY_ADDED_SERIES',
   RECENTLY_UPDATED_SERIES = 'RECENTLY_UPDATED_SERIES',
   RECENTLY_READ_BOOKS = 'RECENTLY_READ_BOOKS',
+  TRENDING = 'TRENDING',
 }
 
 export const RECOMMENDED_DEFAULT = {
   sections: [
+    {section: RecommendedViewSection.TRENDING},
     {section: RecommendedViewSection.KEEP_READING},
     {section: RecommendedViewSection.ON_DECK},
     {section: RecommendedViewSection.RECENTLY_RELEASED_BOOKS},
