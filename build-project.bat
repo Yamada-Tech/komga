@@ -17,7 +17,7 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo [2/2] Building Docker image...
-docker build -t yamada-tech/komga:latest .
+docker build -f Dockerfile.local -t yamada-tech/komga:latest .
 if %ERRORLEVEL% neq 0 (
     echo ERROR: Docker build failed.
     exit /b %ERRORLEVEL%
