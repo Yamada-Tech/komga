@@ -1,51 +1,49 @@
 <template>
-  <v-container fluid v-if="seriesList.length > 0">
-    <h2 class="text-h5">{{ $t('dashboard.trending') }}</h2>
-
-    <v-slide-group show-arrows>
-      <v-slide-item
-        v-for="series in seriesList"
-        :key="series.seriesId"
+  <horizontal-scroller
+    v-if="seriesList.length > 0"
+    class="mb-4"
+  >
+    <template v-slot:prepend>
+      <div class="title">{{ $t('dashboard.trending') }}</div>
+    </template>
+    <template v-slot:content>
+      <div
+        v-for="item in seriesList"
+        :key="item.series.id"
+        class="my-2 mx-2"
       >
-        <v-card
-          :to="series.to"
-          width="150"
-          class="ma-2"
-          :ripple="false"
+        <item-card
+          :item="item.series"
+          :width="cardWidth"
+          :action-menu="false"
+        />
+        <div
+          class="caption text--secondary text-truncate"
+          :style="`width: ${cardWidth}px`"
+          :aria-label="readerCountLabel(item.uniqueReaders)"
         >
-          <v-img
-            :src="seriesThumbnailUrl(series.seriesId)"
-            aspect-ratio="0.7071"
-            contain
-            class="grey lighten-2"
-          />
-          <v-card-subtitle class="px-2 pt-2 pb-1 text-truncate">{{ series.title }}</v-card-subtitle>
-          <v-card-text class="px-2 pt-0 pb-2 caption text--secondary"
-                       :aria-label="readerCountLabel(series.uniqueReaders)">
-            {{ $t('dashboard.trending_count', { count: series.uniqueReaders }) }}
-          </v-card-text>
-        </v-card>
-      </v-slide-item>
-    </v-slide-group>
-  </v-container>
+          {{ $t('dashboard.trending_count', { count: item.uniqueReaders }) }}
+        </div>
+      </div>
+    </template>
+  </horizontal-scroller>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import {seriesThumbnailUrl} from '@/functions/urls'
-import {RawLocation} from 'vue-router'
 import {TopSeriesReadingStatAggregateDto} from '@/types/komga-reading-stats'
 import {SeriesDto} from '@/types/komga-series'
+import HorizontalScroller from '@/components/HorizontalScroller.vue'
+import ItemCard from '@/components/ItemCard.vue'
 
 interface TrendingSeries {
-  seriesId: string,
+  series: SeriesDto,
   uniqueReaders: number,
-  title: string,
-  to: RawLocation,
 }
 
 export default Vue.extend({
   name: 'DashboardTrendingSeries',
+  components: {HorizontalScroller, ItemCard},
   data: () => {
     return {
       period: 'weekly',
@@ -55,8 +53,12 @@ export default Vue.extend({
   async mounted() {
     await this.loadTrendingSeries()
   },
+  computed: {
+    cardWidth(): number {
+      return this.$vuetify.breakpoint.xs ? 120 : 150
+    },
+  },
   methods: {
-    seriesThumbnailUrl,
     readerCountLabel(count: number): string {
       return this.$t('dashboard.trending_count', { count }).toString()
     },
@@ -68,7 +70,7 @@ export default Vue.extend({
             ranked.map(async (it: TopSeriesReadingStatAggregateDto) => {
               try {
                 const series = await this.$komgaSeries.getOneSeries(it.seriesId)
-                return this.toTrendingSeriesCard(series, it)
+                return {series, uniqueReaders: it.uniqueReaders} as TrendingSeries
               } catch (e) {
                 return undefined
               }
@@ -77,17 +79,6 @@ export default Vue.extend({
         this.seriesList = cards.filter((it): it is TrendingSeries => it !== undefined)
       } catch (e) {
         this.$warn('Unable to load trending series for dashboard', e)
-      }
-    },
-    toTrendingSeriesCard(series: SeriesDto, stats: TopSeriesReadingStatAggregateDto): TrendingSeries {
-      return {
-        seriesId: series.id,
-        uniqueReaders: stats.uniqueReaders,
-        title: series.metadata.title || series.name,
-        to: {
-          name: series.oneshot ? 'browse-oneshot' : 'browse-series',
-          params: {seriesId: series.id},
-        },
       }
     },
   },
