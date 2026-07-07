@@ -47,6 +47,19 @@
     />
 
     <v-container fluid>
+      <div v-if="einkMode" class="eink-section-tabs mb-4">
+        <v-btn
+          v-for="tab in einkSectionTabs"
+          :key="tab.value"
+          large
+          class="eink-section-tab"
+          :class="{'eink-section-tab--active': activeSection === tab.value}"
+          @click="activeSection = tab.value"
+        >
+          {{ tab.label }}
+        </v-btn>
+      </div>
+
       <empty-state v-if="allEmpty && !loading"
                    :title="$t('common.nothing_to_show')"
                    icon="mdi-help-circle"
@@ -54,12 +67,13 @@
       >
       </empty-state>
 
-      <dashboard-trending-series v-if="trendingEnabled"/>
+      <dashboard-trending-series v-if="isTrendingVisible()"/>
 
       <template v-for="(section, i) in sections">
         <horizontal-scroller
           v-bind:key="i"
           v-if="section.loader && section.loader.items.length !== 0"
+          v-show="isSectionVisible(section)"
           class="mb-4"
           :tick="section.loader.tick"
           @scroll-changed="(percent) => scrollChanged(section.loader, percent)"
@@ -166,6 +180,7 @@ import {
 } from '@/types/komga-clientsettings'
 import EditRecommendedDialog from '@/components/dialogs/EditRecommendedDialog.vue'
 import DashboardTrendingSeries from '@/components/dashboard/DashboardTrendingSeries.vue'
+import {Theme} from '@/types/themes'
 
 interface SectionConfig {
   loader: PageLoader<any> | undefined,
@@ -207,6 +222,7 @@ export default Vue.extend({
       loaderRecentlyReadBooks: undefined as PageLoader<BookDto> | undefined,
       selectedSeries: [] as SeriesDto[],
       selectedBooks: [] as BookDto[],
+      activeSection: RecommendedViewSection.TRENDING as RecommendedViewSection,
     }
   },
   created() {
@@ -239,6 +255,7 @@ export default Vue.extend({
       route: LIBRARY_ROUTE.RECOMMENDED,
     })
     this.setupLoaders(this.libraryId)
+    this.syncEinkActiveSection()
     this.loadAll()
   },
   props: {
@@ -251,6 +268,10 @@ export default Vue.extend({
     libraryIds() {
       this.setupLoaders(this.libraryId)
       this.loadAll()
+      this.syncEinkActiveSection()
+    },
+    einkMode() {
+      this.syncEinkActiveSection()
     },
     '$store.state.komgaLibraries.libraries': {
       handler(val) {
@@ -325,6 +346,16 @@ export default Vue.extend({
     trendingEnabled(): boolean {
       return this.hasSection(RecommendedViewSection.TRENDING)
     },
+    einkMode(): boolean {
+      return this.$store.state.persistedState.theme === Theme.EINK
+    },
+    einkSectionTabs(): { value: RecommendedViewSection, label: string }[] {
+      return [
+        {value: RecommendedViewSection.TRENDING, label: this.$t('dashboard.trending').toString()},
+        {value: RecommendedViewSection.RECENTLY_UPDATED_SERIES, label: this.$t('dashboard.recently_updated_series').toString()},
+        {value: RecommendedViewSection.RECENTLY_ADDED_SERIES, label: this.$t('dashboard.recently_added_series').toString()},
+      ]
+    },
   },
   methods: {
     async resetDefaultView() {
@@ -335,6 +366,25 @@ export default Vue.extend({
     },
     hasSection(section: RecommendedViewSection): boolean {
       return this.viewConfig.sections.some(it => it.section === section)
+    },
+    isTrendingVisible(): boolean {
+      return this.trendingEnabled && (!this.einkMode || this.activeSection === RecommendedViewSection.TRENDING)
+    },
+    isSectionVisible(section: SectionConfig): boolean {
+      return !this.einkMode || this.activeSection === section.value
+    },
+    syncEinkActiveSection() {
+      if (!this.einkMode) return
+      const availableSections = this.einkSectionTabs
+        .map(it => it.value)
+        .filter(it => this.hasSection(it))
+      if (availableSections.length === 0) {
+        this.activeSection = RecommendedViewSection.TRENDING
+        return
+      }
+      if (!availableSections.includes(this.activeSection)) {
+        this.activeSection = availableSections[0]
+      }
     },
     getSectionConfig(section: RecommendedViewSection): SectionConfig | undefined {
       switch (section) {
@@ -595,5 +645,23 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.eink-section-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
 
+.eink-section-tab {
+  flex: 1;
+  min-height: 48px;
+  border: 2px solid #000000;
+  background: #ffffff !important;
+  color: #000000 !important;
+  transition: none !important;
+}
+
+.eink-section-tab--active {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
 </style>

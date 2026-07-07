@@ -17,9 +17,12 @@
     </div>
 
     <div class="scrolling-wrapper"
+         :class="{'scrolling-wrapper--eink': einkMode}"
          :id="id"
          :ref="id"
          @scroll="computeScrollability"
+         @touchstart="preventTouchScroll"
+         @touchmove="preventTouchScroll"
          v-resize="computeScrollability"
     >
       <div class="d-inline-flex" v-mutate="computeScrollability">
@@ -33,6 +36,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import RtlIcon from '@/components/RtlIcon.vue'
+import {Theme} from '@/types/themes'
 
 export default Vue.extend({
   name: 'HorizontalScroller',
@@ -56,6 +60,11 @@ export default Vue.extend({
   mounted() {
     this.container = this.$refs[this.id] as HTMLElement
     this.computeScrollability()
+  },
+  computed: {
+    einkMode(): boolean {
+      return this.$store.state.persistedState.theme === Theme.EINK
+    },
   },
   watch: {
     tick() {
@@ -97,9 +106,12 @@ export default Vue.extend({
         this.container.scrollTo({
           top: 0,
           left: target,
-          behavior: 'smooth',
+          behavior: this.einkMode ? 'auto' : 'smooth',
         })
       }
+    },
+    preventTouchScroll(event: TouchEvent) {
+      if (this.einkMode) event.preventDefault()
     },
   },
 })
@@ -112,6 +124,12 @@ export default Vue.extend({
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
+}
+
+.scrolling-wrapper--eink {
+  -webkit-overflow-scrolling: auto;
+  overflow-x: hidden;
+  touch-action: none;
 }
 
 .scrolling-wrapper::-webkit-scrollbar {
