@@ -72,6 +72,6 @@ This guide details the system prerequisites and execution workflow required to s
 3.  After the pipeline outputs `BUILD SUCCESSFUL`, execute the fully-bundled independent execution artifact to initialize the web application:
     
     cmd
-        java -jar "komga/complete/komga-*.**.*.-cunstom.jar"
+        java -jar "komga/complete/komga-[ver]-cunstom.jar"
     
 4.  Access `http://localhost:25600` via your web browser to confirm the working status of the user interface.
