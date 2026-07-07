@@ -27,6 +27,9 @@ class LoginListener(
   private val userRepository: KomgaUserRepository,
 ) {
   private data class LoginDedupKey(val userId: String, val ip: String?)
+  // Note: ip may be null when the remote address cannot be determined; two events
+  // with the same userId but different null/non-null ip values are intentionally
+  // treated as distinct keys (different connection origins).
 
   /**
    * Cache used to deduplicate rapid concurrent login success events for the same user+IP.
@@ -46,6 +49,9 @@ class LoginListener(
     val apiKey = komgaPrincipal.apiKey
 
     val dedupKey = LoginDedupKey(userId = user.id, ip = event.getIp())
+    // putIfAbsent is used (not cache.get) because we specifically need to know whether
+    // the entry was already present; cache.get(key) { loader } always returns a value
+    // and cannot distinguish "was cached" from "just loaded".
     if (successLoginDedup.asMap().putIfAbsent(dedupKey, true) != null) {
       logger.debug { "Skipping duplicate login success event for userId=${user.id}" }
       return
