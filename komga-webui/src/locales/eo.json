@@ -22,6 +22,10 @@
     "change_password": "ŝanĝi pasvorton"
   },
   "authentication_activity": {
+    "clear_confirm": "Jes, forigi",
+    "clear_history": "Forigi historion",
+    "clear_waiting": "Servilo rekomencas... La paĝo aŭtomate reŝarĝiĝos post ĉirkaŭ 30 sekundoj.",
+    "clear_warning": "Ĉi tiu operacio restartigas la Komga-servilon. Ĉu vi certas?",
     "datetime": "Dato kaj tempo",
     "email": "Retpoŝta adreso",
     "error": "Eraro",

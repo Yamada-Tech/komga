@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "API-avain",
+    "clear_confirm": "Kyllä, tyhjennä",
+    "clear_history": "Tyhjennä historia",
+    "clear_waiting": "Palvelin käynnistyy uudelleen... Sivu latautuu automaattisesti uudelleen noin 30 sekunnin kuluttua.",
+    "clear_warning": "Tämä toiminto käynnistää Komga-palvelimen uudelleen. Oletko varma?",
     "datetime": "Päivämäärä & Aika",
     "email": "Sähköposti",
     "error": "Virhe",

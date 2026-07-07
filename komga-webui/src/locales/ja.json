@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "APIキー",
+    "clear_confirm": "はい、クリアする",
+    "clear_history": "履歴をクリア",
+    "clear_waiting": "サーバー再起動中... 約30秒後に自動でリロードします",
+    "clear_warning": "この処理はKomgaサーバーを再起動します。よろしいですか？",
     "datetime": "日 / 時",
     "email": "メールアドレス",
     "error": "エラー",

@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "API kľúč",
+    "clear_confirm": "Áno, vymazať",
+    "clear_history": "Vymazať históriu",
+    "clear_waiting": "Server sa reštartuje... Stránka sa automaticky znovu načíta asi za 30 sekúnd.",
+    "clear_warning": "Táto operácia reštartuje server Komga. Ste si istí?",
     "datetime": "Dátum Čas",
     "email": "E-mail",
     "error": "Chyba",
