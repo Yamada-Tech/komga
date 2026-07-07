@@ -1,10 +1,10 @@
 <template>
   <div
     v-touch="{
-               left: () => {if(swipe) {turnRight()}},
-               right: () => {if(swipe) {turnLeft()}},
-               up: () => {if(swipe) {verticalNext()}},
-               down: () => {if(swipe) {verticalPrev()}}
+               left: () => {if(swipe && !einkMode) {turnRight()}},
+               right: () => {if(swipe && !einkMode) {turnLeft()}},
+               up: () => {if(swipe && !einkMode) {verticalNext()}},
+               down: () => {if(swipe && !einkMode) {verticalPrev()}}
              }"
   >
     <v-carousel v-model="carouselPage"
@@ -39,39 +39,63 @@
       </v-carousel-item>
     </v-carousel>
 
-    <!--  clickable zone: left  -->
-    <div v-if="!vertical"
-         @click="turnLeft()"
-         class="left-quarter"
-         style="z-index: 1;"
-    />
+    <template v-if="einkMode">
+      <!--  E-Ink clickable zone: left 35%  -->
+      <div v-if="!vertical"
+           @click="einkTapLeft()"
+           class="eink-left"
+           style="z-index: 1;"
+      />
 
-    <!--  clickable zone: right  -->
-    <div v-if="!vertical"
-         @click="turnRight()"
-         class="right-quarter"
-         style="z-index: 1;"
-    />
+      <!--  E-Ink clickable zone: right 35%  -->
+      <div v-if="!vertical"
+           @click="einkTapRight()"
+           class="eink-right"
+           style="z-index: 1;"
+      />
 
-    <!--  clickable zone: top  -->
-    <div v-if="vertical"
-         @click="verticalPrev()"
-         class="top-quarter"
-         style="z-index: 1;"
-    />
+      <!--  E-Ink clickable zone: center 30%  -->
+      <div @click="centerClick()"
+           class="eink-center"
+           style="z-index: 1;"
+      />
+    </template>
 
-    <!--  clickable zone: bottom  -->
-    <div v-if="vertical"
-         @click="verticalNext()"
-         class="bottom-quarter"
-         style="z-index: 1;"
-    />
+    <template v-else>
+      <!--  clickable zone: left  -->
+      <div v-if="!vertical"
+           @click="turnLeft()"
+           class="left-quarter"
+           style="z-index: 1;"
+      />
 
-    <!--  clickable zone: menu  -->
-    <div @click="centerClick()"
-         :class="`${vertical ? 'center-vertical' : 'center-horizontal'}`"
-         style="z-index: 1;"
-    />
+      <!--  clickable zone: right  -->
+      <div v-if="!vertical"
+           @click="turnRight()"
+           class="right-quarter"
+           style="z-index: 1;"
+      />
+
+      <!--  clickable zone: top  -->
+      <div v-if="vertical"
+           @click="verticalPrev()"
+           class="top-quarter"
+           style="z-index: 1;"
+      />
+
+      <!--  clickable zone: bottom  -->
+      <div v-if="vertical"
+           @click="verticalNext()"
+           class="bottom-quarter"
+           style="z-index: 1;"
+      />
+
+      <!--  clickable zone: menu  -->
+      <div @click="centerClick()"
+           :class="`${vertical ? 'center-vertical' : 'center-horizontal'}`"
+           style="z-index: 1;"
+      />
+    </template>
   </div>
 </template>
 
@@ -120,6 +144,14 @@ export default Vue.extend({
     scale: {
       type: String as () => ScaleType,
       required: true,
+    },
+    einkMode: {
+      type: Boolean,
+      default: false,
+    },
+    einkTapReverse: {
+      type: Boolean,
+      default: false,
     },
   },
   watch: {
@@ -222,6 +254,20 @@ export default Vue.extend({
     },
     preRender(spreadIndex: number): boolean {
       return Math.abs(this.carouselPage - spreadIndex) > (this.animations ? 1 : 0)
+    },
+    einkTapLeft() {
+      if (this.einkTapReverse) {
+        this.turnRight()
+      } else {
+        this.turnLeft()
+      }
+    },
+    einkTapRight() {
+      if (this.einkTapReverse) {
+        this.turnLeft()
+      } else {
+        this.turnRight()
+      }
     },
     centerClick() {
       this.$emit('menu')
@@ -378,5 +424,29 @@ export default Vue.extend({
   position: fixed;
   right: -1000vw;
   top: -1000vh;
+}
+
+.eink-left {
+  top: 0;
+  left: 0;
+  width: 35%;
+  height: 100%;
+  position: absolute;
+}
+
+.eink-right {
+  top: 0;
+  right: 0;
+  width: 35%;
+  height: 100%;
+  position: absolute;
+}
+
+.eink-center {
+  top: 0;
+  left: 35%;
+  width: 30%;
+  height: 100%;
+  position: absolute;
 }
 </style>

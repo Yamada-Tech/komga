@@ -144,7 +144,9 @@
       "scale_type": "Scale type",
       "side_padding": "Side padding",
       "side_padding_none": "None",
-      "webtoon": "Webtoon Reader Options"
+      "webtoon": "Webtoon Reader Options",
+      "eink": "E-Ink mode",
+      "eink_tap_reverse": "Reverse tap direction"
     },
     "shortcuts": {
       "close": "Close",
@@ -283,7 +285,9 @@
     "unlock_all": "Unlock all",
     "url": "URL",
     "use_filter_panel_to_change_filter": "Use the filter panel to change the active filter",
-    "year": "year"
+    "year": "year",
+    "previous_page": "Previous page",
+    "next_page": "Next page"
   },
   "dashboard": {
     "trending": "Trending Manga",
@@ -1041,7 +1045,8 @@
   "theme": {
     "dark": "Dark",
     "light": "Light",
-    "system": "System"
+    "system": "System",
+    "eink": "E-Ink"
   },
   "thumbnail_card": {
     "tooltip_delete": "Delete",

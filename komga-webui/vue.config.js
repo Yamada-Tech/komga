@@ -20,7 +20,7 @@ module.exports = {
   chainWebpack: (config) => {
     if (config.plugins.has('fork-ts-checker')) {
       // Completely remove the fork-ts-checker plugin to prevent out of memory errors on Windows
-      config.plugins.delete('fork-ts-checker');
+      config.plugins.delete('fork-ts-checker')
     }
   },
 

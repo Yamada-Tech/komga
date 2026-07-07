@@ -13,3 +13,50 @@ html {
 .link-underline:hover {
     text-decoration: underline;
 }
+
+/* ---- E-Ink theme ---- */
+.theme--eink {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    overflow: hidden !important;
+}
+
+.theme--eink *,
+.theme--eink *::before,
+.theme--eink *::after {
+    transition: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+}
+
+.theme--eink .v-application {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+}
+
+.theme--eink .v-card,
+.theme--eink .v-toolbar,
+.theme--eink .v-list,
+.theme--eink .v-navigation-drawer {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    border: 1px solid #000000;
+}
+
+.theme--eink .v-btn {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    box-shadow: none !important;
+}
+
+.theme--eink .v-btn:hover,
+.theme--eink .v-btn--active {
+    background-color: #000000 !important;
+    color: #FFFFFF !important;
+}
+
+.theme--eink .theme--light.v-application {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+}
