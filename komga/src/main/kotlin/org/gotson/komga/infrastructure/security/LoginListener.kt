@@ -1,5 +1,6 @@
 package org.gotson.komga.infrastructure.security
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gotson.komga.domain.model.AuthenticationActivity
 import org.gotson.komga.domain.persistence.AuthenticationActivityRepository
@@ -16,6 +17,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuth
 import org.springframework.security.web.authentication.WebAuthenticationDetails
 import org.springframework.stereotype.Component
 import java.util.EventObject
+import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger {}
 
@@ -24,11 +26,37 @@ class LoginListener(
   private val authenticationActivityRepository: AuthenticationActivityRepository,
   private val userRepository: KomgaUserRepository,
 ) {
+  private data class LoginDedupKey(val userId: String, val ip: String?)
+  // Note: ip may be null when the remote address cannot be determined; two events
+  // with the same userId but different null/non-null ip values are intentionally
+  // treated as distinct keys (different connection origins).
+
+  /**
+   * Cache used to deduplicate rapid concurrent login success events for the same user+IP.
+   * Entries expire automatically after [SUCCESS_DEDUP_SECONDS] seconds.
+   */
+  private val successLoginDedup =
+    Caffeine
+      .newBuilder()
+      .expireAfterWrite(SUCCESS_DEDUP_SECONDS, TimeUnit.SECONDS)
+      .maximumSize(10_000)
+      .build<LoginDedupKey, Boolean>()
+
   @EventListener
   fun onSuccess(event: AuthenticationSuccessEvent) {
     val komgaPrincipal = event.authentication.principal as KomgaPrincipal
     val user = komgaPrincipal.user
     val apiKey = komgaPrincipal.apiKey
+
+    val dedupKey = LoginDedupKey(userId = user.id, ip = event.getIp())
+    // putIfAbsent is used (not cache.get) because we specifically need to know whether
+    // the entry was already present; cache.get(key) { loader } always returns a value
+    // and cannot distinguish "was cached" from "just loaded".
+    if (successLoginDedup.asMap().putIfAbsent(dedupKey, true) != null) {
+      logger.debug { "Skipping duplicate login success event for userId=${user.id}" }
+      return
+    }
+
     val source =
       when (event.source) {
         is OAuth2LoginAuthenticationToken -> "OAuth2:${(event.source as OAuth2LoginAuthenticationToken).clientRegistration.clientName}"
@@ -107,4 +135,8 @@ class LoginListener(
     } catch (e: Exception) {
       null
     }
+
+  companion object {
+    private const val SUCCESS_DEDUP_SECONDS = 30L
+  }
 }
