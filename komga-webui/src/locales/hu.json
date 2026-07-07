@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "API-kulcs",
+    "clear_confirm": "Igen, törlés",
+    "clear_history": "Előzmények törlése",
+    "clear_waiting": "A szerver újraindul... Az oldal automatikusan újratöltődik körülbelül 30 másodperc múlva.",
+    "clear_warning": "Ez a művelet újraindítja a Komga szervert. Biztosan folytatni kívánja?",
     "datetime": "Dátum / idő",
     "email": "E-mail",
     "error": "Hiba",

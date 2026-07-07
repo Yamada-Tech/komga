@@ -27,6 +27,10 @@
     "tab_title": "Kunngjøringer"
   },
   "authentication_activity": {
+    "clear_confirm": "Ja, tøm",
+    "clear_history": "Tøm historikk",
+    "clear_waiting": "Serveren starter på nytt... Siden lastes automatisk inn på nytt om ca. 30 sekunder.",
+    "clear_warning": "Denne operasjonen vil starte Komga-serveren på nytt. Er du sikker?",
     "datetime": "Dato/tid",
     "email": "E-post",
     "error": "Feil",

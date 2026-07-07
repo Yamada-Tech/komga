@@ -34,6 +34,10 @@
   },
   "authentication_activity": {
     "api_key": "API-nøgle",
+    "clear_confirm": "Ja, ryd",
+    "clear_history": "Ryd historik",
+    "clear_waiting": "Serveren genstarter... Siden genindlæses automatisk om ca. 30 sekunder.",
+    "clear_warning": "Denne handling genstarter Komga-serveren. Er du sikker?",
     "datetime": "Dato og tid",
     "email": "E-mail",
     "error": "Fejl",

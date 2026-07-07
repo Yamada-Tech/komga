@@ -27,6 +27,10 @@
     "tab_title": "Avisos"
   },
   "authentication_activity": {
+    "clear_confirm": "Sí, esborra",
+    "clear_history": "Esborra historial",
+    "clear_waiting": "El servidor s'està reiniciant... La pàgina es tornarà a carregar automàticament d'aquí a uns 30 segons.",
+    "clear_warning": "Aquesta operació reiniciarà el servidor Komga. Esteu segur?",
     "datetime": "Data i hora",
     "email": "Correu electrònic",
     "error": "Error",

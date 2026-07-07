@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "API Schlüssel",
+    "clear_confirm": "Ja, Löschen",
+    "clear_history": "Verlauf löschen",
+    "clear_waiting": "Server wird neu gestartet... Die Seite wird in ca. 30 Sekunden automatisch neu geladen.",
+    "clear_warning": "Dieser Vorgang startet den Komga-Server neu. Sind Sie sicher?",
     "datetime": "Datum/Uhrzeit",
     "email": "E-Mail",
     "error": "Fehler",

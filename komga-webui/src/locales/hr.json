@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "API ključ",
+    "clear_confirm": "Da, očisti",
+    "clear_history": "Očisti povijest",
+    "clear_waiting": "Poslužitelj se ponovo pokreće... Stranica će se automatski osvježiti za oko 30 sekundi.",
+    "clear_warning": "Ova operacija će ponovo pokrenuti Komga poslužitelj. Jeste li sigurni?",
     "datetime": "Datum / Vrijeme",
     "email": "E-mail adresa",
     "error": "Greška",

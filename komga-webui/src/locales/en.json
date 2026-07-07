@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "API Key",
+    "clear_confirm": "Yes, Clear",
+    "clear_history": "Clear History",
+    "clear_waiting": "Server restarting... The page will automatically reload in about 30 seconds.",
+    "clear_warning": "This operation will restart the Komga server. Are you sure?",
     "datetime": "Date Time",
     "email": "Email",
     "error": "Error",

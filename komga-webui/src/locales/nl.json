@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "API-sleutel",
+    "clear_confirm": "Ja, wissen",
+    "clear_history": "Geschiedenis wissen",
+    "clear_waiting": "Server herstart... De pagina wordt automatisch opnieuw geladen in ongeveer 30 seconden.",
+    "clear_warning": "Deze bewerking herstart de Komga-server. Weet je het zeker?",
     "datetime": "Datum en tijd",
     "email": "E-mail",
     "error": "Fout",

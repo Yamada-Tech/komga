@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "API 金鑰",
+    "clear_confirm": "是，清除",
+    "clear_history": "清除歷史記錄",
+    "clear_waiting": "伺服器重啟中... 頁面將在約30秒後自動重新載入。",
+    "clear_warning": "此操作將重啟 Komga 伺服器。您確定嗎？",
     "datetime": "日期/時間",
     "email": "電子郵件",
     "error": "錯誤",

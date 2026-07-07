@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "Clave API",
+    "clear_confirm": "Si, borrar",
+    "clear_history": "Borrar historial",
+    "clear_waiting": "O servidor está a reiniciarse... A páxina recargarase automaticamente en aproximadamente 30 segundos.",
+    "clear_warning": "Esta operación reiniciará o servidor Komga. Está seguro?",
     "datetime": "Data e Hora",
     "email": "Correo electrónico",
     "error": "Erro",

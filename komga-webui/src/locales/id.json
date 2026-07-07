@@ -36,6 +36,10 @@
   },
   "authentication_activity": {
     "api_key": "Kunci API",
+    "clear_confirm": "Ya, hapus",
+    "clear_history": "Hapus riwayat",
+    "clear_waiting": "Server sedang restart... Halaman akan dimuat ulang secara otomatis dalam sekitar 30 detik.",
+    "clear_warning": "Operasi ini akan me-restart server Komga. Apakah Anda yakin?",
     "datetime": "Tanggal & Waktu",
     "email": "Email",
     "error": "Error",

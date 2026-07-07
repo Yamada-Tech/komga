@@ -215,4 +215,16 @@ export default class KomgaUsersService {
       throw new Error(msg)
     }
   }
+
+  async clearAuthenticationActivity() {
+    try {
+      await this.http.post('/api/v1/history/authentication-activity/clear')
+    } catch (e) {
+      let msg = 'An error occurred while trying to clear authentication activity'
+      if (e.response?.data?.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
 }

@@ -22,6 +22,10 @@
     "change_password": "αλλαγή κωδικού"
   },
   "authentication_activity": {
+    "clear_confirm": "Yes, Clear",
+    "clear_history": "Clear History",
+    "clear_waiting": "Server restarting... The page will automatically reload in about 30 seconds.",
+    "clear_warning": "This operation will restart the Komga server. Are you sure?",
     "datetime": "Ημερομηνία Ώρα",
     "email": "Email",
     "error": "Σφάλμα",
