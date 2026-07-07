@@ -104,13 +104,11 @@ class LoginListener(
   private fun isDuplicateSuccessLogin(key: LoginDedupKey): Boolean {
     val now = Instant.now()
     val cutoff = now.minus(successDebounceWindow)
-    // Lazily prune expired entries once the map grows beyond a small threshold
-    if (recentSuccessLogins.size > 500) {
-      recentSuccessLogins.forEach { (k, ts) -> if (ts.isBefore(cutoff)) recentSuccessLogins.remove(k, ts) }
-    }
-    // put() is atomic and returns the previous value; a non-null value within the window means duplicate
+    // Prune expired entries on each call to keep memory bounded
+    recentSuccessLogins.entries.removeIf { it.value.isBefore(cutoff) }
+    // put() atomically returns the previous value; a value within the window means duplicate
     val previous = recentSuccessLogins.put(key, now)
-    return previous != null && previous.isAfter(cutoff)
+    return previous != null && !previous.isBefore(cutoff)
   }
 
   private fun EventObject.getIp(): String? =
