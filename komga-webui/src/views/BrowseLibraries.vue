@@ -98,26 +98,34 @@
       />
 
       <template v-if="totalPages > 0">
-        <v-pagination
-          v-if="totalPages > 1"
-          v-model="page"
-          :total-visible="paginationVisible"
-          :length="totalPages"
-        />
+        <template v-if="einkMode">
+          <eink-item-browser
+            :items="series"
+            :item-context="itemContext"
+          />
+        </template>
+        <template v-else>
+          <v-pagination
+            v-if="totalPages > 1"
+            v-model="page"
+            :total-visible="paginationVisible"
+            :length="totalPages"
+          />
 
-        <item-browser
-          :items="series"
-          :item-context="itemContext"
-          :selected.sync="selectedSeries"
-          :edit-function="isAdmin ? editSingleSeries : undefined"
-        />
+          <item-browser
+            :items="series"
+            :item-context="itemContext"
+            :selected.sync="selectedSeries"
+            :edit-function="isAdmin ? editSingleSeries : undefined"
+          />
 
-        <v-pagination
-          v-if="totalPages > 1"
-          v-model="page"
-          :total-visible="paginationVisible"
-          :length="totalPages"
-        />
+          <v-pagination
+            v-if="totalPages > 1"
+            v-model="page"
+            :total-visible="paginationVisible"
+            :length="totalPages"
+          />
+        </template>
       </template>
     </v-container>
 
@@ -129,6 +137,7 @@ import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ItemBrowser from '@/components/ItemBrowser.vue'
+import EinkItemBrowser from '@/components/EinkItemBrowser.vue'
 import LibraryNavigation from '@/components/LibraryNavigation.vue'
 import LibraryActionsMenu from '@/components/menus/LibraryActionsMenu.vue'
 import PageSizeSelect from '@/components/PageSizeSelect.vue'
@@ -219,6 +228,7 @@ export default Vue.extend({
     EmptyState,
     ToolbarSticky,
     ItemBrowser,
+    EinkItemBrowser,
     PageSizeSelect,
     LibraryNavigation,
     MultiSelectBar,
@@ -325,6 +335,9 @@ export default Vue.extend({
     next()
   },
   computed: {
+    einkMode(): boolean {
+      return this.$store.state.persistedState.theme === 'theme.eink'
+    },
     seriesGrouping(): Record<string, string[]> {
       let s: Record<string, string[]>
       try {

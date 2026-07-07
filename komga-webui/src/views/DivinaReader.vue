@@ -144,6 +144,8 @@
         :scale="scale"
         :animations="animations"
         :swipe="swipe"
+        :eink-mode="einkMode"
+        :eink-tap-reverse="einkTapReverse"
         @menu="toggleToolbars()"
         @jump-previous="jumpToPrevious()"
         @jump-next="jumpToNext()"
@@ -247,6 +249,14 @@
                   v-model="pageLayout"
                   :label="$t('bookreader.settings.page_layout')"
                 />
+              </v-list-item>
+            </template>
+
+            <template v-if="einkMode">
+              <v-subheader class="font-weight-black text-h6">{{ $t('bookreader.settings.eink') }}</v-subheader>
+              <v-list-item>
+                <settings-switch v-model="einkTapReverse"
+                                 :label="$t('bookreader.settings.eink_tap_reverse')"/>
               </v-list-item>
             </template>
 
@@ -661,6 +671,17 @@ export default Vue.extend({
         this.$store.commit('setWebreaderAlwaysFullscreen', alwaysFullscreen)
         if (alwaysFullscreen) this.enterFullscreen()
         else screenfull.isEnabled && screenfull.exit()
+      },
+    },
+    einkMode(): boolean {
+      return this.$store.state.persistedState.theme === 'theme.eink'
+    },
+    einkTapReverse: {
+      get: function (): boolean {
+        return this.$store.state.persistedState.einkTapReverse
+      },
+      set: function (val: boolean): void {
+        this.$store.commit('setEinkTapReverse', val)
       },
     },
   },

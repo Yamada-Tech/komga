@@ -45,6 +45,7 @@ export const persistedModule: Module<any, any> = {
     importPath: '',
     duplicatesNewPageSize: 10,
     rememberMe: false,
+    einkTapReverse: false,
   },
   getters: {
     getLocaleFirstDay: (state) => () => {
@@ -174,6 +175,9 @@ export const persistedModule: Module<any, any> = {
     },
     setRememberMe(state, val) {
       state.rememberMe = val
+    },
+    setEinkTapReverse(state, val) {
+      state.einkTapReverse = val
     },
   },
 }

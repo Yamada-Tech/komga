@@ -55,18 +55,25 @@ export default Vue.extend({
       }
     },
     changeTheme(theme: Theme) {
-      switch (theme) {
-        case Theme.DARK:
-          this.$vuetify.theme.dark = true
-          break
+      const einkClass = 'theme--eink'
+      if (theme === Theme.EINK) {
+        this.$vuetify.theme.dark = false
+        document.documentElement.classList.add(einkClass)
+      } else {
+        document.documentElement.classList.remove(einkClass)
+        switch (theme) {
+          case Theme.DARK:
+            this.$vuetify.theme.dark = true
+            break
 
-        case Theme.SYSTEM:
-          this.$vuetify.theme.dark = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
-          break
+          case Theme.SYSTEM:
+            this.$vuetify.theme.dark = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+            break
 
-        default:
-          this.$vuetify.theme.dark = false
-          break
+          default:
+            this.$vuetify.theme.dark = false
+            break
+        }
       }
     },
     reloadLibraries(event: LibrarySseDto) {
