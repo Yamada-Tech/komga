@@ -15,7 +15,10 @@ import org.springframework.security.authentication.event.AuthenticationSuccessEv
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken
 import org.springframework.security.web.authentication.WebAuthenticationDetails
 import org.springframework.stereotype.Component
+import java.time.Duration
+import java.time.Instant
 import java.util.EventObject
+import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
 
@@ -24,11 +27,23 @@ class LoginListener(
   private val authenticationActivityRepository: AuthenticationActivityRepository,
   private val userRepository: KomgaUserRepository,
 ) {
+  private data class LoginDedupKey(val userId: String, val ip: String?)
+
+  private val successDebounceWindow: Duration = Duration.ofSeconds(30)
+  private val recentSuccessLogins = ConcurrentHashMap<LoginDedupKey, Instant>()
+
   @EventListener
   fun onSuccess(event: AuthenticationSuccessEvent) {
     val komgaPrincipal = event.authentication.principal as KomgaPrincipal
     val user = komgaPrincipal.user
     val apiKey = komgaPrincipal.apiKey
+
+    val dedupKey = LoginDedupKey(userId = user.id, ip = event.getIp())
+    if (isDuplicateSuccessLogin(dedupKey)) {
+      logger.debug { "Skipping duplicate login success event for userId=${user.id}" }
+      return
+    }
+
     val source =
       when (event.source) {
         is OAuth2LoginAuthenticationToken -> "OAuth2:${(event.source as OAuth2LoginAuthenticationToken).clientRegistration.clientName}"
@@ -84,6 +99,23 @@ class LoginListener(
 
     logger.debug { activity }
     authenticationActivityRepository.insert(activity)
+  }
+
+  private fun isDuplicateSuccessLogin(key: LoginDedupKey): Boolean {
+    val now = Instant.now()
+    val cutoff = now.minus(successDebounceWindow)
+    // Remove expired entries to prevent unbounded memory growth
+    recentSuccessLogins.entries.removeIf { it.value.isBefore(cutoff) }
+    var duplicate = false
+    recentSuccessLogins.compute(key) { _, last ->
+      if (last != null && last.isAfter(cutoff)) {
+        duplicate = true
+        last
+      } else {
+        now
+      }
+    }
+    return duplicate
   }
 
   private fun EventObject.getIp(): String? =
