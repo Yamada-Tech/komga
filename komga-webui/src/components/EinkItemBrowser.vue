@@ -44,6 +44,13 @@ import ItemCard from '@/components/ItemCard.vue'
 import Vue from 'vue'
 import {ItemContext} from '@/types/items'
 
+const PORTRAIT_COLUMNS = 2
+const LANDSCAPE_COLUMNS = 4
+const PORTRAIT_ROWS = 3
+const LANDSCAPE_ROWS = 1
+const PORTRAIT_ITEMS_PER_PAGE = PORTRAIT_COLUMNS * PORTRAIT_ROWS   // 6
+const LANDSCAPE_ITEMS_PER_PAGE = LANDSCAPE_COLUMNS * LANDSCAPE_ROWS // 4
+
 export default Vue.extend({
   name: 'EinkItemBrowser',
   components: {ItemCard},
@@ -72,10 +79,10 @@ export default Vue.extend({
       return this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
     },
     itemsPerPage(): number {
-      return this.isPortrait ? 6 : 4
+      return this.isPortrait ? PORTRAIT_ITEMS_PER_PAGE : LANDSCAPE_ITEMS_PER_PAGE
     },
     columns(): number {
-      return this.isPortrait ? 2 : 4
+      return this.isPortrait ? PORTRAIT_COLUMNS : LANDSCAPE_COLUMNS
     },
     gridClass(): string {
       return `eink-grid eink-grid-cols-${this.columns}`
