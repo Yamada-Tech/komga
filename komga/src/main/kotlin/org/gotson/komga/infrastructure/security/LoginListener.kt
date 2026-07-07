@@ -1,5 +1,6 @@
 package org.gotson.komga.infrastructure.security
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gotson.komga.domain.model.AuthenticationActivity
 import org.gotson.komga.domain.persistence.AuthenticationActivityRepository
@@ -15,10 +16,8 @@ import org.springframework.security.authentication.event.AuthenticationSuccessEv
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken
 import org.springframework.security.web.authentication.WebAuthenticationDetails
 import org.springframework.stereotype.Component
-import java.time.Duration
-import java.time.Instant
 import java.util.EventObject
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger {}
 
@@ -29,8 +28,16 @@ class LoginListener(
 ) {
   private data class LoginDedupKey(val userId: String, val ip: String?)
 
-  private val successDebounceWindow: Duration = Duration.ofSeconds(30)
-  private val recentSuccessLogins = ConcurrentHashMap<LoginDedupKey, Instant>()
+  /**
+   * Cache used to deduplicate rapid concurrent login success events for the same user+IP.
+   * Entries expire automatically after [SUCCESS_DEDUP_SECONDS] seconds.
+   */
+  private val successLoginDedup =
+    Caffeine
+      .newBuilder()
+      .expireAfterWrite(SUCCESS_DEDUP_SECONDS, TimeUnit.SECONDS)
+      .maximumSize(10_000)
+      .build<LoginDedupKey, Boolean>()
 
   @EventListener
   fun onSuccess(event: AuthenticationSuccessEvent) {
@@ -39,7 +46,7 @@ class LoginListener(
     val apiKey = komgaPrincipal.apiKey
 
     val dedupKey = LoginDedupKey(userId = user.id, ip = event.getIp())
-    if (isDuplicateSuccessLogin(dedupKey)) {
+    if (successLoginDedup.asMap().putIfAbsent(dedupKey, true) != null) {
       logger.debug { "Skipping duplicate login success event for userId=${user.id}" }
       return
     }
@@ -101,16 +108,6 @@ class LoginListener(
     authenticationActivityRepository.insert(activity)
   }
 
-  private fun isDuplicateSuccessLogin(key: LoginDedupKey): Boolean {
-    val now = Instant.now()
-    val cutoff = now.minus(successDebounceWindow)
-    // Prune expired entries on each call to keep memory bounded
-    recentSuccessLogins.entries.removeIf { it.value.isBefore(cutoff) }
-    // put() atomically returns the previous value; a value within the window means duplicate
-    val previous = recentSuccessLogins.put(key, now)
-    return previous != null && !previous.isBefore(cutoff)
-  }
-
   private fun EventObject.getIp(): String? =
     try {
       when (source) {
@@ -132,4 +129,8 @@ class LoginListener(
     } catch (e: Exception) {
       null
     }
+
+  companion object {
+    private const val SUCCESS_DEDUP_SECONDS = 30L
+  }
 }
