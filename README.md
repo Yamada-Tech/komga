@@ -14,12 +14,13 @@ Komga is a media server for your comics, mangas, BDs, magazines and eBooks.
 #### Chat on [Discord](https://discord.gg/TdRpkDu)
 <br>
 <br>
+
 ## ⚠️ Custom Fork NoticeThis
 repository is a custom fork of the original gotson/komga. It contains personalized enhancements optimized for local NAS deployment and specific UI preferences.
 For the official documentation and original source, please visit the Official Komga Repository.
 <br>
 <br>
-<br>
+
 ## Yamada-Tech Custom Features
 
 This custom fork includes tailored optimization features for premium, streamlined self-hosting, focusing on interactive user engagement, minimalist administrative control, and lightweight container virtualization. 
