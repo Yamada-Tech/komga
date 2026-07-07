@@ -60,6 +60,8 @@ import {ERROR} from '@/types/events'
 import {AuthenticationActivityDto} from '@/types/komga-users'
 import ConfirmationDialog from '@/components/dialogs/ConfirmationDialog.vue'
 
+const RESTART_RELOAD_DELAY_MS = 30000
+
 export default Vue.extend({
   name: 'AuthenticationActivityTable',
   components: {ConfirmationDialog},
@@ -138,7 +140,7 @@ export default Vue.extend({
       try {
         await this.$komgaUsers.clearAuthenticationActivity()
         this.restarting = true
-        setTimeout(() => window.location.reload(), 30000)
+        setTimeout(() => window.location.reload(), RESTART_RELOAD_DELAY_MS)
       } catch (e) {
         this.$eventHub.$emit(ERROR, {message: e.message} as ErrorEvent)
       }
