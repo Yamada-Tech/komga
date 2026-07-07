@@ -1,10 +1,9 @@
+import DashboardView from '@/views/DashboardView.vue'
 import {RecommendedViewSection} from '@/types/komga-clientsettings'
 
 jest.mock('@/i18n', () => ({
   t: (key: string) => key,
 }))
-
-const DashboardView = require('@/views/DashboardView.vue').default
 
 describe('DashboardView E-Ink section switching', () => {
   const methods = (DashboardView as any).options.methods
@@ -46,9 +45,9 @@ describe('DashboardView E-Ink section switching', () => {
 
   it('returns fixed E-Ink tabs for trending, recently updated and recently added', () => {
     const labels: Record<string, string> = {
-      'dashboard.trending': 'トレンド',
-      'dashboard.recently_updated_series': '最近更新',
-      'dashboard.recently_added_series': '新着追加',
+      'dashboard.trending': 'Trending',
+      'dashboard.recently_updated_series': 'Recently Updated',
+      'dashboard.recently_added_series': 'Recently Added',
     }
     const context = {
       $t: (key: string) => labels[key] ?? key,

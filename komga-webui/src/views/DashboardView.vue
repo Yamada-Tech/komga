@@ -54,7 +54,8 @@
           large
           class="eink-section-tab"
           :class="{'eink-section-tab--active': activeSection === tab.value}"
-          @click="activeSection = tab.value"
+          :disabled="!hasSection(tab.value)"
+          @click="hasSection(tab.value) && (activeSection = tab.value)"
         >
           {{ tab.label }}
         </v-btn>
@@ -379,7 +380,6 @@ export default Vue.extend({
         .map(it => it.value)
         .filter(it => this.hasSection(it))
       if (availableSections.length === 0) {
-        this.activeSection = RecommendedViewSection.TRENDING
         return
       }
       if (!availableSections.includes(this.activeSection)) {

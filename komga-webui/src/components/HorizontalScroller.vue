@@ -17,7 +17,6 @@
     </div>
 
     <div class="scrolling-wrapper"
-         :class="{'scrolling-wrapper--eink': einkMode}"
          :id="id"
          :ref="id"
          @scroll="computeScrollability"
@@ -124,12 +123,6 @@ export default Vue.extend({
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
-}
-
-.scrolling-wrapper--eink {
-  -webkit-overflow-scrolling: auto;
-  overflow-x: hidden;
-  touch-action: none;
 }
 
 .scrolling-wrapper::-webkit-scrollbar {
