@@ -39,7 +39,7 @@
     "clear_confirm": "Да, очистить",
     "clear_history": "Очистить историю",
     "clear_waiting": "Сервер перезапускается... Страница автоматически перезагрузится примерно через 30 секунд.",
-    "clear_warning": "Эта операция перезапустит сервер Komga. Вы уверены?",
+    "clear_warning": "This operation will permanently delete all login history. Are you sure?",
     "datetime": "Дата/Время",
     "email": "Эл. почта",
     "error": "Ошибка",

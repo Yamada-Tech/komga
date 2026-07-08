@@ -21,6 +21,8 @@ interface AuthenticationActivityRepository {
 
   fun insert(activity: AuthenticationActivity)
 
+  fun deleteAll()
+
   fun deleteByUser(user: KomgaUser)
 
   fun deleteOlderThan(dateTime: LocalDateTime)

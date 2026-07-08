@@ -25,7 +25,7 @@
     "clear_confirm": "بله، پاک‌سازی",
     "clear_history": "پاک‌سازی تاریخچه",
     "clear_waiting": "سرور در حال راه‌اندازی مجدد است... صفحه به طور خودکار در حدود ۳۰ ثانیه دیگر بارگذاری مجدد خواهد شد.",
-    "clear_warning": "این عملیات سرور Komga را مجدداً راه‌اندازی خواهد کرد. آیا مطمئن هستید؟",
+    "clear_warning": "This operation will permanently delete all login history. Are you sure?",
     "datetime": "تاریخ و زمان",
     "email": "ایمیل",
     "error": "خطا",

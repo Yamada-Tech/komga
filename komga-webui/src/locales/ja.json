@@ -39,7 +39,7 @@
     "clear_confirm": "はい、クリアする",
     "clear_history": "履歴をクリア",
     "clear_waiting": "サーバー再起動中... 約30秒後に自動でリロードします",
-    "clear_warning": "この処理はKomgaサーバーを再起動します。よろしいですか？",
+    "clear_warning": "この処理はすべてのログイン履歴を完全に消去します。よろしいですか？",
     "datetime": "日 / 時",
     "email": "メールアドレス",
     "error": "エラー",

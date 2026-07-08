@@ -25,7 +25,7 @@
     "clear_confirm": "Ναι, Διαγραφή",
     "clear_history": "Εκκαθάριση ιστορικού",
     "clear_waiting": "Ο διακομιστής επανεκκινεί... Η σελίδα θα φορτωθεί αυτόματα σε περίπου 30 δευτερόλεπτα.",
-    "clear_warning": "Αυτή η λειτουργία θα επανεκκινήσει τον διακομιστή Komga. Είστε σίγουροι;",
+    "clear_warning": "This operation will permanently delete all login history. Are you sure?",
     "datetime": "Ημερομηνία Ώρα",
     "email": "Email",
     "error": "Σφάλμα",
