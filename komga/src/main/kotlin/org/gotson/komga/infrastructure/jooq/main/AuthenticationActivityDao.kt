@@ -101,6 +101,12 @@ class AuthenticationActivityDao(
       .execute()
   }
 
+  override fun deleteAll() {
+    dslRW
+      .deleteFrom(aa)
+      .execute()
+  }
+
   override fun deleteByUser(user: KomgaUser) {
     dslRW
       .deleteFrom(aa)

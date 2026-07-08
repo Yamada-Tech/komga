@@ -39,7 +39,7 @@
     "clear_confirm": "Tak, wyczyść",
     "clear_history": "Wyczyść historię",
     "clear_waiting": "Serwer restartuje się... Strona zostanie automatycznie przeładowana za około 30 sekund.",
-    "clear_warning": "Ta operacja uruchomi ponownie serwer Komga. Jesteś pewien?",
+    "clear_warning": "Ta operacja trwale usunie całą historię logowań. Czy na pewno?",
     "datetime": "Data i czas",
     "email": "E-mail",
     "error": "Błąd",

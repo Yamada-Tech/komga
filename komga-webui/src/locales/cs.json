@@ -39,7 +39,7 @@
     "clear_confirm": "Ano, vymazat",
     "clear_history": "Vymazat historii",
     "clear_waiting": "Server se restartuje... Stránka se automaticky znovu načte přibližně za 30 sekund.",
-    "clear_warning": "Tato operace restartuje server Komga. Jste si jisti?",
+    "clear_warning": "Tato operace trvale smaže celou historii přihlášení. Jste si jisti?",
     "datetime": "Datum a čas",
     "email": "E-mail",
     "error": "Chyba",

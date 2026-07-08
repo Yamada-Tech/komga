@@ -25,7 +25,7 @@
     "clear_confirm": "Da, počisti",
     "clear_history": "Počisti zgodovino",
     "clear_waiting": "Strežnik se znova zaganja... Stran se bo samodejno znova naložila čez približno 30 sekund.",
-    "clear_warning": "Ta operacija bo znova zagnala strežnik Komga. Ste prepričani?",
+    "clear_warning": "Ta operacija bo trajno izbrisala celotno zgodovino prijav. Ste prepričani?",
     "datetime": "Datum in čas",
     "email": "Email",
     "error": "Napaka",

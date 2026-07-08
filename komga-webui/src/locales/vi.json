@@ -25,7 +25,7 @@
     "clear_confirm": "Có, xóa",
     "clear_history": "Xóa lịch sử",
     "clear_waiting": "Máy chủ đang khởi động lại... Trang sẽ tự động tải lại sau khoảng 30 giây.",
-    "clear_warning": "Thao tác này sẽ khởi động lại máy chủ Komga. Bạn có chắc không?",
+    "clear_warning": "Thao tác này sẽ xóa vĩnh viễn toàn bộ lịch sử đăng nhập. Bạn có chắc không?",
     "datetime": "Ngày giờ",
     "email": "Email",
     "error": "Lỗi",

@@ -39,7 +39,7 @@
     "clear_confirm": "Evet, temizle",
     "clear_history": "Geçmişi temizle",
     "clear_waiting": "Sunucu yeniden başlatılıyor... Sayfa yaklaşık 30 saniye içinde otomatik olarak yenilenecek.",
-    "clear_warning": "Bu işlem Komga sunucusunu yeniden başlatacak. Emin misiniz?",
+    "clear_warning": "Bu işlem tüm giriş geçmişini kalıcı olarak silecektir. Emin misiniz?",
     "datetime": "Tarih ve Saat",
     "email": "e-Posta",
     "error": "Hata",
