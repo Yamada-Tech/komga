@@ -39,7 +39,7 @@
     "clear_confirm": "Igen, törlés",
     "clear_history": "Előzmények törlése",
     "clear_waiting": "A szerver újraindul... Az oldal automatikusan újratöltődik körülbelül 30 másodperc múlva.",
-    "clear_warning": "This operation will permanently delete all login history. Are you sure?",
+    "clear_warning": "Ez a művelet véglegesen törli a teljes bejelentkezési előzményt. Biztosan folytatni kívánja?",
     "datetime": "Dátum / idő",
     "email": "E-mail",
     "error": "Hiba",

@@ -30,7 +30,7 @@
     "clear_confirm": "Sí, esborra",
     "clear_history": "Esborra historial",
     "clear_waiting": "El servidor s'està reiniciant... La pàgina es tornarà a carregar automàticament d'aquí a uns 30 segons.",
-    "clear_warning": "This operation will permanently delete all login history. Are you sure?",
+    "clear_warning": "Aquesta operació suprimirà permanentment tot l'historial d'inicis de sessió. Esteu segur?",
     "datetime": "Data i hora",
     "email": "Correu electrònic",
     "error": "Error",

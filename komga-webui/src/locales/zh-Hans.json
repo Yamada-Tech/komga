@@ -39,7 +39,7 @@
     "clear_confirm": "是，清除",
     "clear_history": "清除历史记录",
     "clear_waiting": "服务器重启中... 页面将在约30秒后自动重新加载。",
-    "clear_warning": "This operation will permanently delete all login history. Are you sure?",
+    "clear_warning": "此操作将永久删除所有登录历史。您确定吗？",
     "datetime": "日期/时间",
     "email": "邮箱",
     "error": "错误",

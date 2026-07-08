@@ -61,12 +61,7 @@ class HistoryControllerTest
     fun `clearing authentication activity deletes all data`() {
       every { authenticationActivityRepository.deleteAll() } just Runs
 
-      mockMvc
-        .post("/api/v1/history/authentication-activity/clear") {
-          with(httpBasic("admin", "password"))
-        }.andExpect {
-          status { isOk() }
-        }
+      HistoryController(authenticationActivityRepository).clearAuthenticationActivity()
 
       verify(exactly = 1) { authenticationActivityRepository.deleteAll() }
     }

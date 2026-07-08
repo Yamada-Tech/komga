@@ -39,7 +39,7 @@
     "clear_confirm": "Sim, limpar",
     "clear_history": "Limpar histórico",
     "clear_waiting": "Servidor a reiniciar... A página será recarregada automaticamente em cerca de 30 segundos.",
-    "clear_warning": "This operation will permanently delete all login history. Are you sure?",
+    "clear_warning": "Esta operação irá eliminar permanentemente todo o histórico de inícios de sessão. Tem a certeza?",
     "datetime": "Data e hora",
     "email": "Email",
     "error": "Erro",
