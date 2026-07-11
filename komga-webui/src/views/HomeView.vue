@@ -500,7 +500,7 @@ export default Vue.extend({
     },
     theme() {
       this.$nextTick(() => this.refreshEinkPager())
-    }
+    },
   },
   computed: {
     taskCount(): number {
