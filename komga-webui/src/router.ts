@@ -173,6 +173,11 @@ const router = new Router({
           component: () => import(/* webpackChunkName: "account-settings-ui" */ './views/UIUserSettings.vue'),
         },
         {
+          path: '/account/collections',
+          name: 'account-collections',
+          component: () => import(/* webpackChunkName: "account-collections" */ './views/AccountCollectionsView.vue'),
+        },
+        {
           path: '/account/authentication-activity',
           name: 'account-activity',
           component: () => import(/* webpackChunkName: "account-activity" */ './views/SelfAuthenticationActivity.vue'),

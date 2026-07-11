@@ -68,7 +68,7 @@
           </v-list-item>
 
           <!--   LIBRARIES     -->
-          <v-list-item :to="{name:'libraries', params: {libraryId: LIBRARIES_ALL}}">
+          <v-list-item :to="libraryMenuRoute(LIBRARIES_ALL)">
             <v-list-item-icon>
               <v-icon>mdi-book-multiple</v-icon>
             </v-list-item-icon>
@@ -88,7 +88,7 @@
           <!--   PINNED LIBRARIES     -->
           <v-list-item v-for="(l, index) in librariesPinned"
                        :key="index"
-                       :to="{name:'libraries', params: {libraryId: l.id}}"
+                       :to="libraryMenuRoute(l.id)"
           >
             <v-list-item-icon>
             </v-list-item-icon>
@@ -117,7 +117,7 @@
 
             <v-list-item v-for="(l, index) in librariesUnpinned"
                          :key="index"
-                         :to="{name:'libraries', params: {libraryId: l.id}}"
+                         :to="libraryMenuRoute(l.id)"
             >
               <v-list-item-content>
                 <v-list-item-title>{{ l.name }}</v-list-item-title>
@@ -137,6 +137,7 @@
           <v-list-group no-action
                         v-if="sidebarCollections.length > 0"
                         v-model="expandCollections"
+                        class="sidebar-collections-group"
           >
             <template v-slot:prependIcon>
               <v-icon>mdi-view-grid</v-icon>
@@ -148,6 +149,7 @@
             <v-list-item v-for="collection in sidebarCollections"
                          :key="collection.id"
                          :to="{name: 'browse-collection', params: {collectionId: collection.id}}"
+                         class="sidebar-collection-item"
             >
               <v-list-item-title>{{ collection.name }}</v-list-item-title>
             </v-list-item>
@@ -314,6 +316,10 @@
 
             <v-list-item :to="{name: 'account-settings-ui'}">
               <v-list-item-title>{{ $t('common.ui') }}</v-list-item-title>
+            </v-list-item>
+
+            <v-list-item :to="{name: 'account-collections'}">
+              <v-list-item-title>{{ $t('common.collections') }}</v-list-item-title>
             </v-list-item>
 
             <v-list-item :to="{name: 'account-activity'}">
@@ -557,7 +563,9 @@ export default Vue.extend({
     async loadSidebarCollections() {
       try {
         const collections = (await this.$komgaCollections.getCollections(undefined, {unpaged: true} as PageRequest)).content
-        this.sidebarCollections = collections.sort((a, b) => a.name.localeCompare(b.name, this.$i18n.locale))
+        this.sidebarCollections = collections
+          .filter(c => c.showInSidebar)
+          .sort((a, b) => a.name.localeCompare(b.name, this.$i18n.locale))
       } catch (e) {
         this.sidebarCollections = []
       }
@@ -581,6 +589,12 @@ export default Vue.extend({
     },
     addLibrary() {
       this.$store.dispatch('dialogAddLibrary')
+    },
+    libraryMenuRoute(libraryId: string) {
+      if (this.theme === Theme.EINK) {
+        return {name: 'browse-libraries', params: {libraryId}}
+      }
+      return {name: 'libraries', params: {libraryId}}
     },
   },
 })

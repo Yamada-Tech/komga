@@ -455,7 +455,9 @@
       "button_confirm": "変更を保存",
       "dialog_title": "コレクションを編集",
       "field_manual_ordering": "手動で並べる",
+      "field_show_in_sidebar": "サイドバーメニューに表示する",
       "label_ordering": "コレクション中のシリーズは、デフォルトでは名前順に並びます。並び順を自分で決めるために、手動で並べることができます。",
+      "label_sidebar": "このコレクションを全ユーザー向けの左メニューに表示するか選択します。",
       "tab_general": "一般",
       "tab_poster": "ポスター"
     },

@@ -1,6 +1,6 @@
 <template>
-  <div class="eink-browser">
-    <div v-if="hasItems" :class="gridClass">
+  <div class="eink-browser" :class="`eink-browser--${deviceProfile}`">
+    <div v-if="hasItems" :class="gridClass" :style="gridStyle">
       <div v-for="item in currentPageItems"
            :key="item.id"
            class="eink-grid-cell"
@@ -44,13 +44,6 @@ import ItemCard from '@/components/ItemCard.vue'
 import Vue from 'vue'
 import {ItemContext} from '@/types/items'
 
-const PORTRAIT_COLUMNS = 2
-const LANDSCAPE_COLUMNS = 4
-const PORTRAIT_ROWS = 3
-const LANDSCAPE_ROWS = 1
-const PORTRAIT_ITEMS_PER_PAGE = PORTRAIT_COLUMNS * PORTRAIT_ROWS   // 6
-const LANDSCAPE_ITEMS_PER_PAGE = LANDSCAPE_COLUMNS * LANDSCAPE_ROWS // 4
-
 export default Vue.extend({
   name: 'EinkItemBrowser',
   components: {ItemCard},
@@ -78,14 +71,58 @@ export default Vue.extend({
     isPortrait(): boolean {
       return this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
     },
-    itemsPerPage(): number {
-      return this.isPortrait ? PORTRAIT_ITEMS_PER_PAGE : LANDSCAPE_ITEMS_PER_PAGE
+    shortSide(): number {
+      return Math.min(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+    },
+    longSide(): number {
+      return Math.max(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+    },
+    aspectRatio(): number {
+      return this.longSide / this.shortSide
+    },
+    deviceProfile(): string {
+      if (this.isPortrait && this.aspectRatio >= 1.9 && this.shortSide <= 450) return 'palma'
+      if (this.shortSide <= 430) return 'inch6'
+      if (this.shortSide <= 540) return 'inch68'
+      return 'inch78'
     },
     columns(): number {
-      return this.isPortrait ? PORTRAIT_COLUMNS : LANDSCAPE_COLUMNS
+      switch (this.deviceProfile) {
+        case 'palma':
+          return this.isPortrait ? 2 : 3
+        case 'inch6':
+          return this.isPortrait ? 2 : 3
+        case 'inch68':
+          return this.isPortrait ? 2 : 4
+        case 'inch78':
+        default:
+          return this.isPortrait ? 3 : 5
+      }
+    },
+    rows(): number {
+      switch (this.deviceProfile) {
+        case 'palma':
+          return 2
+        case 'inch6':
+          return 2
+        case 'inch68':
+          return this.isPortrait ? 3 : 2
+        case 'inch78':
+        default:
+          return this.isPortrait ? 3 : 2
+      }
+    },
+    itemsPerPage(): number {
+      return this.columns * this.rows
     },
     gridClass(): string {
-      return `eink-grid eink-grid-cols-${this.columns}`
+      return 'eink-grid'
+    },
+    gridStyle(): Record<string, string> {
+      return {
+        gridTemplateColumns: `repeat(${this.columns}, minmax(0, 1fr))`,
+        gridTemplateRows: `repeat(${this.rows}, minmax(0, 1fr))`,
+      }
     },
     totalPages(): number {
       if (!this.items.length) return 0
@@ -99,8 +136,9 @@ export default Vue.extend({
       return (this.items as any[]).slice(start, start + this.itemsPerPage)
     },
     itemWidth(): number {
-      const availableWidth = this.$vuetify.breakpoint.width - 32
-      return Math.floor(availableWidth / this.columns) - 8
+      const horizontalPadding = this.deviceProfile === 'palma' ? 24 : 32
+      const availableWidth = this.$vuetify.breakpoint.width - horizontalPadding
+      return Math.max(84, Math.floor(availableWidth / this.columns) - 10)
     },
   },
   methods: {
@@ -130,21 +168,15 @@ export default Vue.extend({
   overflow: hidden;
 }
 
-.eink-grid-cols-2 {
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-}
-
-.eink-grid-cols-4 {
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(1, 1fr);
-}
-
 .eink-grid-cell {
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
+}
+
+.eink-grid-cell :deep(.v-card) {
+  margin: auto;
 }
 
 .eink-pagination {
@@ -167,5 +199,29 @@ export default Vue.extend({
   font-size: 1.2rem;
   font-weight: bold;
   color: #000000;
+}
+
+.eink-browser--palma .eink-grid {
+  gap: 4px;
+  padding: 4px;
+}
+
+.eink-browser--palma .eink-nav-btn {
+  min-width: 92px;
+  font-size: 0.95rem;
+}
+
+.eink-browser--palma .eink-page-info {
+  font-size: 1rem;
+}
+
+.eink-browser--inch6 .eink-nav-btn {
+  min-width: 104px;
+  font-size: 1rem;
+}
+
+.eink-browser--inch68 .eink-nav-btn,
+.eink-browser--inch78 .eink-nav-btn {
+  min-width: 120px;
 }
 </style>

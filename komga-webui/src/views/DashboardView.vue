@@ -47,7 +47,7 @@
     />
 
     <v-container fluid>
-      <div v-if="einkMode" class="eink-section-tabs mb-4">
+      <div v-if="einkMode" class="eink-section-tabs mb-4" :class="`eink-section-tabs--${einkDeviceProfile}`">
         <v-btn
           v-for="tab in einkSectionTabs"
           :key="tab.value"
@@ -350,6 +350,21 @@ export default Vue.extend({
     einkMode(): boolean {
       return this.$store.state.persistedState.theme === Theme.EINK
     },
+    einkShortSide(): number {
+      return Math.min(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+    },
+    einkLongSide(): number {
+      return Math.max(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+    },
+    einkAspectRatio(): number {
+      return this.einkLongSide / this.einkShortSide
+    },
+    einkDeviceProfile(): string {
+      if (this.einkAspectRatio >= 1.9 && this.einkShortSide <= 450) return 'palma'
+      if (this.einkShortSide <= 430) return 'inch6'
+      if (this.einkShortSide <= 540) return 'inch68'
+      return 'inch78'
+    },
     einkSectionTabs(): { value: RecommendedViewSection, label: string }[] {
       return [
         {value: RecommendedViewSection.TRENDING, label: this.$t('dashboard.trending').toString()},
@@ -647,13 +662,21 @@ export default Vue.extend({
 <style scoped>
 .eink-section-tabs {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .eink-section-tab {
-  flex: 1;
-  min-height: 48px;
+  flex: 1 1 180px;
+  min-height: 56px;
+  height: auto !important;
+  white-space: normal !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+  text-align: center;
+  padding: 8px 10px !important;
+  max-width: 100%;
   border: 2px solid #000000;
   background: #ffffff !important;
   color: #000000 !important;
@@ -663,5 +686,34 @@ export default Vue.extend({
 .eink-section-tab--active {
   background: #000000 !important;
   color: #ffffff !important;
+}
+
+.eink-section-tabs--palma .eink-section-tab {
+  flex-basis: 100%;
+  min-height: 52px;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  padding: 8px !important;
+}
+
+.eink-section-tabs--inch6 .eink-section-tab {
+  flex-basis: 100%;
+  font-size: 0.9rem;
+}
+
+.eink-section-tabs--inch68 .eink-section-tab {
+  flex-basis: calc(50% - 8px);
+  font-size: 0.94rem;
+}
+
+.eink-section-tabs--inch78 .eink-section-tab {
+  flex-basis: calc(50% - 8px);
+}
+
+@media (max-width: 600px) {
+  .eink-section-tab {
+    flex-basis: 100%;
+    font-size: 0.9rem;
+  }
 }
 </style>

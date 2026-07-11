@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.UniqueElements
 data class CollectionCreationDto(
   @get:NotBlank val name: String,
   val ordered: Boolean,
+  val showInSidebar: Boolean? = null,
   @get:NotEmpty @get:UniqueElements
   val seriesIds: List<String>,
 )

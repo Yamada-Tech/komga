@@ -45,6 +45,17 @@
                   </v-col>
                 </v-row>
 
+                <v-row>
+                  <v-col>
+                    <div class="text-body-2">{{ $t('dialog.edit_collection.label_sidebar') }}</div>
+                    <v-checkbox
+                      v-model="form.showInSidebar"
+                      :label="$t('dialog.edit_collection.field_show_in_sidebar')"
+                      hide-details
+                    />
+                  </v-col>
+                </v-row>
+
               </v-container>
             </v-card>
           </v-tab-item>
@@ -115,6 +126,7 @@ export default Vue.extend({
       form: {
         name: '',
         ordered: false,
+        showInSidebar: false,
       },
       poster: {
         selectedThumbnail: '',
@@ -164,6 +176,7 @@ export default Vue.extend({
       this.tab = 0
       this.form.name = collection.name
       this.form.ordered = collection.ordered
+      this.form.showInSidebar = collection.showInSidebar
 
       this.poster.selectedThumbnail = ''
       this.poster.deleteQueue = []
@@ -210,6 +223,7 @@ export default Vue.extend({
         const update = {
           name: this.form.name,
           ordered: this.form.ordered,
+          showInSidebar: this.form.showInSidebar,
         } as CollectionUpdateDto
 
         await this.$komgaCollections.patchCollection(this.collection.id, update)

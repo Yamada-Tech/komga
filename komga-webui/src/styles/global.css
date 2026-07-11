@@ -18,7 +18,7 @@ html {
 .theme--eink {
     background-color: #FFFFFF !important;
     color: #000000 !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
 }
 
 .theme--eink *,
@@ -59,4 +59,19 @@ html {
 .theme--eink .theme--light.v-application {
     background: #FFFFFF !important;
     color: #000000 !important;
+}
+
+.theme--eink .sidebar-collections-group > .v-list-group__header {
+    border: 2px solid #000000;
+}
+
+.theme--eink .sidebar-collection-item {
+    border-left: 2px solid #000000;
+    margin-left: 8px;
+}
+
+.theme--eink .sidebar-collection-item .v-list-item__title {
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
 }

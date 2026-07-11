@@ -4,7 +4,7 @@
       <v-card
         :width="width"
         @click="onClick"
-        :class="noLink ? 'no-link' : ''"
+        :class="[(noLink ? 'no-link' : ''), (isEinkMode ? 'eink-card' : '')]"
         :ripple="false"
       >
         <!--      Thumbnail-->
@@ -178,6 +178,7 @@ import {coverBase64} from '@/types/image'
 import {ReadListDto} from '@/types/komga-readlists'
 import OneShotActionsMenu from '@/components/menus/OneshotActionsMenu.vue'
 import {CLIENT_SETTING} from '@/types/komga-clientsettings'
+import {Theme} from '@/types/themes'
 
 export default Vue.extend({
   name: 'ItemCard',
@@ -277,6 +278,9 @@ export default Vue.extend({
   computed: {
     isStretch(): boolean {
       return this.$store.getters.getClientSettings[CLIENT_SETTING.WEBUI_POSTER_STRETCH]?.value === 'true'
+    },
+    isEinkMode(): boolean {
+      return this.$store.state.persistedState.theme === Theme.EINK
     },
     isBlurUnread(): boolean {
       return this.$store.getters.getClientSettings[CLIENT_SETTING.WEBUI_POSTER_BLUR_UNREAD]?.value === 'true'
@@ -402,6 +406,26 @@ export default Vue.extend({
 
 .no-link {
   cursor: default;
+}
+
+.eink-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.eink-card .v-card__subtitle {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.8rem;
+  padding-top: 8px;
+  padding-bottom: 4px;
+}
+
+.eink-card .v-card__text {
+  text-align: center;
 }
 
 .item-border {

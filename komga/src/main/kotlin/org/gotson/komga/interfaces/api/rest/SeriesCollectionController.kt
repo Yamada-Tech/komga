@@ -21,6 +21,7 @@ import org.gotson.komga.domain.model.ThumbnailSeriesCollection
 import org.gotson.komga.domain.persistence.SeriesCollectionRepository
 import org.gotson.komga.domain.persistence.ThumbnailSeriesCollectionRepository
 import org.gotson.komga.domain.service.SeriesCollectionLifecycle
+import org.gotson.komga.infrastructure.configuration.KomgaSettingsProvider
 import org.gotson.komga.infrastructure.image.ImageAnalyzer
 import org.gotson.komga.infrastructure.jooq.UnpagedSorted
 import org.gotson.komga.infrastructure.mediacontainer.ContentDetector
@@ -75,6 +76,7 @@ class SeriesCollectionController(
   private val imageAnalyzer: ImageAnalyzer,
   private val thumbnailSeriesCollectionRepository: ThumbnailSeriesCollectionRepository,
   private val eventPublisher: ApplicationEventPublisher,
+  private val komgaSettingsProvider: KomgaSettingsProvider,
 ) {
   @Operation(summary = "List collections", tags = [OpenApiConfiguration.TagNames.COLLECTIONS])
   @PageableWithoutSortAsQueryParam
@@ -104,7 +106,7 @@ class SeriesCollectionController(
 
     return collectionRepository
       .findAll(principal.user.getAuthorizedLibraryIds(libraryIds), principal.user.getAuthorizedLibraryIds(null), searchTerm, pageRequest, principal.user.restrictions)
-      .map { it.toDto() }
+      .map { it.toDto(showInSidebar = isCollectionShownInSidebar(it.id)) }
   }
 
   @Operation(summary = "Get collection details", tags = [OpenApiConfiguration.TagNames.COLLECTIONS])
@@ -115,7 +117,7 @@ class SeriesCollectionController(
   ): CollectionDto =
     collectionRepository
       .findByIdOrNull(id, principal.user.getAuthorizedLibraryIds(null), principal.user.restrictions)
-      ?.toDto()
+      ?.toDto(showInSidebar = isCollectionShownInSidebar(id))
       ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
   @Operation(summary = "Get collection's poster image", tags = [OpenApiConfiguration.TagNames.COLLECTION_POSTER])
@@ -229,14 +231,19 @@ class SeriesCollectionController(
     collection: CollectionCreationDto,
   ): CollectionDto =
     try {
-      collectionLifecycle
+      val created =
+        collectionLifecycle
         .addCollection(
           SeriesCollection(
             name = collection.name,
             ordered = collection.ordered,
             seriesIds = collection.seriesIds,
           ),
-        ).toDto()
+        )
+
+      collection.showInSidebar?.let { setCollectionShownInSidebar(created.id, it) }
+
+      created.toDto(showInSidebar = isCollectionShownInSidebar(created.id))
     } catch (e: DuplicateNameException) {
       throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
     }
@@ -259,6 +266,7 @@ class SeriesCollectionController(
         )
       try {
         collectionLifecycle.updateCollection(updated)
+        collection.showInSidebar?.let { setCollectionShownInSidebar(updated.id, it) }
       } catch (e: DuplicateNameException) {
         throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
       }
@@ -273,8 +281,21 @@ class SeriesCollectionController(
     @PathVariable id: String,
   ) {
     collectionRepository.findByIdOrNull(id)?.let {
+      setCollectionShownInSidebar(id, false)
       collectionLifecycle.deleteCollection(it)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  }
+
+  private fun isCollectionShownInSidebar(collectionId: String): Boolean =
+    komgaSettingsProvider.sidebarCollectionIds.contains(collectionId)
+
+  private fun setCollectionShownInSidebar(
+    collectionId: String,
+    show: Boolean,
+  ) {
+    val ids = komgaSettingsProvider.sidebarCollectionIds.toMutableSet()
+    if (show) ids.add(collectionId) else ids.remove(collectionId)
+    komgaSettingsProvider.sidebarCollectionIds = ids.toList()
   }
 
   @Operation(summary = "List collection's series", tags = [OpenApiConfiguration.TagNames.COLLECTION_SERIES])

@@ -459,7 +459,9 @@
       "button_confirm": "Save changes",
       "dialog_title": "Edit collection",
       "field_manual_ordering": "Manual ordering",
+      "field_show_in_sidebar": "Show in sidebar menu",
       "label_ordering": "By default, series in a collection will be ordered by name. You can enable manual ordering to define your own order.",
+      "label_sidebar": "Choose whether this collection is visible in the left sidebar for all users.",
       "tab_general": "General",
       "tab_poster": "Poster"
     },
