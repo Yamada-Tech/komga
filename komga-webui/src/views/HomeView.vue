@@ -133,6 +133,26 @@
             </v-list-item>
           </v-list-group>
 
+          <!--   COLLECTIONS     -->
+          <v-list-group no-action
+                        v-if="sidebarCollections.length > 0"
+                        v-model="expandCollections"
+          >
+            <template v-slot:prependIcon>
+              <v-icon>mdi-view-grid</v-icon>
+            </template>
+            <template v-slot:activator>
+              <v-list-item-title>{{ $t('common.collections') }}</v-list-item-title>
+            </template>
+
+            <v-list-item v-for="collection in sidebarCollections"
+                         :key="collection.id"
+                         :to="{name: 'browse-collection', params: {collectionId: collection.id}}"
+            >
+              <v-list-item-title>{{ collection.name }}</v-list-item-title>
+            </v-list-item>
+          </v-list-group>
+
           <!--   IMPORT     -->
           <v-list-group v-if="isAdmin && showSidebarImport"
                         prepend-icon="mdi-import"
@@ -385,6 +405,8 @@ import {BookSearch, SearchConditionAnyOfBook, SearchConditionMediaStatus, Search
 import LibrariesActionsMenu from '@/components/menus/LibrariesActionsMenu.vue'
 import ReorderLibraries from '@/components/ReorderLibraries.vue'
 import AppLogo from '@/components/AppLogo.vue'
+import {CollectionDto} from '@/types/komga-collections'
+import {COLLECTION_ADDED, COLLECTION_CHANGED, COLLECTION_DELETED} from '@/types/events'
 
 type SidebarVisibilitySettings = Partial<Pick<SettingsDto, 'showSidebarImport' | 'showSidebarMedia' | 'showSidebarHistory'>>
 
@@ -410,10 +432,12 @@ export default Vue.extend({
       expandImport: false,
       expandAccount: false,
       expandUnpinned: false,
+      expandCollections: false,
       showReorder: false,
       showSidebarImport: true,
       showSidebarMedia: true,
       showSidebarHistory: true,
+      sidebarCollections: [] as CollectionDto[],
     }
   },
   async created() {
@@ -433,11 +457,19 @@ export default Vue.extend({
       this.$komgaReleases.getReleases()
         .then(x => this.$store.commit('setReleases', x))
     }
+    this.loadSidebarCollections()
+
     this.$eventHub.$on('server-settings-changed', this.updateSidebarVisibilitySettings)
+    this.$eventHub.$on(COLLECTION_ADDED, this.loadSidebarCollections)
+    this.$eventHub.$on(COLLECTION_CHANGED, this.loadSidebarCollections)
+    this.$eventHub.$on(COLLECTION_DELETED, this.loadSidebarCollections)
     this.checkRoute(this.$route)
   },
   beforeDestroy() {
     this.$eventHub.$off('server-settings-changed', this.updateSidebarVisibilitySettings)
+    this.$eventHub.$off(COLLECTION_ADDED, this.loadSidebarCollections)
+    this.$eventHub.$off(COLLECTION_CHANGED, this.loadSidebarCollections)
+    this.$eventHub.$off(COLLECTION_DELETED, this.loadSidebarCollections)
   },
   watch: {
     $route(to, from) {
@@ -522,12 +554,21 @@ export default Vue.extend({
       this.showSidebarMedia = typeof settings.showSidebarMedia === 'boolean' ? settings.showSidebarMedia : true
       this.showSidebarHistory = typeof settings.showSidebarHistory === 'boolean' ? settings.showSidebarHistory : true
     },
+    async loadSidebarCollections() {
+      try {
+        const collections = (await this.$komgaCollections.getCollections(undefined, {unpaged: true} as PageRequest)).content
+        this.sidebarCollections = collections.sort((a, b) => a.name.localeCompare(b.name, this.$i18n.locale))
+      } catch (e) {
+        this.sidebarCollections = []
+      }
+    },
     checkRoute(to) {
       this.expandSettings = to.path.includes('/settings/')
       this.expandMediaManagement = to.path.includes('/media-management/')
       this.expandImport = to.path.includes('/import/')
       this.expandDuplicatePages = to.path.includes('/duplicate-pages/')
       this.expandAccount = to.path.includes('/account/')
+      this.expandCollections = to.path.includes('/collections/')
       if (this.librariesUnpinned.some(it => it.id === to.params.libraryId)) this.expandUnpinned = true
       else if (this.librariesPinned.some(it => it.id === to.params.libraryId)) this.expandUnpinned = false
     },
