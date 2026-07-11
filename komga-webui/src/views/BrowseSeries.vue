@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!$_.isEmpty(series)">
+  <div v-if="!$_.isEmpty(series)" :class="einkMode ? 'eink-page-root' : ''">
     <toolbar-sticky v-if="selectedBooks.length === 0">
       <!--   Go back to parent library   -->
       <v-tooltip bottom :disabled="!isAdmin">
@@ -81,8 +81,8 @@
       </template>
     </filter-drawer>
 
-    <v-container fluid class="pa-6" :class="einkMode ? 'eink-series-layout' : ''">
-      <v-row>
+    <v-container fluid :class="einkMode ? 'eink-series-layout' : 'pa-6'">
+      <v-row :class="einkMode ? 'eink-series-header-row' : ''">
         <v-col v-if="!einkMode || showEinkPrimaryMeta" cols="4" sm="4" md="auto" lg="auto" xl="auto">
           <item-card
             v-if="series.hasOwnProperty('id')"
@@ -94,11 +94,11 @@
           ></item-card>
         </v-col>
 
-        <v-col :cols="(einkMode && !showEinkPrimaryMeta) ? 12 : 8">
-          <v-container>
-            <v-row v-if="!einkMode || showEinkPrimaryMeta">
-              <v-col class="py-1">
-                <span class="text-h5" v-if="$_.get(series, 'metadata.title')">{{ series.metadata.title }}</span>
+        <v-col :cols="(einkMode && !showEinkPrimaryMeta) ? 12 : 8" :class="einkMode ? 'eink-series-meta-col' : ''">
+          <v-container :class="einkMode ? 'pa-0' : ''">
+            <v-row v-if="!einkMode || showEinkPrimaryMeta" :class="einkMode ? 'eink-primary-row' : ''">
+              <v-col :class="einkMode ? 'py-0' : 'py-1'">
+                <span :class="einkMode ? 'text-subtitle-1' : 'text-h5'" v-if="$_.get(series, 'metadata.title')">{{ series.metadata.title }}</span>
                 <router-link
                   class="caption link-underline"
                   :class="$vuetify.breakpoint.smAndUp ? 'mx-2' : ''"
@@ -109,7 +109,7 @@
               </v-col>
             </v-row>
 
-            <v-row v-if="series.booksMetadata.releaseDate && (!einkMode || showEinkPrimaryMeta)" class="align-center text-caption">
+            <v-row v-if="series.booksMetadata.releaseDate && (!einkMode || showEinkPrimaryMeta)" class="align-center text-caption" :class="einkMode ? 'eink-year-row' : ''">
               <v-col class="py-1">
                 <v-tooltip right>
                   <template v-slot:activator="{ on }">
@@ -125,7 +125,7 @@
               </v-col>
             </v-row>
 
-            <v-row v-if="!einkMode || showEinkPrimaryMeta" class="text-body-2">
+            <v-row v-if="!einkMode || showEinkPrimaryMeta" class="text-body-2" :class="einkMode ? 'eink-chip-row' : ''">
               <v-col class="py-1 pe-0" cols="auto">
                 <v-chip label small link :color="statusChip.color" :text-color="statusChip.text"
                         :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {status: [new SearchConditionSeriesStatus(new SearchOperatorIs(series.metadata.status))]}}">
@@ -159,7 +159,7 @@
               </v-col>
             </v-row>
 
-            <v-row v-if="!einkMode || showEinkPrimaryMeta" class="text-caption" align="center">
+            <v-row v-if="!einkMode || showEinkPrimaryMeta" class="text-caption" align="center" :class="einkMode ? 'eink-count-row' : ''">
               <v-col cols="auto" v-if="series.metadata.totalBookCount">
                 {{ $t('common.books_total', {count: series.booksCount, total: series.metadata.totalBookCount}) }}
               </v-col>
@@ -554,7 +554,7 @@
         </v-col>
       </v-row>
 
-      <v-divider class="mt-4 mb-1"/>
+      <v-divider :class="einkMode ? 'my-1' : 'mt-4 mb-1'"/>
 
       <empty-state
         v-if="totalPages === 0"
@@ -572,6 +572,7 @@
             :items="books"
             :item-context="einkBookItemContext"
             :reserved-height="einkReservedHeight"
+            :external-pager-active="einkMode && totalPages > 1"
           />
 
           <v-pagination
@@ -579,6 +580,7 @@
             v-model="page"
             :total-visible="paginationVisible"
             :length="totalPages"
+            :class="einkMode ? 'eink-bottom-pagination' : ''"
           />
         </template>
         <template v-else>
@@ -808,7 +810,7 @@ export default Vue.extend({
       const availableHeight = Math.max(180, this.$vuetify.breakpoint.height - this.einkReservedHeight - 68)
       const itemWidth = Math.max(96, Math.floor((this.$vuetify.breakpoint.width - 32) / this.einkColumns) - 10)
       const estimatedCardHeight = Math.round((itemWidth / 0.7071) + (this.einkInfoLevel === 0 ? 44 : this.einkInfoLevel === 1 ? 56 : 72))
-      const minRows = 1
+      const minRows = isPortrait ? 2 : 1
       return Math.max(minRows, Math.min(6, Math.floor(availableHeight / estimatedCardHeight)))
     },
     einkReservedHeight(): number {
@@ -1323,6 +1325,72 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.eink-series-layout {
+  padding: 8px 8px 2px 8px;
+}
+
+.eink-page-root {
+  padding-bottom: 48px;
+}
+
+.eink-bottom-pagination {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom, 0);
+  z-index: 24;
+  margin: 0;
+  padding: 2px 8px;
+  background: #ffffff;
+  border-top: 2px solid #000000;
+}
+
+.eink-series-header-row {
+  margin-bottom: 2px;
+}
+
+.eink-series-meta-col {
+  padding-top: 0;
+}
+
+@media (orientation: landscape) {
+  .eink-series-layout .eink-primary-row .text-subtitle-1 {
+    font-size: 0.9rem !important;
+    line-height: 1.1;
+  }
+
+  .eink-series-layout .eink-primary-row .caption,
+  .eink-series-layout .eink-year-row,
+  .eink-series-layout .eink-count-row {
+    font-size: 0.68rem;
+    line-height: 1.05;
+  }
+
+  .eink-series-layout .eink-chip-row {
+    font-size: 0.74rem;
+    line-height: 1.05;
+  }
+
+  .eink-series-layout .eink-primary-row .v-col,
+  .eink-series-layout .eink-year-row .v-col,
+  .eink-series-layout .eink-chip-row .v-col,
+  .eink-series-layout .eink-count-row .v-col {
+    padding-top: 1px;
+    padding-bottom: 1px;
+  }
+
+  .eink-series-layout .eink-chip-row :deep(.v-chip.v-size--small) {
+    height: 20px;
+    min-height: 20px;
+    font-size: 0.68rem;
+    padding: 0 6px;
+  }
+
+  .eink-series-layout .eink-chip-row :deep(.v-chip .v-chip__content) {
+    line-height: 1;
+  }
+}
+
 .eink-summary {
   white-space: pre-wrap;
   font-size: 0.95rem;

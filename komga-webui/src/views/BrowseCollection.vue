@@ -1,5 +1,5 @@
 <template>
-  <div v-if="collection">
+  <div v-if="collection" :class="einkMode ? 'eink-page-root' : ''">
     <toolbar-sticky v-if="!editElements && selectedSeries.length === 0">
 
       <collection-actions-menu v-if="collection"
@@ -36,7 +36,7 @@
         </v-tooltip>
       </v-btn>
 
-      <page-size-select v-model="pageSize"/>
+      <page-size-select v-if="!einkMode" v-model="pageSize"/>
 
       <v-btn icon @click="drawer = !drawer">
         <v-icon :color="filterActive ? 'secondary' : ''">mdi-filter-variant</v-icon>
@@ -106,25 +106,35 @@
 
       <template v-else>
         <v-pagination
-          v-if="totalPages > 1"
+          v-if="totalPages > 1 && !einkMode"
           v-model="page"
           :total-visible="paginationVisible"
           :length="totalPages"
         />
 
-        <item-browser
-          :items.sync="series"
-          :selected.sync="selectedSeries"
-          :edit-function="isAdmin ? editSingleSeries : undefined"
-          :draggable="editElements && collection.ordered"
-          :deletable="editElements"
-        />
+        <template v-if="einkMode">
+          <eink-item-browser
+            :items="series"
+            :reserved-height="einkReservedHeight"
+            :external-pager-active="einkMode && totalPages > 1"
+          />
+        </template>
+        <template v-else>
+          <item-browser
+            :items.sync="series"
+            :selected.sync="selectedSeries"
+            :edit-function="isAdmin ? editSingleSeries : undefined"
+            :draggable="editElements && collection.ordered"
+            :deletable="editElements"
+          />
+        </template>
 
         <v-pagination
           v-if="totalPages > 1"
           v-model="page"
           :total-visible="paginationVisible"
           :length="totalPages"
+          :class="einkMode ? 'eink-bottom-pagination' : ''"
         />
       </template>
 
@@ -136,6 +146,7 @@
 <script lang="ts">
 import CollectionActionsMenu from '@/components/menus/CollectionActionsMenu.vue'
 import ItemBrowser from '@/components/ItemBrowser.vue'
+import EinkItemBrowser from '@/components/EinkItemBrowser.vue'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import {
   COLLECTION_CHANGED,
@@ -173,6 +184,7 @@ export default Vue.extend({
   components: {
     PageSizeSelect,
     ToolbarSticky,
+    EinkItemBrowser,
     ItemBrowser,
     CollectionActionsMenu,
     MultiSelectBar,
@@ -215,6 +227,14 @@ export default Vue.extend({
       required: true,
     },
   },
+  watch: {
+    einkAutoPageSize() {
+      this.applyEinkPageSize()
+    },
+    einkMode() {
+      this.applyEinkPageSize()
+    },
+  },
   created() {
     this.$eventHub.$on(COLLECTION_CHANGED, this.collectionChanged)
     this.$eventHub.$on(COLLECTION_DELETED, this.collectionDeleted)
@@ -238,6 +258,8 @@ export default Vue.extend({
     await this.resetParams(this.$route, this.collectionId)
     if (this.$route.query.page) this.page = Number(this.$route.query.page)
     if (this.$route.query.pageSize) this.pageSize = Number(this.$route.query.pageSize)
+
+    this.applyEinkPageSize()
 
     this.loadCollection(this.collectionId)
 
@@ -263,7 +285,47 @@ export default Vue.extend({
     next()
   },
   computed: {
+    einkMode(): boolean {
+      return this.$store.state.persistedState.theme === 'theme.eink'
+    },
+    einkAutoPageSize(): number {
+      if (!this.einkMode) return this.pageSize
+      return this.einkColumns * this.einkRows
+    },
+    einkCompactMode(): boolean {
+      const width = this.$vuetify.breakpoint.width
+      const height = this.$vuetify.breakpoint.height
+      return Math.min(width, height) <= 430 || (width * height) <= 320000
+    },
+    einkColumns(): number {
+      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      const availableWidth = Math.max(220, this.$vuetify.breakpoint.width - (this.einkCompactMode ? 24 : 32))
+      const minCardWidth = this.einkCompactMode ? 130 : (isPortrait ? 170 : 180)
+      const minColumns = isPortrait ? 2 : 3
+      return Math.max(minColumns, Math.min(5, Math.floor(availableWidth / minCardWidth)))
+    },
+    einkRows(): number {
+      const gridPadding = this.einkCompactMode ? 16 : 24
+      const availableHeight = Math.max(180, this.$vuetify.breakpoint.height - this.einkReservedHeight - 68 - gridPadding)
+      const itemWidth = Math.max(84, Math.floor((this.$vuetify.breakpoint.width - 32) / this.einkColumns) - 10)
+      const estimatedCardHeight = Math.round((itemWidth / 0.7071) + (this.einkCompactMode ? 56 : 72))
+      const minRows = isPortrait ? 2 : 1
+      return Math.max(minRows, Math.min(6, Math.floor(availableHeight / estimatedCardHeight)))
+    },
+    einkReservedHeight(): number {
+      if (!this.einkMode) return 220
+      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      const shortSide = Math.min(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+      if (shortSide <= 430) return isPortrait ? 140 : 90
+      if (shortSide <= 540) return isPortrait ? 160 : 100
+      return isPortrait ? 180 : 120
+    },
     paginationVisible(): number {
+      if (this.einkMode) {
+        if (this.$vuetify.breakpoint.xs) return 5
+        if (this.$vuetify.breakpoint.sm) return 7
+        return 11
+      }
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
           return 5
@@ -331,6 +393,12 @@ export default Vue.extend({
     },
   },
   methods: {
+    applyEinkPageSize() {
+      if (!this.einkMode) return
+      if (this.pageSize !== this.einkAutoPageSize) {
+        this.pageSize = this.einkAutoPageSize
+      }
+    },
     resetFilters() {
       this.drawer = false
       for (const prop in this.filters) {
@@ -572,3 +640,21 @@ export default Vue.extend({
   },
 })
 </script>
+
+<style scoped>
+.eink-page-root {
+  padding-bottom: 48px;
+}
+
+.eink-bottom-pagination {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom, 0);
+  z-index: 24;
+  margin: 0;
+  padding: 2px 8px;
+  background: #ffffff;
+  border-top: 2px solid #000000;
+}
+</style>

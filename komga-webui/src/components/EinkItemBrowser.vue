@@ -1,5 +1,5 @@
 <template>
-  <div class="eink-browser" :class="isCompact ? 'eink-browser--compact' : ''">
+  <div class="eink-browser" :class="isCompact ? 'eink-browser--compact' : ''" :style="browserStyle">
     <div v-if="hasItems" :class="gridClass" :style="gridStyle">
       <div v-for="item in currentPageItems"
            :key="item.id"
@@ -17,7 +17,7 @@
       <slot name="empty"></slot>
     </v-row>
 
-    <div v-if="totalPages > 1" class="eink-pagination">
+    <div v-if="showInternalPagination" class="eink-pagination">
       <v-pagination
         v-model="currentPage"
         :length="totalPages"
@@ -47,6 +47,10 @@ export default Vue.extend({
     reservedHeight: {
       type: Number,
       default: 0,
+    },
+    externalPagerActive: {
+      type: Boolean,
+      default: false,
     },
   },
   data: function () {
@@ -96,24 +100,36 @@ export default Vue.extend({
       return Math.max(200, this.effectiveWidth - horizontalPadding)
     },
     availableHeight(): number {
-      const paginationHeight = 68
-      const gridPadding = this.isCompact ? 16 : 24
+      const isLandscape = !this.isPortrait
+      const paginationHeight = this.paginationBarHeight
+      const gridPadding = isLandscape ? 6 : (this.isCompact ? 10 : 14)
       const shortSide = Math.min(this.effectiveWidth, this.effectiveHeight)
-      const viewportMargin = shortSide <= 430 ? 44 : shortSide <= 720 ? 56 : 68
-      return Math.max(120, this.effectiveHeight - viewportMargin - this.reservedHeight - paginationHeight - gridPadding)
+      const viewportMargin = isLandscape
+        ? (shortSide <= 430 ? 16 : shortSide <= 720 ? 20 : 24)
+        : (shortSide <= 430 ? 30 : shortSide <= 720 ? 40 : 52)
+      const effectiveReservedHeight = isLandscape ? Math.round(this.reservedHeight * 0.55) : this.reservedHeight
+      return Math.max(120, this.effectiveHeight - viewportMargin - effectiveReservedHeight - paginationHeight - gridPadding)
+    },
+    paginationBarHeight(): number {
+      return this.isPortrait ? 46 : 38
+    },
+    browserStyle(): Record<string, string> {
+      return {
+        '--eink-pagination-reserve': `${this.paginationBarHeight + 4}px`,
+      }
     },
     cardMetaHeight(): number {
       return this.isCompact ? 42 : 58
     },
     columns(): number {
       const minCardWidth = this.isCompact ? 120 : (this.isPortrait ? 165 : 190)
-      const maxColumns = !this.isCompact && !this.isPortrait ? 4 : 5
+      const maxColumns = !this.isCompact && !this.isPortrait ? 3 : 5
       const minColumns = this.isPortrait ? 2 : 3
       return Math.max(minColumns, Math.min(maxColumns, Math.floor(this.availableWidth / minCardWidth)))
     },
     rows(): number {
       const estimatedCardHeight = Math.round((this.itemWidth / 0.7071) + this.cardMetaHeight)
-      const minRows = 1
+      const minRows = this.isPortrait ? 2 : 1
       return Math.max(minRows, Math.min(6, Math.floor(this.availableHeight / estimatedCardHeight)))
     },
     itemsPerPage(): number {
@@ -151,6 +167,9 @@ export default Vue.extend({
       if (this.effectiveWidth <= 768) return 7
       return 11
     },
+    showInternalPagination(): boolean {
+      return !this.externalPagerActive && this.totalPages > 1
+    },
   },
   methods: {
     syncViewportSize() {
@@ -168,6 +187,7 @@ export default Vue.extend({
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  padding-bottom: var(--eink-pagination-reserve, 0px);
 }
 
 .eink-grid {
@@ -190,18 +210,46 @@ export default Vue.extend({
 }
 
 .eink-pagination {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom, 0);
+  z-index: 25;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 16px;
+  padding: 2px 8px;
   border-top: 2px solid #000000;
   background-color: #FFFFFF;
   flex-shrink: 0;
 }
 
+.eink-pagination :deep(.v-pagination) {
+  margin: 0;
+}
+
+.eink-pagination :deep(.v-pagination__item),
+.eink-pagination :deep(.v-pagination__navigation) {
+  min-width: 28px;
+  width: 28px;
+  height: 28px;
+  margin: 0 2px;
+}
+
 .eink-browser--compact .eink-grid {
   gap: 4px;
   padding: 4px;
+}
+
+@media (orientation: landscape) {
+  .eink-grid {
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .eink-pagination {
+    padding: 0 6px;
+  }
 }
 
 </style>

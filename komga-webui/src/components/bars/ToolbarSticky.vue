@@ -4,6 +4,8 @@
              class="sticky-bar"
              :style="barStyle"
              :elevation="elevation"
+             dense
+             height="42"
   >
     <slot/>
   </v-toolbar>
@@ -17,9 +19,9 @@ export default Vue.extend({
   computed: {
     barStyle (): any {
       if (['xs', 'sm'].includes(this.$vuetify.breakpoint.name.toString())) {
-        return { 'top': '56px' }
+        return { 'top': '48px' }
       } else {
-        return { 'top': '64px' }
+        return { 'top': '48px' }
       }
     },
   },
@@ -41,5 +43,26 @@ export default Vue.extend({
   position: -webkit-sticky;
   position: sticky;
   z-index: 2
+}
+
+.sticky-bar :deep(.v-btn--icon) {
+  width: 30px;
+  height: 30px;
+}
+
+.sticky-bar :deep(.v-btn) {
+  min-width: 30px;
+}
+
+.sticky-bar :deep(.v-icon) {
+  font-size: 18px;
+}
+
+.sticky-bar :deep(.v-input.v-text-field--outlined .v-input__slot) {
+  min-height: 32px;
+}
+
+.sticky-bar :deep(.v-select__selection) {
+  font-size: 0.82rem;
 }
 </style>

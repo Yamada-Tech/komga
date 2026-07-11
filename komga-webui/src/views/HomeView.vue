@@ -2,6 +2,8 @@
   <div class="fill-height" :class="isEinkMode ? 'eink-scroll-lock' : ''">
     <v-app-bar
       app
+      dense
+      height="48"
     >
       <v-badge
         dot
@@ -151,7 +153,9 @@
                          :to="{name: 'browse-collection', params: {collectionId: collection.id}}"
                          class="sidebar-collection-item"
             >
-              <v-list-item-title>{{ collection.name }}</v-list-item-title>
+              <v-list-item-content>
+                <v-list-item-title>{{ collection.name }}</v-list-item-title>
+              </v-list-item-content>
             </v-list-item>
           </v-list-group>
 
@@ -393,16 +397,6 @@
       <toaster-notification/>
       <router-view/>
     </v-main>
-
-    <div v-if="isEinkMode && einkPageCount > 1" class="eink-global-pager">
-      <v-btn small :disabled="einkPage <= 1" @click="goEinkPrevPage">
-        {{ $t('common.previous_page') }}
-      </v-btn>
-      <span class="eink-global-pager__info">{{ einkPage }} / {{ einkPageCount }}</span>
-      <v-btn small :disabled="einkPage >= einkPageCount" @click="goEinkNextPage">
-        {{ $t('common.next_page') }}
-      </v-btn>
-    </div>
   </div>
 </template>
 
@@ -454,10 +448,6 @@ export default Vue.extend({
       showSidebarMedia: true,
       showSidebarHistory: true,
       sidebarCollections: [] as CollectionDto[],
-      einkPage: 1,
-      einkPageCount: 1,
-      einkViewportHeight: 0,
-      einkProgrammaticScroll: false,
     }
   },
   async created() {
@@ -496,10 +486,10 @@ export default Vue.extend({
   watch: {
     $route(to, from) {
       this.checkRoute(to)
-      this.$nextTick(() => this.refreshEinkPager())
+      this.$nextTick(() => this.enforceEinkNoScroll())
     },
     theme() {
-      this.$nextTick(() => this.refreshEinkPager())
+      this.$nextTick(() => this.enforceEinkNoScroll())
     },
   },
   computed: {
@@ -569,11 +559,11 @@ export default Vue.extend({
   },
   mounted() {
     this.setupEinkPager()
-    this.$nextTick(() => this.refreshEinkPager())
+    this.$nextTick(() => this.enforceEinkNoScroll())
   },
   methods: {
     setupEinkPager() {
-      window.addEventListener('resize', this.refreshEinkPager)
+      window.addEventListener('resize', this.enforceEinkNoScroll)
       window.addEventListener('scroll', this.handleEinkScroll, {passive: false, capture: true})
       document.addEventListener('scroll', this.handleEinkScroll, true)
       window.addEventListener('wheel', this.blockEinkManualScroll, {passive: false, capture: true})
@@ -583,12 +573,12 @@ export default Vue.extend({
       window.addEventListener('keydown', this.blockEinkManualKeyScroll, true)
       document.addEventListener('keydown', this.blockEinkManualKeyScroll, true)
       if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', this.refreshEinkPager)
+        window.visualViewport.addEventListener('resize', this.enforceEinkNoScroll)
         window.visualViewport.addEventListener('scroll', this.handleEinkScroll)
       }
     },
     teardownEinkPager() {
-      window.removeEventListener('resize', this.refreshEinkPager)
+      window.removeEventListener('resize', this.enforceEinkNoScroll)
       window.removeEventListener('scroll', this.handleEinkScroll, true)
       document.removeEventListener('scroll', this.handleEinkScroll, true)
       window.removeEventListener('wheel', this.blockEinkManualScroll, true)
@@ -598,64 +588,26 @@ export default Vue.extend({
       window.removeEventListener('keydown', this.blockEinkManualKeyScroll, true)
       document.removeEventListener('keydown', this.blockEinkManualKeyScroll, true)
       if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', this.refreshEinkPager)
+        window.visualViewport.removeEventListener('resize', this.enforceEinkNoScroll)
         window.visualViewport.removeEventListener('scroll', this.handleEinkScroll)
       }
     },
-    getEinkViewportHeight(): number {
-      const vv = window.visualViewport
-      const rawHeight = Math.round(vv?.height || window.innerHeight)
-      const shortSide = Math.min(Math.round(vv?.width || window.innerWidth), rawHeight)
-      if (shortSide <= 430) return Math.max(1, rawHeight - 44)
-      if (shortSide <= 720) return Math.max(1, rawHeight - 56)
-      return Math.max(1, rawHeight - 68)
-    },
-    refreshEinkPager() {
-      if (!this.isEinkMode) {
-        this.einkPage = 1
-        this.einkPageCount = 1
-        return
+    enforceEinkNoScroll() {
+      if (!this.isEinkMode) return
+      if ((window.scrollY || document.documentElement.scrollTop || 0) !== 0) {
+        window.scrollTo({top: 0, left: 0, behavior: 'auto'})
       }
-      const viewportHeight = this.getEinkViewportHeight()
-      const scrollTop = Math.round(window.scrollY || document.documentElement.scrollTop || 0)
-      const doc = document.scrollingElement || document.documentElement
-      const scrollHeight = Math.max(doc.scrollHeight, document.body.scrollHeight)
-
-      this.einkViewportHeight = Math.max(1, viewportHeight)
-      this.einkPageCount = Math.max(1, Math.ceil(scrollHeight / this.einkViewportHeight))
-      this.einkPage = Math.min(this.einkPageCount, Math.max(1, Math.floor(scrollTop / this.einkViewportHeight) + 1))
-    },
-    goEinkPrevPage() {
-      if (!this.isEinkMode || this.einkPage <= 1) return
-      this.einkProgrammaticScroll = true
-      window.scrollTo({top: (this.einkPage - 2) * this.einkViewportHeight, behavior: 'auto'})
-      this.refreshEinkPager()
-      this.$nextTick(() => this.einkProgrammaticScroll = false)
-    },
-    goEinkNextPage() {
-      if (!this.isEinkMode || this.einkPage >= this.einkPageCount) return
-      this.einkProgrammaticScroll = true
-      window.scrollTo({top: this.einkPage * this.einkViewportHeight, behavior: 'auto'})
-      this.refreshEinkPager()
-      this.$nextTick(() => this.einkProgrammaticScroll = false)
     },
     handleEinkScroll(event?: Event) {
       if (!this.isEinkMode) {
-        this.refreshEinkPager()
         return
       }
       const target = event?.target as HTMLElement | null
-      if (!this.einkProgrammaticScroll && target && target !== document && target !== document.body && target !== document.documentElement) {
+      if (target && target !== document && target !== document.body && target !== document.documentElement) {
         target.scrollTop = 0
         target.scrollLeft = 0
       }
-      if (this.einkProgrammaticScroll) {
-        this.refreshEinkPager()
-        return
-      }
-      const top = (this.einkPage - 1) * this.einkViewportHeight
-      window.scrollTo({top, behavior: 'auto'})
-      this.refreshEinkPager()
+      window.scrollTo({top: 0, left: 0, behavior: 'auto'})
       if (event && 'preventDefault' in event) event.preventDefault()
     },
     blockEinkManualScroll(event: Event) {
@@ -730,29 +682,17 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.eink-global-pager {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: env(safe-area-inset-bottom, 0);
-  z-index: 20;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  background: #ffffff;
-  border-top: 1px solid #000000;
-}
-
-.eink-global-pager__info {
-  min-width: 70px;
-  text-align: center;
-  font-size: 0.9rem;
-}
-
 .eink-scroll-lock {
   touch-action: none;
   overscroll-behavior-y: none;
+}
+
+:deep(.v-app-bar .v-btn--icon) {
+  width: 30px;
+  height: 30px;
+}
+
+:deep(.v-app-bar .v-icon) {
+  font-size: 18px;
 }
 </style>

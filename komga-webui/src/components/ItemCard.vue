@@ -111,11 +111,11 @@
         </v-img>
 
         <!--      Description-->
-        <template v-if="!thumbnailOnly">
+        <div v-if="!thumbnailOnly" class="eink-card__meta">
           <router-link v-if="!Array.isArray(title)" :to="title.to" class="link-underline"
                        @click.native="$event.stopImmediatePropagation()">
             <v-card-subtitle
-              v-line-clamp="2"
+              v-line-clamp="titleLineClamp"
               v-bind="subtitleProps"
               :title="title.title"
             >{{ title.title }}
@@ -140,7 +140,7 @@
           </template>
           <v-card-text class="px-2 pt-0 font-weight-light" v-html="body">
           </v-card-text>
-        </template>
+        </div>
       </v-card>
     </template>
   </v-hover>
@@ -312,6 +312,9 @@ export default Vue.extend({
     subtitleProps(): Object {
       return this.computedItem.subtitleProps()
     },
+    titleLineClamp(): number {
+      return this.isEinkMode ? 3 : 2
+    },
     body(): string {
       return this.computedItem.body(this.itemContext)
     },
@@ -412,6 +415,13 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.eink-card .eink-card__meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
 }
 
 .eink-card .v-card__subtitle {

@@ -1,5 +1,5 @@
 <template>
-  <div :style="$vuetify.breakpoint.xs ? 'margin-bottom: 56px' : undefined">
+  <div :style="$vuetify.breakpoint.xs ? 'margin-bottom: 56px' : undefined" :class="einkMode ? 'eink-page-root' : ''">
     <toolbar-sticky v-if="selectedCollections.length === 0">
       <!--   Action menu   -->
       <library-actions-menu v-if="isAdmin && library"
@@ -52,6 +52,7 @@
         v-model="page"
         :total-visible="paginationVisible"
         :length="totalPages"
+        :class="einkMode ? 'eink-bottom-pagination' : ''"
       />
     </v-container>
 
@@ -258,3 +259,21 @@ export default Vue.extend({
   },
 })
 </script>
+
+<style scoped>
+.eink-page-root {
+  padding-bottom: 48px;
+}
+
+.eink-bottom-pagination {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom, 0);
+  z-index: 24;
+  margin: 0;
+  padding: 2px 8px;
+  background: #ffffff;
+  border-top: 2px solid #000000;
+}
+</style>

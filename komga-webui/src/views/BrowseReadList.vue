@@ -1,5 +1,5 @@
 <template>
-  <div v-if="readList">
+  <div v-if="readList" :class="einkMode ? 'eink-page-root' : ''">
     <toolbar-sticky v-if="!editElements && selectedBooks.length === 0">
 
       <read-list-actions-menu v-if="readList"
@@ -36,7 +36,7 @@
         </v-tooltip>
       </v-btn>
 
-      <page-size-select v-model="pageSize"/>
+      <page-size-select v-if="!einkMode" v-model="pageSize"/>
 
       <v-btn icon @click="drawer = !drawer">
         <v-icon :color="filterActive ? 'secondary' : ''">mdi-filter-variant</v-icon>
@@ -128,7 +128,7 @@
 
       <template v-else>
         <v-pagination
-          v-if="totalPages > 1"
+          v-if="totalPages > 1 && !einkMode"
           v-model="page"
           :total-visible="paginationVisible"
           :length="totalPages"
@@ -148,6 +148,7 @@
           v-model="page"
           :total-visible="paginationVisible"
           :length="totalPages"
+          :class="einkMode ? 'eink-bottom-pagination' : ''"
         />
       </template>
 
@@ -283,6 +284,9 @@ export default Vue.extend({
     next()
   },
   computed: {
+    einkMode(): boolean {
+      return this.$store.state.persistedState.theme === 'theme.eink'
+    },
     itemContext(): ItemContext[] {
       if (this.readList?.ordered === false) return [ItemContext.SHOW_SERIES, ItemContext.RELEASE_DATE]
       return [ItemContext.SHOW_SERIES]
@@ -554,3 +558,21 @@ export default Vue.extend({
   },
 })
 </script>
+
+<style scoped>
+.eink-page-root {
+  padding-bottom: 48px;
+}
+
+.eink-bottom-pagination {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom, 0);
+  z-index: 24;
+  margin: 0;
+  padding: 2px 8px;
+  background: #ffffff;
+  border-top: 2px solid #000000;
+}
+</style>

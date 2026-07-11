@@ -1,5 +1,5 @@
 <template>
-  <div :style="$vuetify.breakpoint.xs ? 'margin-bottom: 56px' : undefined">
+  <div :style="$vuetify.breakpoint.xs ? 'margin-bottom: 56px' : undefined" :class="einkMode ? 'eink-page-root' : ''">
     <toolbar-sticky v-if="selectedSeries.length === 0">
       <!--   Action menu   -->
       <library-actions-menu v-if="isAdmin && library"
@@ -117,6 +117,7 @@
             :items="series"
             :item-context="itemContext"
             :reserved-height="einkReservedHeight"
+            :external-pager-active="einkMode && totalPages > 1"
           />
 
           <v-pagination
@@ -124,6 +125,7 @@
             v-model="page"
             :total-visible="paginationVisible"
             :length="totalPages"
+            :class="einkMode ? 'eink-bottom-pagination' : ''"
           />
         </template>
         <template v-else>
@@ -409,7 +411,7 @@ export default Vue.extend({
       const availableHeight = Math.max(180, this.$vuetify.breakpoint.height - this.einkReservedHeight - 68 - gridPadding)
       const itemWidth = Math.max(84, Math.floor((this.$vuetify.breakpoint.width - 32) / this.einkColumns) - 10)
       const estimatedCardHeight = Math.round((itemWidth / 0.7071) + (this.einkCompactMode ? 56 : 72))
-      const minRows = 1
+      const minRows = isPortrait ? 2 : 1
       return Math.max(minRows, Math.min(6, Math.floor(availableHeight / estimatedCardHeight)))
     },
     einkReservedHeight(): number {
@@ -1015,5 +1017,23 @@ export default Vue.extend({
   },
 })
 </script>
+
+<style scoped>
+.eink-page-root {
+  padding-bottom: 48px;
+}
+
+.eink-bottom-pagination {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom, 0);
+  z-index: 24;
+  margin: 0;
+  padding: 2px 8px;
+  background: #ffffff;
+  border-top: 2px solid #000000;
+}
+</style>
 <style scoped>
 </style>

@@ -79,7 +79,6 @@
           v-if="einkMode && section.value === RecommendedViewSection.TRENDING && trendingSeries.length > 0 && isSectionVisible(section)"
           class="mb-4"
         >
-          <div class="title mb-2">{{ $t('dashboard.trending') }}</div>
           <eink-item-browser
             :items="trendingSeries"
             :reserved-height="einkReservedHeight"
@@ -91,7 +90,6 @@
           v-if="einkMode && section.value !== RecommendedViewSection.TRENDING && section.loader && section.loader.items.length !== 0 && isSectionVisible(section)"
           class="mb-4"
         >
-          <div class="title mb-2">{{ $t(`dashboard.${section.value.toLowerCase()}`) }}</div>
           <eink-item-browser
             :items="section.loader.items"
             :item-context="section.itemContext"
