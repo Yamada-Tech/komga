@@ -48,9 +48,9 @@ class KomgaSettingsProvider(
       field = value
     }
 
-  var sidebarCollectionIds: List<String> =
+  var sidebarHiddenCollectionIds: List<String> =
     serverSettingsDao
-      .getSettingByKey(Settings.SIDEBAR_COLLECTION_IDS.name, String::class.java)
+      .getSettingByKey(Settings.SIDEBAR_HIDDEN_COLLECTION_IDS.name, String::class.java)
       ?.split(",")
       ?.map { it.trim() }
       ?.filter { it.isNotBlank() }
@@ -59,9 +59,9 @@ class KomgaSettingsProvider(
     set(value) {
       val sanitized = value.map { it.trim() }.filter { it.isNotBlank() }.distinct()
       if (sanitized.isEmpty())
-        serverSettingsDao.deleteSetting(Settings.SIDEBAR_COLLECTION_IDS.name)
+        serverSettingsDao.deleteSetting(Settings.SIDEBAR_HIDDEN_COLLECTION_IDS.name)
       else
-        serverSettingsDao.saveSetting(Settings.SIDEBAR_COLLECTION_IDS.name, sanitized.joinToString(","))
+        serverSettingsDao.saveSetting(Settings.SIDEBAR_HIDDEN_COLLECTION_IDS.name, sanitized.joinToString(","))
       field = sanitized
     }
 
@@ -158,7 +158,7 @@ private enum class Settings {
   SHOW_SIDEBAR_IMPORT,
   SHOW_SIDEBAR_MEDIA,
   SHOW_SIDEBAR_HISTORY,
-  SIDEBAR_COLLECTION_IDS,
+  SIDEBAR_HIDDEN_COLLECTION_IDS,
   REMEMBER_ME_KEY,
   REMEMBER_ME_DURATION,
   THUMBNAIL_SIZE,

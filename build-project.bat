@@ -4,27 +4,69 @@ set NODE_OPTIONS=--max-old-space-size=4096
 
 cd /d "%~dp0"
 
+echo [0/2] Cleaning previous build artifacts...
 if exist "%~dp0complete" rmdir /s /q "%~dp0complete"
-mkdir "%~dp0complete"
+if exist "%~dp0build" rmdir /s /q "%~dp0build"
+if exist "%~dp0komga\build" rmdir /s /q "%~dp0komga\build"
+if exist "%~dp0komga-tray\build" rmdir /s /q "%~dp0komga-tray\build"
+if exist "%~dp0komga-webui\dist" rmdir /s /q "%~dp0komga-webui\dist"
 
 if exist "%~dp0backend_build.log" del "%~dp0backend_build.log"
 
-echo [1/2] Building Frontend and Backend via Official Gradle Route...
-call gradlew.bat :komga:prepareThymeLeaf :komga:bootJar :komga-tray:jar --no-daemon --console=plain -Dorg.gradle.jvmargs="-Xmx2560m" -PgitProperties.failOnNoGitDirectory=false 2>&1 | powershell -Command "$Input | Tee-Object -FilePath '%~dp0backend_build.log'"
+mkdir "%~dp0complete"
 
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: Gradle build failed. Please check backend_build.log
-    exit /b %ERRORLEVEL%
-)
+echo [1/2] Building Frontend and Backend via Official Gradle Route...
+call gradlew.bat clean :komga:prepareThymeLeaf :komga:bootJar :komga-tray:jar --no-daemon --console=plain -Dorg.gradle.jvmargs="-Xmx2560m" -PgitProperties.failOnNoGitDirectory=false > "%~dp0backend_build.log" 2>&1
+set "GRADLE_EXIT=%ERRORLEVEL%"
+
+if %GRADLE_EXIT% neq 0 goto :HANDLE_GRADLE_FAILURE
+goto :GRADLE_OK
+
+:HANDLE_GRADLE_FAILURE
+findstr /c:"Cannot find module" "%~dp0backend_build.log" >nul
+if errorlevel 1 goto :GRADLE_ABORT
+
+echo [RECOVERY] Frontend dependency inconsistency detected. Reinstalling dependencies...
+if exist "%~dp0komga-webui\node_modules" rmdir /s /q "%~dp0komga-webui\node_modules"
+call gradlew.bat :komga:npmInstall --rerun-tasks --no-daemon --console=plain >> "%~dp0backend_build.log" 2>&1
+if errorlevel 1 goto :GRADLE_RECOVERY_ABORT
+
+echo [RECOVERY] Retrying full build after dependency reinstall...
+call gradlew.bat clean :komga:prepareThymeLeaf :komga:bootJar :komga-tray:jar --no-daemon --console=plain -Dorg.gradle.jvmargs="-Xmx2560m" -PgitProperties.failOnNoGitDirectory=false > "%~dp0backend_build.log" 2>&1
+set "GRADLE_EXIT=%ERRORLEVEL%"
+if %GRADLE_EXIT% neq 0 goto :GRADLE_ABORT
+
+:GRADLE_OK
+type "%~dp0backend_build.log"
+goto :AFTER_GRADLE_BUILD
+
+:GRADLE_RECOVERY_ABORT
+type "%~dp0backend_build.log"
+echo ERROR: Dependency recovery failed. Please check backend_build.log
+exit /b %ERRORLEVEL%
+
+:GRADLE_ABORT
+type "%~dp0backend_build.log"
+echo ERROR: Gradle build failed. Please check backend_build.log
+exit /b %GRADLE_EXIT%
+
+:AFTER_GRADLE_BUILD
 
 copy /y "%~dp0komga\build\libs\komga-*.jar" "%~dp0complete\" >nul
 if exist "%~dp0complete\*plain.jar" del "%~dp0complete\*plain.jar" >nul
 
 setlocal enabledelayedexpansion
+set "ver="
 for %%f in ("%~dp0complete\komga-*.jar") do (
     set "fname=%%~nf"
     set "ver=!fname:komga-=!"
     ren "%%f" "komga-!ver!-custom.jar"
+)
+
+if "!ver!"=="" (
+    echo ERROR: Built JAR was not found in komga\build\libs. Stopping pipeline.
+    endlocal
+    exit /b 1
 )
 
 echo Checking local environment for Docker / WSL capabilities...

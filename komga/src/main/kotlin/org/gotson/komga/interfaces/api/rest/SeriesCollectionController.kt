@@ -287,15 +287,15 @@ class SeriesCollectionController(
   }
 
   private fun isCollectionShownInSidebar(collectionId: String): Boolean =
-    komgaSettingsProvider.sidebarCollectionIds.contains(collectionId)
+    !komgaSettingsProvider.sidebarHiddenCollectionIds.contains(collectionId)
 
   private fun setCollectionShownInSidebar(
     collectionId: String,
     show: Boolean,
   ) {
-    val ids = komgaSettingsProvider.sidebarCollectionIds.toMutableSet()
-    if (show) ids.add(collectionId) else ids.remove(collectionId)
-    komgaSettingsProvider.sidebarCollectionIds = ids.toList()
+    val hiddenIds = komgaSettingsProvider.sidebarHiddenCollectionIds.toMutableSet()
+    if (show) hiddenIds.remove(collectionId) else hiddenIds.add(collectionId)
+    komgaSettingsProvider.sidebarHiddenCollectionIds = hiddenIds.toList()
   }
 
   @Operation(summary = "List collection's series", tags = [OpenApiConfiguration.TagNames.COLLECTION_SERIES])
