@@ -93,7 +93,7 @@
       </template>
     </filter-drawer>
 
-    <v-container fluid>
+    <v-container fluid :class="einkMode ? 'eink-content-max' : ''">
       <empty-state
         v-if="totalPages === 0"
         :title="$t('common.filter_no_matches')"
@@ -166,6 +166,7 @@ import FilterDrawer from '@/components/FilterDrawer.vue'
 import FilterPanels from '@/components/FilterPanels.vue'
 import FilterList from '@/components/FilterList.vue'
 import {Location} from 'vue-router'
+import {computeEinkColumns, computeEinkCompactMode, computeEinkReservedHeight, computeEinkRows} from '@/functions/eink-layout'
 import EmptyState from '@/components/EmptyState.vue'
 import {Oneshot, SeriesDto} from '@/types/komga-series'
 import {authorRoles} from '@/types/author-roles'
@@ -293,32 +294,60 @@ export default Vue.extend({
       return this.einkColumns * this.einkRows
     },
     einkCompactMode(): boolean {
-      const width = this.$vuetify.breakpoint.width
-      const height = this.$vuetify.breakpoint.height
-      return Math.min(width, height) <= 430 || (width * height) <= 320000
+      return computeEinkCompactMode(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
     },
     einkColumns(): number {
-      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
-      const availableWidth = Math.max(220, this.$vuetify.breakpoint.width - (this.einkCompactMode ? 24 : 32))
-      const minCardWidth = this.einkCompactMode ? 130 : (isPortrait ? 170 : 180)
-      const minColumns = isPortrait ? 2 : 3
-      return Math.max(minColumns, Math.min(5, Math.floor(availableWidth / minCardWidth)))
+      return computeEinkColumns({
+        width: this.$vuetify.breakpoint.width,
+        height: this.$vuetify.breakpoint.height,
+        compactMode: this.einkCompactMode,
+        minColumnsPortrait: 3,
+        minColumnsLandscape: 3,
+        maxColumns: 5,
+        minCardWidthCompactPortrait: 108,
+        minCardWidthCompactLandscape: 118,
+        minCardWidthPortrait: 136,
+        minCardWidthLandscape: 160,
+        horizontalPaddingCompact: 8,
+        horizontalPaddingRegular: 12,
+      })
     },
     einkRows(): number {
-      const gridPadding = this.einkCompactMode ? 16 : 24
-      const availableHeight = Math.max(180, this.$vuetify.breakpoint.height - this.einkReservedHeight - 68 - gridPadding)
-      const itemWidth = Math.max(84, Math.floor((this.$vuetify.breakpoint.width - 32) / this.einkColumns) - 10)
-      const estimatedCardHeight = Math.round((itemWidth / 0.7071) + (this.einkCompactMode ? 56 : 72))
-      const minRows = isPortrait ? 2 : 1
-      return Math.max(minRows, Math.min(6, Math.floor(availableHeight / estimatedCardHeight)))
+      return computeEinkRows({
+        width: this.$vuetify.breakpoint.width,
+        height: this.$vuetify.breakpoint.height,
+        compactMode: this.einkCompactMode,
+        columns: this.einkColumns,
+        reservedHeight: this.einkReservedHeight,
+        minRowsPortrait: 2,
+        minRowsLandscape: 1,
+        maxRows: 6,
+        baseOffset: 64,
+        gridPaddingPortraitCompact: 10,
+        gridPaddingPortraitRegular: 14,
+        gridPaddingLandscape: 8,
+        safetyPaddingPortraitCompact: 10,
+        safetyPaddingPortraitRegular: 14,
+        safetyPaddingLandscape: 6,
+        cardMetaHeightCompact: 34,
+        cardMetaHeightRegular: 40,
+        rowSafetyRatioPortrait: 1.1,
+        rowSafetyRatioLandscape: 1.06,
+        itemWidthInsetCompact: 4,
+        itemWidthInsetRegular: 6,
+        horizontalPaddingCompact: 8,
+        horizontalPaddingRegular: 12,
+      })
     },
     einkReservedHeight(): number {
       if (!this.einkMode) return 220
-      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
-      const shortSide = Math.min(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
-      if (shortSide <= 430) return isPortrait ? 140 : 90
-      if (shortSide <= 540) return isPortrait ? 160 : 100
-      return isPortrait ? 180 : 120
+      return computeEinkReservedHeight({
+        width: this.$vuetify.breakpoint.width,
+        height: this.$vuetify.breakpoint.height,
+        shortSideThresholds: [430, 540],
+        portraitValues: [140, 160, 180],
+        landscapeValues: [90, 100, 120],
+      })
     },
     paginationVisible(): number {
       if (this.einkMode) {
@@ -642,19 +671,21 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.eink-page-root {
-  padding-bottom: 48px;
+:deep(.theme--eink) .eink-page-root {
+  padding-bottom: 60px;
 }
 
-.eink-bottom-pagination {
+:deep(.theme--eink) .eink-bottom-pagination {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: env(safe-area-inset-bottom, 0);
+  bottom: 0;
   z-index: 24;
   margin: 0;
-  padding: 2px 8px;
+  padding: 1px 4px;
   background: #ffffff;
   border-top: 2px solid #000000;
+  min-height: 32px;
+  overflow: hidden;
 }
 </style>

@@ -46,8 +46,8 @@
       @delete="deleteBooks"
     />
 
-    <v-container fluid>
-      <div v-if="einkMode" class="mb-4">
+    <v-container fluid :class="einkMode ? 'eink-dashboard-container eink-content-max' : ''">
+      <div v-if="einkMode" class="eink-selector-wrap">
         <v-select
           v-model="activeSection"
           :items="einkSectionTabs"
@@ -77,7 +77,7 @@
         <div
           v-bind:key="`eink-trend-${i}`"
           v-if="einkMode && section.value === RecommendedViewSection.TRENDING && trendingSeries.length > 0 && isSectionVisible(section)"
-          class="mb-4"
+          class="eink-section-block"
         >
           <eink-item-browser
             :items="trendingSeries"
@@ -88,7 +88,7 @@
         <div
           v-bind:key="`eink-sec-${i}`"
           v-if="einkMode && section.value !== RecommendedViewSection.TRENDING && section.loader && section.loader.items.length !== 0 && isSectionVisible(section)"
-          class="mb-4"
+          class="eink-section-block"
         >
           <eink-item-browser
             :items="section.loader.items"
@@ -411,10 +411,10 @@ export default Vue.extend({
       }))
     },
     einkReservedHeight(): number {
-      if (this.einkDeviceProfile === 'palma') return 300
-      if (this.einkDeviceProfile === 'inch6') return 290
-      if (this.einkDeviceProfile === 'inch68') return 270
-      return 250
+      if (this.einkDeviceProfile === 'palma') return 185
+      if (this.einkDeviceProfile === 'inch6') return 175
+      if (this.einkDeviceProfile === 'inch68') return 165
+      return 155
     },
   },
   methods: {
@@ -740,6 +740,21 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.eink-dashboard-container {
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+.eink-selector-wrap {
+  margin-bottom: 6px;
+}
+
+.eink-section-block {
+  margin-bottom: 4px;
+}
+
 .eink-section-selector {
   max-width: 100%;
 }

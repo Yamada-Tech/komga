@@ -11,6 +11,9 @@ import {LibrarySseDto, SessionExpiredDto} from '@/types/komga-sse'
 
 export default Vue.extend({
   name: 'App',
+  data: () => ({
+    einkButtonSizeObserver: null as MutationObserver | null,
+  }),
   created() {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.systemThemeChange)
 
@@ -21,6 +24,7 @@ export default Vue.extend({
     this.$eventHub.$on(SESSION_EXPIRED, this.logout)
   },
   beforeDestroy() {
+    this.stopEinkButtonClassCleanup()
     window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', this.systemThemeChange)
 
     this.$eventHub.$off(LIBRARY_ADDED, this.reloadLibraries)
@@ -49,6 +53,28 @@ export default Vue.extend({
     },
   },
   methods: {
+    removeEinkDefaultButtonSizeClass() {
+      const buttons = document.querySelectorAll('.theme--eink .v-btn.v-btn--icon.v-btn--round.v-size--default')
+      buttons.forEach((el) => el.classList.remove('v-size--default'))
+    },
+    startEinkButtonClassCleanup() {
+      if (this.einkButtonSizeObserver) return
+      this.einkButtonSizeObserver = new MutationObserver(() => {
+        this.removeEinkDefaultButtonSizeClass()
+      })
+      this.einkButtonSizeObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class'],
+      })
+      this.removeEinkDefaultButtonSizeClass()
+    },
+    stopEinkButtonClassCleanup() {
+      if (!this.einkButtonSizeObserver) return
+      this.einkButtonSizeObserver.disconnect()
+      this.einkButtonSizeObserver = null
+    },
     systemThemeChange() {
       if (this.$store.state.persistedState.theme === Theme.SYSTEM) {
         this.changeTheme(this.$store.state.persistedState.theme)
@@ -59,7 +85,9 @@ export default Vue.extend({
       if (theme === Theme.EINK) {
         this.$vuetify.theme.dark = false
         document.documentElement.classList.add(einkClass)
+        this.startEinkButtonClassCleanup()
       } else {
+        this.stopEinkButtonClassCleanup()
         document.documentElement.classList.remove(einkClass)
         switch (theme) {
           case Theme.DARK:

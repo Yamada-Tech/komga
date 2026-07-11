@@ -313,7 +313,7 @@ export default Vue.extend({
       return this.computedItem.subtitleProps()
     },
     titleLineClamp(): number {
-      return this.isEinkMode ? 3 : 2
+      return this.isEinkMode ? 2 : 2
     },
     body(): string {
       return this.computedItem.body(this.itemContext)
@@ -436,6 +436,21 @@ export default Vue.extend({
 
 .eink-card .v-card__text {
   text-align: center;
+}
+
+.eink-card .v-card__subtitle {
+  font-size: 0.72rem;
+  line-height: 1.15;
+  min-height: 2.05rem;
+  padding-top: 4px;
+  padding-bottom: 2px;
+}
+
+.eink-card .v-card__text {
+  font-size: 0.64rem;
+  line-height: 1.1;
+  padding: 0 8px 4px;
+  margin: 0;
 }
 
 .item-border {

@@ -96,19 +96,20 @@ export default Vue.extend({
       return Math.min(width, height) <= 430 || (width * height) <= 320000
     },
     availableWidth(): number {
-      const horizontalPadding = this.isCompact ? 24 : 32
+      const horizontalPadding = this.isCompact ? 8 : 12
       return Math.max(200, this.effectiveWidth - horizontalPadding)
     },
     availableHeight(): number {
       const isLandscape = !this.isPortrait
       const paginationHeight = this.paginationBarHeight
       const gridPadding = isLandscape ? 6 : (this.isCompact ? 10 : 14)
+      const safetyPadding = this.isPortrait ? (this.isCompact ? 14 : 18) : 8
       const shortSide = Math.min(this.effectiveWidth, this.effectiveHeight)
       const viewportMargin = isLandscape
         ? (shortSide <= 430 ? 16 : shortSide <= 720 ? 20 : 24)
         : (shortSide <= 430 ? 30 : shortSide <= 720 ? 40 : 52)
       const effectiveReservedHeight = isLandscape ? Math.round(this.reservedHeight * 0.55) : this.reservedHeight
-      return Math.max(120, this.effectiveHeight - viewportMargin - effectiveReservedHeight - paginationHeight - gridPadding)
+      return Math.max(120, this.effectiveHeight - viewportMargin - effectiveReservedHeight - paginationHeight - gridPadding - safetyPadding)
     },
     paginationBarHeight(): number {
       return this.isPortrait ? 46 : 38
@@ -119,7 +120,7 @@ export default Vue.extend({
       }
     },
     cardMetaHeight(): number {
-      return this.isCompact ? 42 : 58
+      return this.isCompact ? 34 : 40
     },
     columns(): number {
       const minCardWidth = this.isCompact ? 120 : (this.isPortrait ? 165 : 190)
@@ -128,7 +129,8 @@ export default Vue.extend({
       return Math.max(minColumns, Math.min(maxColumns, Math.floor(this.availableWidth / minCardWidth)))
     },
     rows(): number {
-      const estimatedCardHeight = Math.round((this.itemWidth / 0.7071) + this.cardMetaHeight)
+      const safetyRatio = this.isPortrait ? 1.12 : 1.08
+      const estimatedCardHeight = Math.round(((this.itemWidth / 0.7071) + this.cardMetaHeight) * safetyRatio)
       const minRows = this.isPortrait ? 2 : 1
       return Math.max(minRows, Math.min(6, Math.floor(this.availableHeight / estimatedCardHeight)))
     },
@@ -157,7 +159,7 @@ export default Vue.extend({
     },
     itemWidth(): number {
       const widthByColumns = Math.floor(this.availableWidth / this.columns) - 10
-      const targetRowsForSizing = 1
+      const targetRowsForSizing = this.isPortrait ? 2 : 1
       const maxWidthForTargetRows = Math.floor(((this.availableHeight / targetRowsForSizing) - this.cardMetaHeight) * 0.7071)
       const floorWidth = this.isCompact ? 40 : 56
       return Math.max(floorWidth, Math.min(widthByColumns, Math.max(floorWidth, maxWidthForTargetRows)))
@@ -193,8 +195,8 @@ export default Vue.extend({
 .eink-grid {
   display: grid;
   flex: 1;
-  gap: 8px;
-  padding: 8px;
+  gap: 6px;
+  padding: 4px;
   overflow: hidden;
 }
 
@@ -230,21 +232,22 @@ export default Vue.extend({
 
 .eink-pagination :deep(.v-pagination__item),
 .eink-pagination :deep(.v-pagination__navigation) {
-  min-width: 28px;
-  width: 28px;
-  height: 28px;
+  min-width: 26px;
+  width: 26px;
+  height: 26px;
   margin: 0 2px;
+  border-width: 1px !important;
 }
 
 .eink-browser--compact .eink-grid {
-  gap: 4px;
-  padding: 4px;
+  gap: 3px;
+  padding: 2px;
 }
 
 @media (orientation: landscape) {
   .eink-grid {
-    gap: 4px;
-    padding: 4px;
+    gap: 3px;
+    padding: 2px;
   }
 
   .eink-pagination {

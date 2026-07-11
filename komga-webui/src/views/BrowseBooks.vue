@@ -70,7 +70,7 @@
       </template>
     </filter-drawer>
 
-    <v-container fluid>
+    <v-container fluid :class="einkMode ? 'eink-content-max' : ''">
       <empty-state
         v-if="totalPages === 0 && sortOrFilterActive"
         :title="$t('common.filter_no_matches')"
@@ -680,20 +680,22 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.eink-page-root {
-  padding-bottom: 48px;
+:deep(.theme--eink) .eink-page-root {
+  padding-bottom: 60px;
 }
 
-.eink-bottom-pagination {
+:deep(.theme--eink) .eink-bottom-pagination {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: env(safe-area-inset-bottom, 0);
+  bottom: 0;
   z-index: 24;
   margin: 0;
-  padding: 2px 8px;
+  padding: 1px 4px;
   background: #ffffff;
   border-top: 2px solid #000000;
+  min-height: 32px;
+  overflow: hidden;
 }
 </style>
 <style scoped>

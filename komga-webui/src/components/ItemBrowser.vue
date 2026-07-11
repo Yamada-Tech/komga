@@ -20,7 +20,7 @@
           <v-item
             v-for="item in localItems"
             :key="item.id"
-            class="my-2 mx-2"
+            :class="isEinkMode ? 'my-1 mx-1' : 'my-2 mx-2'"
             v-slot:default="{ toggle, active }" :value="item"
           >
             <slot name="item">
@@ -94,6 +94,7 @@
 <script lang="ts">
 import ItemCard from '@/components/ItemCard.vue'
 import {computeCardWidth} from '@/functions/grid-utilities'
+import {Theme} from '@/types/themes'
 import Vue from 'vue'
 import draggable from 'vuedraggable'
 import {ItemContext} from '@/types/items'
@@ -187,6 +188,9 @@ export default Vue.extend({
     },
   },
   computed: {
+    isEinkMode(): boolean {
+      return this.$store.state.persistedState.theme === Theme.EINK
+    },
     flexClass(): string {
       return this.nowrap ? 'd-flex flex-nowrap' : 'd-flex flex-wrap'
     },
@@ -243,7 +247,17 @@ export default Vue.extend({
     },
     onResize() {
       const content = this.$refs.content as HTMLElement
-      this.width = computeCardWidth(content.clientWidth, this.$vuetify.breakpoint.name.toString())
+      if (this.isEinkMode && !this.fixedItemWidth) {
+        const availableWidth = Math.max(200, content.clientWidth - 4)
+        const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+        const minColumns = isPortrait ? 2 : 3
+        const minCardWidth = this.$vuetify.breakpoint.xs ? 116 : (isPortrait ? 150 : 165)
+        const columns = Math.max(minColumns, Math.min(5, Math.floor(availableWidth / minCardWidth)))
+        const cellPadding = this.$vuetify.breakpoint.xs ? 4 : 6
+        this.width = Math.max(90, Math.floor((availableWidth / columns) - (cellPadding * 2)))
+      } else {
+        this.width = computeCardWidth(content.clientWidth, this.$vuetify.breakpoint.name.toString())
+      }
     },
     deleteItem(item: any) {
       const index = this.localItems.findIndex((e: any) => e.id === item.id)

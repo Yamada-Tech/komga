@@ -32,28 +32,44 @@
 
     <library-navigation v-if="$vuetify.breakpoint.smAndDown && !einkMode" :libraryId="libraryId" bottom-navigation/>
 
-    <v-container fluid>
-      <v-pagination
-        v-if="totalPages > 1 && !einkMode"
-        v-model="page"
-        :total-visible="paginationVisible"
-        :length="totalPages"
-      />
+    <v-container fluid :class="einkMode ? 'eink-content-max' : ''">
+      <template v-if="einkMode">
+        <eink-item-browser
+          :items="readLists"
+          :reserved-height="einkReservedHeight"
+          :external-pager-active="einkMode && totalPages > 1"
+        />
 
-      <item-browser
-        :items="readLists"
-        :selectable="isAdmin"
-        :selected.sync="selectedReadLists"
-        :edit-function="isAdmin ? editSingle : undefined"
-      />
+        <v-pagination
+          v-if="totalPages > 1"
+          v-model="page"
+          :total-visible="paginationVisible"
+          :length="totalPages"
+          :class="einkMode ? 'eink-bottom-pagination' : ''"
+        />
+      </template>
+      <template v-else>
+        <v-pagination
+          v-if="totalPages > 1"
+          v-model="page"
+          :total-visible="paginationVisible"
+          :length="totalPages"
+        />
 
-      <v-pagination
-        v-if="totalPages > 1"
-        v-model="page"
-        :total-visible="paginationVisible"
-        :length="totalPages"
-        :class="einkMode ? 'eink-bottom-pagination' : ''"
-      />
+        <item-browser
+          :items="readLists"
+          :selectable="isAdmin"
+          :selected.sync="selectedReadLists"
+          :edit-function="isAdmin ? editSingle : undefined"
+        />
+
+        <v-pagination
+          v-if="totalPages > 1"
+          v-model="page"
+          :total-visible="paginationVisible"
+          :length="totalPages"
+        />
+      </template>
     </v-container>
 
   </div>
@@ -62,12 +78,14 @@
 <script lang="ts">
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import ItemBrowser from '@/components/ItemBrowser.vue'
+import EinkItemBrowser from '@/components/EinkItemBrowser.vue'
 import LibraryNavigation from '@/components/LibraryNavigation.vue'
 import LibraryActionsMenu from '@/components/menus/LibraryActionsMenu.vue'
 import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import {LIBRARY_CHANGED, READLIST_ADDED, READLIST_CHANGED, READLIST_DELETED} from '@/types/events'
 import Vue from 'vue'
 import {Location} from 'vue-router'
+import {computeEinkColumns, computeEinkCompactMode, computeEinkReservedHeight, computeEinkRows} from '@/functions/eink-layout'
 import {LIBRARIES_ALL, LIBRARY_ROUTE} from '@/types/library'
 import {LibrarySseDto} from '@/types/komga-sse'
 import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
@@ -81,6 +99,7 @@ export default Vue.extend({
     ToolbarSticky,
     LibraryNavigation,
     ItemBrowser,
+    EinkItemBrowser,
     PageSizeSelect,
     MultiSelectBar,
   },
@@ -103,6 +122,12 @@ export default Vue.extend({
     },
   },
   watch: {
+    einkAutoPageSize() {
+      this.applyEinkPageSize()
+    },
+    einkMode() {
+      this.applyEinkPageSize()
+    },
     '$store.getters.getLibrariesPinned': {
       handler(val) {
         if (this.libraryId === LIBRARIES_ALL)
@@ -129,6 +154,8 @@ export default Vue.extend({
     // restore from query param
     if (this.$route.query.page) this.page = Number(this.$route.query.page)
     if (this.$route.query.pageSize) this.pageSize = Number(this.$route.query.pageSize)
+
+    this.applyEinkPageSize()
 
     this.loadLibrary(this.libraryId)
 
@@ -162,6 +189,66 @@ export default Vue.extend({
     einkMode(): boolean {
       return this.$store.state.persistedState.theme === 'theme.eink'
     },
+    einkAutoPageSize(): number {
+      if (!this.einkMode) return this.pageSize
+      return this.einkColumns * this.einkRows
+    },
+    einkCompactMode(): boolean {
+      return computeEinkCompactMode(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+    },
+    einkColumns(): number {
+      return computeEinkColumns({
+        width: this.$vuetify.breakpoint.width,
+        height: this.$vuetify.breakpoint.height,
+        compactMode: this.einkCompactMode,
+        minColumnsPortrait: 3,
+        minColumnsLandscape: 3,
+        maxColumns: 5,
+        minCardWidthCompactPortrait: 108,
+        minCardWidthCompactLandscape: 118,
+        minCardWidthPortrait: 136,
+        minCardWidthLandscape: 160,
+        horizontalPaddingCompact: 8,
+        horizontalPaddingRegular: 12,
+      })
+    },
+    einkRows(): number {
+      return computeEinkRows({
+        width: this.$vuetify.breakpoint.width,
+        height: this.$vuetify.breakpoint.height,
+        compactMode: this.einkCompactMode,
+        columns: this.einkColumns,
+        reservedHeight: this.einkReservedHeight,
+        minRowsPortrait: 2,
+        minRowsLandscape: 1,
+        maxRows: 6,
+        baseOffset: 64,
+        gridPaddingPortraitCompact: 10,
+        gridPaddingPortraitRegular: 14,
+        gridPaddingLandscape: 8,
+        safetyPaddingPortraitCompact: 10,
+        safetyPaddingPortraitRegular: 14,
+        safetyPaddingLandscape: 6,
+        cardMetaHeightCompact: 34,
+        cardMetaHeightRegular: 40,
+        rowSafetyRatioPortrait: 1.1,
+        rowSafetyRatioLandscape: 1.06,
+        itemWidthInsetCompact: 4,
+        itemWidthInsetRegular: 6,
+        horizontalPaddingCompact: 8,
+        horizontalPaddingRegular: 12,
+      })
+    },
+    einkReservedHeight(): number {
+      if (!this.einkMode) return 220
+      return computeEinkReservedHeight({
+        width: this.$vuetify.breakpoint.width,
+        height: this.$vuetify.breakpoint.height,
+        shortSideThresholds: [430, 540],
+        portraitValues: [140, 160, 180],
+        landscapeValues: [100, 110, 130],
+      })
+    },
     paginationVisible(): number {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
@@ -177,6 +264,12 @@ export default Vue.extend({
     },
   },
   methods: {
+    applyEinkPageSize() {
+      if (!this.einkMode) return
+      if (this.pageSize !== this.einkAutoPageSize) {
+        this.pageSize = this.einkAutoPageSize
+      }
+    },
     setWatches() {
       this.pageSizeUnwatch = this.$watch('pageSize', (val) => {
         this.$store.commit('setBrowsingPageSize', val)
@@ -262,19 +355,21 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.eink-page-root {
-  padding-bottom: 48px;
+:deep(.theme--eink) .eink-page-root {
+  padding-bottom: 60px;
 }
 
-.eink-bottom-pagination {
+:deep(.theme--eink) .eink-bottom-pagination {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: env(safe-area-inset-bottom, 0);
+  bottom: 0;
   z-index: 24;
   margin: 0;
-  padding: 2px 8px;
+  padding: 1px 4px;
   background: #ffffff;
   border-top: 2px solid #000000;
+  min-height: 32px;
+  overflow: hidden;
 }
 </style>
