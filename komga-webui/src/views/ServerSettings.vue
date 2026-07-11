@@ -182,6 +182,15 @@
           :label="$t('server_settings.label_sidebar_show_history')"
           hide-details
         />
+        <v-checkbox
+          v-model="form.enableInitialNavigation"
+          @change="$v.form.enableInitialNavigation.$touch()"
+          :label="$t('server_settings.label_enable_initial_navigation')"
+          hide-details
+        />
+        <div class="caption text--secondary mt-1 mb-2">
+          {{ $t('server_settings.label_enable_initial_navigation_note') }}
+        </div>
 
       </v-col>
     </v-row>
@@ -255,6 +264,7 @@
 </template>
 
 <script lang="ts">
+import {CLIENT_SETTING} from '@/types/komga-clientsettings'
 import {SettingsDto, ThumbnailSizeDto} from '@/types/komga-settings'
 import Vue from 'vue'
 import {helpers, maxValue, minValue, required} from 'vuelidate/lib/validators'
@@ -274,6 +284,17 @@ export default Vue.extend({
       showSidebarImport: true,
       showSidebarMedia: true,
       showSidebarHistory: true,
+      enableInitialNavigation: true,
+      librarySortOptionsVisibility: {
+        'metadata.titleSort': true,
+        'createdDate': true,
+        'lastModifiedDate': true,
+        'readDate': true,
+        'booksMetadata.releaseDate': true,
+        'name': true,
+        'booksCount': true,
+        'random': true,
+      } as Record<string, boolean>,
       rememberMeDurationDays: 365,
       renewRememberMeKey: false,
       thumbnailSize: ThumbnailSizeDto.DEFAULT,
@@ -297,6 +318,8 @@ export default Vue.extend({
       showSidebarImport: {},
       showSidebarMedia: {},
       showSidebarHistory: {},
+      enableInitialNavigation: {},
+      librarySortOptionsVisibility: {},
       rememberMeDurationDays: {
         minValue: minValue(1),
         required,
@@ -331,6 +354,18 @@ export default Vue.extend({
         text: this.$t(`enums.thumbnail_size.${x}`),
         value: x,
       }))
+    },
+    librarySortOptionControls(): { key: string, label: string }[] {
+      return [
+        {key: 'metadata.titleSort', label: this.$t('sort.name').toString()},
+        {key: 'createdDate', label: this.$t('sort.date_added').toString()},
+        {key: 'lastModifiedDate', label: this.$t('sort.date_updated').toString()},
+        {key: 'readDate', label: this.$t('sort.date_read').toString()},
+        {key: 'booksMetadata.releaseDate', label: this.$t('sort.release_date').toString()},
+        {key: 'name', label: this.$t('sort.folder_name').toString()},
+        {key: 'booksCount', label: this.$t('sort.books_count').toString()},
+        {key: 'random', label: this.$t('sort.random').toString()},
+      ]
     },
     rememberMeDurationErrors(): string[] {
       const errors = [] as string[]
@@ -373,8 +408,15 @@ export default Vue.extend({
   },
   methods: {
     async refreshSettings() {
+      await this.$store.dispatch('getClientSettingsGlobal')
       const settings = await (this.$komgaSettings.getSettings())
       this.$_.merge(this.form, settings)
+      this.form.enableInitialNavigation = this.$store.getters.getClientSettings[CLIENT_SETTING.WEBUI_INITIAL_NAVIGATION]?.value !== 'false'
+      try {
+        const sortOptions = JSON.parse(this.$store.getters.getClientSettings[CLIENT_SETTING.WEBUI_LIBRARY_SORT_OPTIONS]?.value || '{}') as Record<string, boolean>
+        this.form.librarySortOptionsVisibility = Object.assign({}, this.form.librarySortOptionsVisibility, sortOptions)
+      } catch (_) {
+      }
       this.form.serverPort = settings.serverPort.databaseSource
       this.form.serverContextPath = settings.serverContextPath.databaseSource
       this.form.kepubifyPath = settings.kepubifyPath.databaseSource
@@ -419,11 +461,31 @@ export default Vue.extend({
 
 
       await this.$komgaSettings.updateSettings(newSettings)
+      if (this.$v.form?.enableInitialNavigation?.$dirty) {
+        await this.$komgaSettings.updateClientSettingGlobal({
+          [CLIENT_SETTING.WEBUI_INITIAL_NAVIGATION]: {
+            value: `${this.form.enableInitialNavigation}`,
+            allowUnauthorized: true,
+          },
+        })
+        await this.$store.dispatch('getClientSettingsGlobal')
+      }
+      if (this.$v.form?.librarySortOptionsVisibility?.$dirty) {
+        await this.$komgaSettings.updateClientSettingGlobal({
+          [CLIENT_SETTING.WEBUI_LIBRARY_SORT_OPTIONS]: {
+            value: JSON.stringify(this.form.librarySortOptionsVisibility),
+            allowUnauthorized: true,
+          },
+        })
+        await this.$store.dispatch('getClientSettingsGlobal')
+      }
       await this.refreshSettings()
       this.$eventHub.$emit('server-settings-changed', {
         showSidebarImport: this.form.showSidebarImport,
         showSidebarMedia: this.form.showSidebarMedia,
         showSidebarHistory: this.form.showSidebarHistory,
+        enableInitialNavigation: this.form.enableInitialNavigation,
+        librarySortOptionsVisibility: this.form.librarySortOptionsVisibility,
       })
 
       if (thumbnailSizeHasChanged) {
@@ -432,6 +494,10 @@ export default Vue.extend({
     },
     regenerateThumbnails(forBiggerResultOnly: boolean) {
       this.$komgaBooks.regenerateThumbnails(forBiggerResultOnly)
+    },
+    setLibrarySortOption(key: string, value: boolean) {
+      this.$set(this.form.librarySortOptionsVisibility, key, value)
+      this.$v.form.librarySortOptionsVisibility.$touch()
     },
     async uploadLogo() {
       if (!this.logoFile) return

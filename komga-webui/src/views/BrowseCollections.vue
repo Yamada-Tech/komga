@@ -30,11 +30,11 @@
       @delete="deleteCollections"
     />
 
-    <library-navigation v-if="$vuetify.breakpoint.smAndDown" :libraryId="libraryId" bottom-navigation/>
+    <library-navigation v-if="$vuetify.breakpoint.smAndDown && !einkMode" :libraryId="libraryId" bottom-navigation/>
 
     <v-container fluid>
       <v-pagination
-        v-if="totalPages > 1"
+        v-if="totalPages > 1 && !einkMode"
         v-model="page"
         :total-visible="paginationVisible"
         :length="totalPages"
@@ -156,6 +156,9 @@ export default Vue.extend({
     },
     isAdmin(): boolean {
       return this.$store.getters.meAdmin
+    },
+    einkMode(): boolean {
+      return this.$store.state.persistedState.theme === 'theme.eink'
     },
     paginationVisible(): number {
       switch (this.$vuetify.breakpoint.name) {

@@ -29,8 +29,24 @@
               </v-list-item-content>
 
               <v-list-item-action>
+                <v-checkbox
+                  :input-value="collection.showInSidebar"
+                  hide-details
+                  class="mt-0 pt-0"
+                  @click.stop
+                  @change="toggleShowInSidebar(collection, $event)"
+                />
+              </v-list-item-action>
+
+              <v-list-item-action>
                 <v-btn icon :to="{name: 'browse-collection', params: {collectionId: collection.id}}">
                   <v-icon>mdi-open-in-new</v-icon>
+                </v-btn>
+              </v-list-item-action>
+
+              <v-list-item-action>
+                <v-btn icon color="error" @click.stop="confirmDeleteCollection(collection)">
+                  <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </v-list-item-action>
             </v-list-item>
@@ -44,29 +60,16 @@
 
       <v-col cols="12" md="8">
         <v-card outlined>
-          <v-card-title class="d-flex align-center">
-            <span>{{ selectedCollection ? selectedCollection.name : $t('common.collections') }}</span>
-            <v-spacer/>
-            <v-btn icon :to="{name: 'browse-collection', params: {collectionId: selectedCollection.id}}" v-if="selectedCollection">
-              <v-icon>mdi-open-in-new</v-icon>
-            </v-btn>
-            <v-btn icon color="error" @click="showDeleteDialog = true" v-if="selectedCollection">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </v-card-title>
-
-          <v-divider/>
-
           <v-list v-if="selectedCollectionSeries.length > 0">
-            <v-list-item v-for="series in selectedCollectionSeries" :key="series.id" :to="{name: series.oneshot ? 'browse-oneshot' : 'browse-series', params: {seriesId: series.id}}">
+            <v-list-item v-for="series in selectedCollectionSeries" :key="series.id">
               <v-list-item-content>
                 <v-list-item-title>{{ series.name }}</v-list-item-title>
                 <v-list-item-subtitle>{{ $tc('common.books_n', series.booksCount, {count: series.booksCount}) }}</v-list-item-subtitle>
               </v-list-item-content>
 
               <v-list-item-action>
-                <v-btn icon color="error" @click.stop="removeFromCollection(series.id)">
-                  <v-icon>mdi-link-off</v-icon>
+                <v-btn icon color="error" @click.stop.prevent="removeFromCollection(series.id)">
+                  <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </v-list-item-action>
             </v-list-item>
@@ -213,6 +216,20 @@ export default Vue.extend({
       try {
         await this.$komgaCollections.deleteCollection(this.selectedCollection.id)
         this.showDeleteDialog = false
+        await this.loadCollections()
+      } catch (e) {
+        this.emitError(e)
+      }
+    },
+    confirmDeleteCollection(collection: CollectionDto) {
+      this.selectedCollectionId = collection.id
+      this.showDeleteDialog = true
+    },
+    async toggleShowInSidebar(collection: CollectionDto, val: boolean) {
+      try {
+        await this.$komgaCollections.patchCollection(collection.id, {
+          showInSidebar: val,
+        } as CollectionUpdateDto)
         await this.loadCollections()
       } catch (e) {
         this.emitError(e)

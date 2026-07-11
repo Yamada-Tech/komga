@@ -31,7 +31,7 @@
         <v-icon>mdi-pencil</v-icon>
       </v-btn>
 
-      <page-size-select v-model="pageSize"/>
+      <page-size-select v-if="!einkMode" v-model="pageSize"/>
 
       <v-btn icon @click="drawer = !drawer">
         <v-icon :color="sortOrFilterActive ? 'secondary' : ''">mdi-filter-variant</v-icon>
@@ -81,9 +81,9 @@
       </template>
     </filter-drawer>
 
-    <v-container fluid class="pa-6">
+    <v-container fluid class="pa-6" :class="einkMode ? 'eink-series-layout' : ''">
       <v-row>
-        <v-col cols="4" sm="4" md="auto" lg="auto" xl="auto">
+        <v-col v-if="!einkMode || showEinkPrimaryMeta" cols="4" sm="4" md="auto" lg="auto" xl="auto">
           <item-card
             v-if="series.hasOwnProperty('id')"
             width="212"
@@ -94,9 +94,9 @@
           ></item-card>
         </v-col>
 
-        <v-col cols="8">
+        <v-col :cols="(einkMode && !showEinkPrimaryMeta) ? 12 : 8">
           <v-container>
-            <v-row>
+            <v-row v-if="!einkMode || showEinkPrimaryMeta">
               <v-col class="py-1">
                 <span class="text-h5" v-if="$_.get(series, 'metadata.title')">{{ series.metadata.title }}</span>
                 <router-link
@@ -109,7 +109,7 @@
               </v-col>
             </v-row>
 
-            <v-row v-if="series.booksMetadata.releaseDate" class="align-center text-caption">
+            <v-row v-if="series.booksMetadata.releaseDate && (!einkMode || showEinkPrimaryMeta)" class="align-center text-caption">
               <v-col class="py-1">
                 <v-tooltip right>
                   <template v-slot:activator="{ on }">
@@ -125,7 +125,7 @@
               </v-col>
             </v-row>
 
-            <v-row class="text-body-2">
+            <v-row v-if="!einkMode || showEinkPrimaryMeta" class="text-body-2">
               <v-col class="py-1 pe-0" cols="auto">
                 <v-chip label small link :color="statusChip.color" :text-color="statusChip.text"
                         :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {status: [new SearchConditionSeriesStatus(new SearchOperatorIs(series.metadata.status))]}}">
@@ -159,7 +159,7 @@
               </v-col>
             </v-row>
 
-            <v-row class="text-caption" align="center">
+            <v-row v-if="!einkMode || showEinkPrimaryMeta" class="text-caption" align="center">
               <v-col cols="auto" v-if="series.metadata.totalBookCount">
                 {{ $t('common.books_total', {count: series.booksCount, total: series.metadata.totalBookCount}) }}
               </v-col>
@@ -175,7 +175,7 @@
                          class="mb-4"
                          i18n-less="titles_more.less"
                          i18n-more="titles_more.more"
-                         v-if="series.metadata.alternateTitles.length > 0"
+                         v-if="series.metadata.alternateTitles.length > 0 && (!einkMode || showEinkPrimaryMeta)"
               >
                 <v-row v-for="(a, i) in series.metadata.alternateTitles"
                        :key="i"
@@ -206,7 +206,14 @@
 
               <v-row v-if="series.metadata.summary">
                 <v-col>
-                  <read-more v-model="readMore">{{ series.metadata.summary }}</read-more>
+                  <template v-if="einkMode">
+                    <div
+                      class="eink-summary"
+                      :class="{'eink-summary--collapsed': !summaryExpanded}"
+                      @click="summaryExpanded = !summaryExpanded"
+                    >{{ series.metadata.summary }}</div>
+                  </template>
+                  <read-more v-else v-model="readMore" :lines="summaryReadMoreLines">{{ series.metadata.summary }}</read-more>
                 </v-col>
               </v-row>
 
@@ -220,7 +227,14 @@
                     </template>
                     {{ $t('browse_series.series_no_summary') }}
                   </v-tooltip>
-                  <read-more v-model="readMore">{{ series.booksMetadata.summary }}</read-more>
+                  <template v-if="einkMode">
+                    <div
+                      class="eink-summary"
+                      :class="{'eink-summary--collapsed': !summaryExpanded}"
+                      @click="summaryExpanded = !summaryExpanded"
+                    >{{ series.booksMetadata.summary }}</div>
+                  </template>
+                  <read-more v-else v-model="readMore" :lines="summaryReadMoreLines">{{ series.booksMetadata.summary }}</read-more>
                 </v-col>
               </v-row>
             </template>
@@ -234,7 +248,7 @@
                    class="mb-4"
                    i18n-less="titles_more.less"
                    i18n-more="titles_more.more"
-                   v-if="series.metadata.alternateTitles.length > 0"
+                   v-if="series.metadata.alternateTitles.length > 0 && (!einkMode || showEinkPrimaryMeta)"
         >
           <v-row v-for="(a, i) in series.metadata.alternateTitles"
                  :key="i"
@@ -269,7 +283,14 @@
         <!--   Series summary     -->
         <v-row v-if="series.metadata.summary">
           <v-col>
-            <read-more v-model="readMore">{{ series.metadata.summary }}</read-more>
+            <template v-if="einkMode">
+              <div
+                class="eink-summary"
+                :class="{'eink-summary--collapsed': !summaryExpanded}"
+                @click="summaryExpanded = !summaryExpanded"
+              >{{ series.metadata.summary }}</div>
+            </template>
+            <read-more v-else v-model="readMore" :lines="summaryReadMoreLines">{{ series.metadata.summary }}</read-more>
           </v-col>
         </v-row>
 
@@ -284,13 +305,30 @@
               </template>
               {{ $t('browse_series.series_no_summary') }}
             </v-tooltip>
-            <read-more v-model="readMore">{{ series.booksMetadata.summary }}</read-more>
+            <template v-if="einkMode">
+              <div
+                class="eink-summary"
+                :class="{'eink-summary--collapsed': !summaryExpanded}"
+                @click="summaryExpanded = !summaryExpanded"
+              >{{ series.booksMetadata.summary }}</div>
+            </template>
+            <read-more v-else v-model="readMore" :lines="summaryReadMoreLines">{{ series.booksMetadata.summary }}</read-more>
           </v-col>
         </v-row>
       </template>
 
+      <v-row v-if="einkMode && showEinkSecondaryMeta" class="mb-2">
+        <v-col>
+          <v-btn small text @click="metaExpanded = !metaExpanded">
+            {{ metaExpanded ? $t('read_more.less') : $t('read_more.more') }}
+            <v-icon right small>mdi-chevron-{{ metaExpanded ? 'up' : 'down' }}</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+
+      <template v-if="!einkMode || metaExpanded">
       <!--  Publisher    -->
-      <v-row v-if="series.metadata.publisher" class="align-center text-caption">
+      <v-row v-if="series.metadata.publisher && (!einkMode || showEinkSecondaryMeta)" class="align-center text-caption">
         <v-col cols="4" sm="3" md="2" xl="1" class="py-1 text-uppercase">{{ $t('common.publisher') }}</v-col>
         <v-col cols="8" sm="9" md="10" xl="11" class="py-1">
           <v-chip
@@ -306,11 +344,26 @@
         </v-col>
       </v-row>
 
+      </template>
+
       <!--  Genres    -->
-      <v-row v-if="series.metadata.genres.length > 0" class="align-center text-caption">
+      <v-row v-if="series.metadata.genres.length > 0 && (!einkMode || showEinkSecondaryMeta)" class="align-center text-caption">
         <v-col cols="4" sm="3" md="2" xl="1" class="py-1 text-uppercase">{{ $t('common.genre') }}</v-col>
         <v-col cols="8" sm="9" md="10" xl="11" class="py-1 text-capitalize">
-          <vue-horizontal>
+          <template v-if="einkMode">
+            <v-chip v-for="(t, i) in $_.sortBy(series.metadata.genres)"
+                    :key="i"
+                    class="me-2 mb-2"
+                    :title="t"
+                    :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {genre: [new SearchConditionGenre(new SearchOperatorIs(t))]}}"
+                    label
+                    small
+                    outlined
+                    link
+            >{{ t }}
+            </v-chip>
+          </template>
+          <vue-horizontal v-else>
             <template v-slot:btn-prev>
               <v-btn icon small>
                 <v-icon>mdi-chevron-left</v-icon>
@@ -338,11 +391,36 @@
       </v-row>
 
       <!--  Tags    -->
-      <v-row v-if="series.metadata.tags.length > 0 || series.booksMetadata.tags.length > 0"
+      <v-row v-if="(series.metadata.tags.length > 0 || series.booksMetadata.tags.length > 0) && (!einkMode || showEinkSecondaryMeta)"
              class="align-center text-caption">
         <v-col cols="4" sm="3" md="2" xl="1" class="py-1 text-uppercase">{{ $t('common.tags') }}</v-col>
         <v-col cols="8" sm="9" md="10" xl="11" class="py-1 text-capitalize">
-          <vue-horizontal>
+          <template v-if="einkMode">
+            <v-chip v-for="(t, i) in $_.sortBy(series.metadata.tags)"
+                    :key="`series_${i}`"
+                    class="me-2 mb-2"
+                    :title="t"
+                    :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {tag: [new SearchConditionTag(new SearchOperatorIs(t))]}}"
+                    label
+                    small
+                    outlined
+                    link
+            >{{ t }}
+            </v-chip>
+            <v-chip v-for="(t, i) in $_(series.booksMetadata.tags).difference(series.metadata.tags).sortBy()"
+                    :key="`book_${i}`"
+                    class="me-2 mb-2"
+                    :title="t"
+                    :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {tag: [new SearchConditionTag(new SearchOperatorIs(t))]}}"
+                    label
+                    small
+                    outlined
+                    link
+                    color="contrast-light-2"
+            >{{ t }}
+            </v-chip>
+          </template>
+          <vue-horizontal v-else>
             <template v-slot:btn-prev>
               <v-btn icon small>
                 <v-icon>mdi-chevron-left</v-icon>
@@ -381,6 +459,8 @@
         </v-col>
       </v-row>
 
+      <template v-if="(!einkMode || metaExpanded) && (!einkMode || showEinkSecondaryMeta)">
+
       <v-row v-if="series.metadata.links.length > 0" class="align-center text-caption">
         <v-col class="py-1 text-uppercase" cols="4" sm="3" md="2" xl="1">{{ $t('browse_book.links') }}</v-col>
         <v-col class="py-1" cols="8" sm="9" md="10" xl="11">
@@ -415,7 +495,20 @@
       >
         <v-col cols="4" sm="3" md="2" xl="1" class="py-1 text-uppercase">{{ $t(`author_roles.${role}`) }}</v-col>
         <v-col cols="8" sm="9" md="10" xl="11" class="py-1">
-          <vue-horizontal>
+          <template v-if="einkMode">
+            <v-chip v-for="(name, i) in authorsByRole[role].sort()"
+                    :key="i"
+                    class="me-2 mb-2"
+                    :title="name"
+                    :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {[role]: [name]}}"
+                    label
+                    small
+                    outlined
+                    link
+            >{{ name }}
+            </v-chip>
+          </template>
+          <vue-horizontal v-else>
             <template v-slot:btn-prev>
               <v-btn icon small>
                 <v-icon>mdi-chevron-left</v-icon>
@@ -442,8 +535,9 @@
           </vue-horizontal>
         </v-col>
       </v-row>
+      </template>
 
-      <v-row>
+      <v-row v-if="!einkMode || showEinkSecondaryMeta">
         <v-col>
           <collections-expansion-panels :collections="collections">
             <template v-slot:prepend="props">
@@ -473,6 +567,21 @@
       </empty-state>
 
       <template v-else>
+        <template v-if="einkMode">
+          <eink-item-browser
+            :items="books"
+            :item-context="einkBookItemContext"
+            :reserved-height="einkReservedHeight"
+          />
+
+          <v-pagination
+            v-if="totalPages > 1"
+            v-model="page"
+            :total-visible="paginationVisible"
+            :length="totalPages"
+          />
+        </template>
+        <template v-else>
         <v-pagination
           v-if="totalPages > 1"
           v-model="page"
@@ -492,6 +601,7 @@
           :total-visible="paginationVisible"
           :length="totalPages"
         />
+        </template>
       </template>
 
     </v-container>
@@ -504,6 +614,7 @@ import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import CollectionsExpansionPanels from '@/components/CollectionsExpansionPanels.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import EinkItemBrowser from '@/components/EinkItemBrowser.vue'
 import ItemBrowser from '@/components/ItemBrowser.vue'
 import ItemCard from '@/components/ItemCard.vue'
 import SeriesActionsMenu from '@/components/menus/SeriesActionsMenu.vue'
@@ -582,6 +693,7 @@ import {
   FiltersOptions,
   NameValue,
 } from '@/types/filter'
+import {Theme} from '@/types/themes'
 
 const tags = require('language-tags')
 
@@ -589,6 +701,7 @@ export default Vue.extend({
   name: 'BrowseSeries',
   components: {
     ToolbarSticky,
+    EinkItemBrowser,
     ItemBrowser,
     PageSizeSelect,
     SeriesActionsMenu,
@@ -638,6 +751,8 @@ export default Vue.extend({
       },
       readMore: false,
       readMoreTitles: false,
+      summaryExpanded: false,
+      metaExpanded: true,
     }
   },
   computed: {
@@ -648,6 +763,63 @@ export default Vue.extend({
       if (this.sortActive.key === 'readProgress.readDate') return [ItemContext.READ_DATE]
       if (this.sortActive.key === 'fileSize') return [ItemContext.FILE_SIZE]
       return []
+    },
+    einkBookItemContext(): ItemContext[] {
+      return this.einkMode ? [] : this.itemContext
+    },
+    einkMode(): boolean {
+      return this.$store.state.persistedState.theme === Theme.EINK
+    },
+    einkViewportArea(): number {
+      return this.$vuetify.breakpoint.width * this.$vuetify.breakpoint.height
+    },
+    einkShortestSide(): number {
+      return Math.min(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+    },
+    einkInfoLevel(): number {
+      if (!this.einkMode) return 2
+      const areaScore = this.einkViewportArea / 100000
+      const sideScore = this.einkShortestSide / 200
+      const orientationBonus = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width ? 0.2 : 0
+      const score = areaScore + sideScore + orientationBonus
+      if (score < 6.2) return 0
+      if (score < 8.6) return 1
+      return 2
+    },
+    showEinkPrimaryMeta(): boolean {
+      return !this.einkMode || this.einkInfoLevel >= 1
+    },
+    showEinkSecondaryMeta(): boolean {
+      return !this.einkMode || this.einkInfoLevel >= 2
+    },
+    summaryReadMoreLines(): number {
+      if (this.einkMode && this.einkInfoLevel === 0) return 2
+      return 4
+    },
+    einkColumns(): number {
+      const availableWidth = Math.max(220, this.$vuetify.breakpoint.width - 32)
+      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      const minCardWidth = this.einkInfoLevel === 0 ? 120 : this.einkInfoLevel === 1 ? 140 : (isPortrait ? 170 : 180)
+      const minColumns = isPortrait ? 2 : 3
+      return Math.max(minColumns, Math.min(5, Math.floor(availableWidth / minCardWidth)))
+    },
+    einkRows(): number {
+      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      const availableHeight = Math.max(180, this.$vuetify.breakpoint.height - this.einkReservedHeight - 68)
+      const itemWidth = Math.max(96, Math.floor((this.$vuetify.breakpoint.width - 32) / this.einkColumns) - 10)
+      const estimatedCardHeight = Math.round((itemWidth / 0.7071) + (this.einkInfoLevel === 0 ? 44 : this.einkInfoLevel === 1 ? 56 : 72))
+      const minRows = 1
+      return Math.max(minRows, Math.min(6, Math.floor(availableHeight / estimatedCardHeight)))
+    },
+    einkReservedHeight(): number {
+      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      if (this.einkInfoLevel === 0) return isPortrait ? 170 : 110
+      if (this.einkInfoLevel === 1) return isPortrait ? 230 : 150
+      return isPortrait ? 320 : 200
+    },
+    einkAutoPageSize(): number {
+      if (!this.einkMode) return this.pageSize
+      return Math.max(1, this.einkColumns * this.einkRows)
     },
     sortOptions(): SortOption[] {
       return [
@@ -806,6 +978,14 @@ export default Vue.extend({
         document.title = `Komga - ${val.metadata.title}`
       }
     },
+    einkAutoPageSize() {
+      this.applyEinkPageSize()
+    },
+    einkMode() {
+      this.applyEinkPageSize()
+      this.metaExpanded = !this.einkMode
+      this.summaryExpanded = false
+    },
   },
   created() {
     this.$eventHub.$on(SERIES_CHANGED, this.seriesChanged)
@@ -841,6 +1021,10 @@ export default Vue.extend({
     if (this.$route.query.page) this.page = Number(this.$route.query.page)
     if (this.$route.query.pageSize) this.pageSize = Number(this.$route.query.pageSize)
 
+    this.applyEinkPageSize()
+    this.metaExpanded = !this.einkMode
+    this.summaryExpanded = false
+
     this.loadSeries(this.seriesId)
 
     this.setWatches()
@@ -853,6 +1037,7 @@ export default Vue.extend({
       await this.resetParams(to, to.params.seriesId)
       this.readMore = false
       this.readMoreTitles = false
+      this.summaryExpanded = false
       this.page = 1
       this.totalPages = 1
       this.totalElements = null
@@ -867,6 +1052,12 @@ export default Vue.extend({
     next()
   },
   methods: {
+    applyEinkPageSize() {
+      if (!this.einkMode) return
+      if (this.pageSize !== this.einkAutoPageSize) {
+        this.pageSize = this.einkAutoPageSize
+      }
+    },
     getLibraryName(item: SeriesDto): string {
       return this.$store.getters.getLibraryById(item.libraryId).name
     },
@@ -1132,4 +1323,17 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.eink-summary {
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.eink-summary--collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 </style>

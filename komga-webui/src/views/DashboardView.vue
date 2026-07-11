@@ -17,7 +17,7 @@
 
     </toolbar-sticky>
 
-    <library-navigation v-if="individualLibrary && $vuetify.breakpoint.smAndDown" :libraryId="libraryId"
+    <library-navigation v-if="individualLibrary && $vuetify.breakpoint.smAndDown && !einkMode" :libraryId="libraryId"
                         bottom-navigation/>
 
     <multi-select-bar
@@ -47,18 +47,17 @@
     />
 
     <v-container fluid>
-      <div v-if="einkMode" class="eink-section-tabs mb-4" :class="`eink-section-tabs--${einkDeviceProfile}`">
-        <v-btn
-          v-for="tab in einkSectionTabs"
-          :key="tab.value"
-          large
-          class="eink-section-tab"
-          :class="{'eink-section-tab--active': activeSection === tab.value}"
-          :disabled="!hasSection(tab.value)"
-          @click="hasSection(tab.value) && (activeSection = tab.value)"
-        >
-          {{ tab.label }}
-        </v-btn>
+      <div v-if="einkMode" class="mb-4">
+        <v-select
+          v-model="activeSection"
+          :items="einkSectionTabs"
+          item-text="label"
+          item-value="value"
+          dense
+          outlined
+          hide-details
+          class="eink-section-selector"
+        />
       </div>
 
       <empty-state v-if="allEmpty && !loading"
@@ -68,12 +67,41 @@
       >
       </empty-state>
 
-      <dashboard-trending-series v-if="isTrendingVisible()"/>
-
       <template v-for="(section, i) in sections">
+        <dashboard-trending-series
+          v-bind:key="`trend-${i}`"
+          v-if="!einkMode && section.value === RecommendedViewSection.TRENDING && trendingSeries.length > 0 && isSectionVisible(section)"
+          class="mb-4"
+        />
+
+        <div
+          v-bind:key="`eink-trend-${i}`"
+          v-if="einkMode && section.value === RecommendedViewSection.TRENDING && trendingSeries.length > 0 && isSectionVisible(section)"
+          class="mb-4"
+        >
+          <div class="title mb-2">{{ $t('dashboard.trending') }}</div>
+          <eink-item-browser
+            :items="trendingSeries"
+            :reserved-height="einkReservedHeight"
+          />
+        </div>
+
+        <div
+          v-bind:key="`eink-sec-${i}`"
+          v-if="einkMode && section.value !== RecommendedViewSection.TRENDING && section.loader && section.loader.items.length !== 0 && isSectionVisible(section)"
+          class="mb-4"
+        >
+          <div class="title mb-2">{{ $t(`dashboard.${section.value.toLowerCase()}`) }}</div>
+          <eink-item-browser
+            :items="section.loader.items"
+            :item-context="section.itemContext"
+            :reserved-height="einkReservedHeight"
+          />
+        </div>
+
         <horizontal-scroller
           v-bind:key="i"
-          v-if="section.loader && section.loader.items.length !== 0"
+          v-if="!einkMode && section.value !== RecommendedViewSection.TRENDING && section.loader && section.loader.items.length !== 0"
           v-show="isSectionVisible(section)"
           class="mb-4"
           :tick="section.loader.tick"
@@ -107,6 +135,7 @@
 
       <v-fab-transition>
         <v-btn
+          v-if="!einkMode"
           fab
           bottom
           right
@@ -132,6 +161,7 @@ import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import HorizontalScroller from '@/components/HorizontalScroller.vue'
 import ItemBrowser from '@/components/ItemBrowser.vue'
+import EinkItemBrowser from '@/components/EinkItemBrowser.vue'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import LibraryActionsMenu from '@/components/menus/LibraryActionsMenu.vue'
 import LibraryNavigation from '@/components/LibraryNavigation.vue'
@@ -182,6 +212,7 @@ import {
 import EditRecommendedDialog from '@/components/dialogs/EditRecommendedDialog.vue'
 import DashboardTrendingSeries from '@/components/dashboard/DashboardTrendingSeries.vue'
 import {Theme} from '@/types/themes'
+import {TopSeriesReadingStatAggregateDto} from '@/types/komga-reading-stats'
 
 interface SectionConfig {
   loader: PageLoader<any> | undefined,
@@ -201,6 +232,7 @@ export default Vue.extend({
     DashboardTrendingSeries,
     EditRecommendedDialog,
     HorizontalScroller,
+    EinkItemBrowser,
     EmptyState,
     ToolbarSticky,
     LibraryNavigation,
@@ -212,6 +244,7 @@ export default Vue.extend({
     return {
       ItemContext,
       SectionType,
+      RecommendedViewSection,
       loading: false,
       modalEditRecommended: false,
       loaderRecentlyAddedSeries: undefined as PageLoader<SeriesDto> | undefined,
@@ -221,6 +254,7 @@ export default Vue.extend({
       loaderOnDeckBooks: undefined as PageLoader<BookDto> | undefined,
       loaderRecentlyReleasedBooks: undefined as PageLoader<BookDto> | undefined,
       loaderRecentlyReadBooks: undefined as PageLoader<BookDto> | undefined,
+      trendingSeries: [] as SeriesDto[],
       selectedSeries: [] as SeriesDto[],
       selectedBooks: [] as BookDto[],
       activeSection: RecommendedViewSection.TRENDING as RecommendedViewSection,
@@ -311,11 +345,16 @@ export default Vue.extend({
     },
     sections(): SectionConfig[] {
       const sections = [] as SectionConfig[]
-      this.viewConfig.sections.forEach((it: ClientSettingsRecommendedViewSection) => {
+      this.recommendedSections.forEach((it: ClientSettingsRecommendedViewSection) => {
         const config = this.getSectionConfig(it.section)
         if (config != undefined) sections.push(config)
       })
       return sections
+    },
+    recommendedSections(): ClientSettingsRecommendedViewSection[] {
+      return this.viewConfig.sections && this.viewConfig.sections.length > 0
+        ? this.viewConfig.sections
+        : RECOMMENDED_DEFAULT.sections
     },
     library(): LibraryDto | undefined {
       return this.getLibraryLazy(this.libraryId)
@@ -330,13 +369,15 @@ export default Vue.extend({
       return this.$vuetify.breakpoint.xs ? 120 : 150
     },
     allEmpty(): boolean {
+      const trendingEmpty = this.trendingSeries.length === 0
       return (this.loaderRecentlyAddedSeries == undefined || this.loaderRecentlyAddedSeries?.items.length === 0) &&
         (this.loaderRecentlyUpdatedSeries == undefined || this.loaderRecentlyUpdatedSeries?.items.length === 0) &&
         (this.loaderRecentlyAddedBooks == undefined || this.loaderRecentlyAddedBooks?.items.length === 0) &&
         (this.loaderKeepReadingBooks == undefined || this.loaderKeepReadingBooks?.items.length === 0) &&
         (this.loaderOnDeckBooks == undefined || this.loaderOnDeckBooks?.items.length === 0) &&
         (this.loaderRecentlyReleasedBooks == undefined || this.loaderRecentlyReleasedBooks?.items.length === 0) &&
-        (this.loaderRecentlyReadBooks == undefined || this.loaderRecentlyReadBooks?.items.length === 0)
+        (this.loaderRecentlyReadBooks == undefined || this.loaderRecentlyReadBooks?.items.length === 0) &&
+        trendingEmpty
     },
     individualLibrary(): boolean {
       return this.libraryId !== LIBRARIES_ALL
@@ -366,14 +407,24 @@ export default Vue.extend({
       return 'inch78'
     },
     einkSectionTabs(): { value: RecommendedViewSection, label: string }[] {
-      return [
-        {value: RecommendedViewSection.TRENDING, label: this.$t('dashboard.trending').toString()},
-        {value: RecommendedViewSection.RECENTLY_UPDATED_SERIES, label: this.$t('dashboard.recently_updated_series').toString()},
-        {value: RecommendedViewSection.RECENTLY_ADDED_SERIES, label: this.$t('dashboard.recently_added_series').toString()},
-      ]
+      return this.recommendedSections.map(it => ({
+        value: it.section,
+        label: this.$t(`dashboard.${it.section.toLowerCase()}`).toString(),
+      }))
+    },
+    einkReservedHeight(): number {
+      if (this.einkDeviceProfile === 'palma') return 300
+      if (this.einkDeviceProfile === 'inch6') return 290
+      if (this.einkDeviceProfile === 'inch68') return 270
+      return 250
     },
   },
   methods: {
+    hasEinkSectionContent(section: RecommendedViewSection): boolean {
+      if (section === RecommendedViewSection.TRENDING) return this.trendingSeries.length > 0
+      const config = this.getSectionConfig(section)
+      return !!config?.loader && config.loader.items.length > 0
+    },
     async resetDefaultView() {
       await this.$komgaSettings.deleteClientSettingUser([this.settingsKey])
       await this.$store.dispatch('getClientSettingsUser')
@@ -381,10 +432,7 @@ export default Vue.extend({
       this.loadAll(true)
     },
     hasSection(section: RecommendedViewSection): boolean {
-      return this.viewConfig.sections.some(it => it.section === section)
-    },
-    isTrendingVisible(): boolean {
-      return this.trendingEnabled && (!this.einkMode || this.activeSection === RecommendedViewSection.TRENDING)
+      return this.recommendedSections.some(it => it.section === section)
     },
     isSectionVisible(section: SectionConfig): boolean {
       return !this.einkMode || this.activeSection === section.value
@@ -401,8 +449,26 @@ export default Vue.extend({
         this.activeSection = availableSections[0]
       }
     },
+    syncEinkSectionWithContent() {
+      if (!this.einkMode) return
+      if (this.hasEinkSectionContent(this.activeSection)) return
+
+      const firstWithContent = this.einkSectionTabs
+        .map(it => it.value)
+        .find(it => this.hasEinkSectionContent(it))
+
+      if (firstWithContent) {
+        this.activeSection = firstWithContent
+      }
+    },
     getSectionConfig(section: RecommendedViewSection): SectionConfig | undefined {
       switch (section) {
+        case RecommendedViewSection.TRENDING:
+          return {
+            loader: undefined,
+            type: SectionType.SERIES,
+            value: section,
+          }
         case RecommendedViewSection.KEEP_READING:
           return {
             loader: this.loaderKeepReadingBooks,
@@ -456,6 +522,23 @@ export default Vue.extend({
     },
     async scrollChanged(loader: PageLoader<any>, percent: number) {
       if (percent > 0.95) await loader.loadNext()
+    },
+    async loadTrendingSeries() {
+      try {
+        const ranked = await this.$komgaReadingStats.getTopSeriesByPeriod('weekly', 12)
+        const cards = await Promise.all(
+          ranked.map(async (it: TopSeriesReadingStatAggregateDto) => {
+            try {
+              return await this.$komgaSeries.getOneSeries(it.seriesId)
+            } catch (e) {
+              return undefined
+            }
+          }),
+        )
+        this.trendingSeries = cards.filter((it): it is SeriesDto => it !== undefined)
+      } catch (e) {
+        this.trendingSeries = []
+      }
     },
     getRequestLibraryId(libraryId: string): string[] {
       return libraryId !== LIBRARIES_ALL ? [libraryId] : this.$store.getters.getLibrariesPinned.map((it: LibraryDto) => it.id)
@@ -536,31 +619,30 @@ export default Vue.extend({
       this.selectedSeries = []
       this.selectedBooks = []
 
-      if (reload) {
-        Promise.all([
-          this.loaderKeepReadingBooks?.reload(),
-          this.loaderOnDeckBooks?.reload(),
-          this.loaderRecentlyReleasedBooks?.reload(),
-          this.loaderRecentlyAddedBooks?.reload(),
-          this.loaderRecentlyAddedSeries?.reload(),
-          this.loaderRecentlyUpdatedSeries?.reload(),
-          this.loaderRecentlyReadBooks?.reload(),
-        ]).then(() => {
-          this.loading = false
-        })
-      } else {
-        Promise.all([
-          this.loaderKeepReadingBooks?.loadNext(),
-          this.loaderOnDeckBooks?.loadNext(),
-          this.loaderRecentlyReleasedBooks?.loadNext(),
-          this.loaderRecentlyAddedBooks?.loadNext(),
-          this.loaderRecentlyAddedSeries?.loadNext(),
-          this.loaderRecentlyUpdatedSeries?.loadNext(),
-          this.loaderRecentlyReadBooks?.loadNext(),
-        ]).then(() => {
-          this.loading = false
-        })
-      }
+      const requests = reload ? [
+        this.loadTrendingSeries(),
+        this.loaderKeepReadingBooks?.reload(),
+        this.loaderOnDeckBooks?.reload(),
+        this.loaderRecentlyReleasedBooks?.reload(),
+        this.loaderRecentlyAddedBooks?.reload(),
+        this.loaderRecentlyAddedSeries?.reload(),
+        this.loaderRecentlyUpdatedSeries?.reload(),
+        this.loaderRecentlyReadBooks?.reload(),
+      ] : [
+        this.loadTrendingSeries(),
+        this.loaderKeepReadingBooks?.loadNext(),
+        this.loaderOnDeckBooks?.loadNext(),
+        this.loaderRecentlyReleasedBooks?.loadNext(),
+        this.loaderRecentlyAddedBooks?.loadNext(),
+        this.loaderRecentlyAddedSeries?.loadNext(),
+        this.loaderRecentlyUpdatedSeries?.loadNext(),
+        this.loaderRecentlyReadBooks?.loadNext(),
+      ]
+
+      Promise.allSettled(requests).finally(() => {
+        this.syncEinkSectionWithContent()
+        this.loading = false
+      })
     },
     async singleEditSeries(series: SeriesDto) {
       if (series.oneshot) {
@@ -660,60 +742,18 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.eink-section-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.eink-section-tab {
-  flex: 1 1 180px;
-  min-height: 56px;
-  height: auto !important;
-  white-space: normal !important;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  line-height: 1.3;
-  text-align: center;
-  padding: 8px 10px !important;
+.eink-section-selector {
   max-width: 100%;
-  border: 2px solid #000000;
-  background: #ffffff !important;
-  color: #000000 !important;
-  transition: none !important;
 }
 
-.eink-section-tab--active {
-  background: #000000 !important;
-  color: #ffffff !important;
+.eink-section-selector :deep(.v-input__slot) {
+  min-height: 44px !important;
 }
 
-.eink-section-tabs--palma .eink-section-tab {
-  flex-basis: 100%;
-  min-height: 52px;
-  font-size: 0.86rem;
-  line-height: 1.2;
-  padding: 8px !important;
-}
-
-.eink-section-tabs--inch6 .eink-section-tab {
-  flex-basis: 100%;
-  font-size: 0.9rem;
-}
-
-.eink-section-tabs--inch68 .eink-section-tab {
-  flex-basis: calc(50% - 8px);
-  font-size: 0.94rem;
-}
-
-.eink-section-tabs--inch78 .eink-section-tab {
-  flex-basis: calc(50% - 8px);
-}
-
-@media (max-width: 600px) {
-  .eink-section-tab {
-    flex-basis: 100%;
-    font-size: 0.9rem;
-  }
+.eink-section-selector :deep(.v-select__selection) {
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

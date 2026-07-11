@@ -1,5 +1,5 @@
 <template>
-  <div class="eink-browser" :class="`eink-browser--${deviceProfile}`">
+  <div class="eink-browser" :class="isCompact ? 'eink-browser--compact' : ''">
     <div v-if="hasItems" :class="gridClass" :style="gridStyle">
       <div v-for="item in currentPageItems"
            :key="item.id"
@@ -18,23 +18,11 @@
     </v-row>
 
     <div v-if="totalPages > 1" class="eink-pagination">
-      <v-btn
-        x-large
-        :disabled="currentPage <= 1"
-        @click="prevPage"
-        class="eink-nav-btn"
-      >
-        {{ $t('common.previous_page') }}
-      </v-btn>
-      <span class="eink-page-info">{{ currentPage }} / {{ totalPages }}</span>
-      <v-btn
-        x-large
-        :disabled="currentPage >= totalPages"
-        @click="nextPage"
-        class="eink-nav-btn"
-      >
-        {{ $t('common.next_page') }}
-      </v-btn>
+      <v-pagination
+        v-model="currentPage"
+        :length="totalPages"
+        :total-visible="paginationVisible"
+      />
     </div>
   </div>
 </template>
@@ -56,10 +44,16 @@ export default Vue.extend({
       type: Array as () => ItemContext[],
       default: () => [],
     },
+    reservedHeight: {
+      type: Number,
+      default: 0,
+    },
   },
   data: function () {
     return {
       currentPage: 1,
+      viewportWidth: 0,
+      viewportHeight: 0,
     }
   },
   watch: {
@@ -67,50 +61,60 @@ export default Vue.extend({
       this.currentPage = 1
     },
   },
+  mounted() {
+    this.syncViewportSize()
+    window.addEventListener('resize', this.syncViewportSize)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', this.syncViewportSize)
+      window.visualViewport.addEventListener('scroll', this.syncViewportSize)
+    }
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.syncViewportSize)
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', this.syncViewportSize)
+      window.visualViewport.removeEventListener('scroll', this.syncViewportSize)
+    }
+  },
   computed: {
     isPortrait(): boolean {
-      return this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      return this.effectiveHeight >= this.effectiveWidth
     },
-    shortSide(): number {
-      return Math.min(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+    effectiveWidth(): number {
+      return this.viewportWidth || this.$vuetify.breakpoint.width
     },
-    longSide(): number {
-      return Math.max(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+    effectiveHeight(): number {
+      return this.viewportHeight || this.$vuetify.breakpoint.height
     },
-    aspectRatio(): number {
-      return this.longSide / this.shortSide
+    isCompact(): boolean {
+      const width = this.effectiveWidth
+      const height = this.effectiveHeight
+      return Math.min(width, height) <= 430 || (width * height) <= 320000
     },
-    deviceProfile(): string {
-      if (this.isPortrait && this.aspectRatio >= 1.9 && this.shortSide <= 450) return 'palma'
-      if (this.shortSide <= 430) return 'inch6'
-      if (this.shortSide <= 540) return 'inch68'
-      return 'inch78'
+    availableWidth(): number {
+      const horizontalPadding = this.isCompact ? 24 : 32
+      return Math.max(200, this.effectiveWidth - horizontalPadding)
+    },
+    availableHeight(): number {
+      const paginationHeight = 68
+      const gridPadding = this.isCompact ? 16 : 24
+      const shortSide = Math.min(this.effectiveWidth, this.effectiveHeight)
+      const viewportMargin = shortSide <= 430 ? 44 : shortSide <= 720 ? 56 : 68
+      return Math.max(120, this.effectiveHeight - viewportMargin - this.reservedHeight - paginationHeight - gridPadding)
+    },
+    cardMetaHeight(): number {
+      return this.isCompact ? 42 : 58
     },
     columns(): number {
-      switch (this.deviceProfile) {
-        case 'palma':
-          return this.isPortrait ? 2 : 3
-        case 'inch6':
-          return this.isPortrait ? 2 : 3
-        case 'inch68':
-          return this.isPortrait ? 2 : 4
-        case 'inch78':
-        default:
-          return this.isPortrait ? 3 : 5
-      }
+      const minCardWidth = this.isCompact ? 120 : (this.isPortrait ? 165 : 190)
+      const maxColumns = !this.isCompact && !this.isPortrait ? 4 : 5
+      const minColumns = this.isPortrait ? 2 : 3
+      return Math.max(minColumns, Math.min(maxColumns, Math.floor(this.availableWidth / minCardWidth)))
     },
     rows(): number {
-      switch (this.deviceProfile) {
-        case 'palma':
-          return 2
-        case 'inch6':
-          return 2
-        case 'inch68':
-          return this.isPortrait ? 3 : 2
-        case 'inch78':
-        default:
-          return this.isPortrait ? 3 : 2
-      }
+      const estimatedCardHeight = Math.round((this.itemWidth / 0.7071) + this.cardMetaHeight)
+      const minRows = 1
+      return Math.max(minRows, Math.min(6, Math.floor(this.availableHeight / estimatedCardHeight)))
     },
     itemsPerPage(): number {
       return this.columns * this.rows
@@ -136,17 +140,23 @@ export default Vue.extend({
       return (this.items as any[]).slice(start, start + this.itemsPerPage)
     },
     itemWidth(): number {
-      const horizontalPadding = this.deviceProfile === 'palma' ? 24 : 32
-      const availableWidth = this.$vuetify.breakpoint.width - horizontalPadding
-      return Math.max(84, Math.floor(availableWidth / this.columns) - 10)
+      const widthByColumns = Math.floor(this.availableWidth / this.columns) - 10
+      const targetRowsForSizing = 1
+      const maxWidthForTargetRows = Math.floor(((this.availableHeight / targetRowsForSizing) - this.cardMetaHeight) * 0.7071)
+      const floorWidth = this.isCompact ? 40 : 56
+      return Math.max(floorWidth, Math.min(widthByColumns, Math.max(floorWidth, maxWidthForTargetRows)))
+    },
+    paginationVisible(): number {
+      if (this.effectiveWidth <= 420) return 5
+      if (this.effectiveWidth <= 768) return 7
+      return 11
     },
   },
   methods: {
-    prevPage() {
-      if (this.currentPage > 1) this.currentPage--
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) this.currentPage++
+    syncViewportSize() {
+      const vv = window.visualViewport
+      this.viewportWidth = Math.round(vv?.width || window.innerWidth || this.$vuetify.breakpoint.width)
+      this.viewportHeight = Math.round(vv?.height || window.innerHeight || this.$vuetify.breakpoint.height)
     },
   },
 })
@@ -181,7 +191,7 @@ export default Vue.extend({
 
 .eink-pagination {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 8px 16px;
   border-top: 2px solid #000000;
@@ -189,39 +199,9 @@ export default Vue.extend({
   flex-shrink: 0;
 }
 
-.eink-nav-btn {
-  min-width: 120px;
-  font-size: 1.1rem;
-  font-weight: bold;
-}
-
-.eink-page-info {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #000000;
-}
-
-.eink-browser--palma .eink-grid {
+.eink-browser--compact .eink-grid {
   gap: 4px;
   padding: 4px;
 }
 
-.eink-browser--palma .eink-nav-btn {
-  min-width: 92px;
-  font-size: 0.95rem;
-}
-
-.eink-browser--palma .eink-page-info {
-  font-size: 1rem;
-}
-
-.eink-browser--inch6 .eink-nav-btn {
-  min-width: 104px;
-  font-size: 1rem;
-}
-
-.eink-browser--inch68 .eink-nav-btn,
-.eink-browser--inch78 .eink-nav-btn {
-  min-width: 120px;
-}
 </style>

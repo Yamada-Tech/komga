@@ -1,5 +1,5 @@
 <template>
-  <vue-read-more-smooth no-shadow :lines="4" :open.sync="open">
+  <vue-read-more-smooth no-shadow :lines="lines" :open.sync="open">
     <div style="white-space: pre-wrap" class="body-2">
       <slot/>
     </div>
@@ -37,6 +37,10 @@ export default Vue.extend({
     value: {
       type: Boolean,
       default: false,
+    },
+    lines: {
+      type: Number,
+      default: 4,
     },
     i18nMore: {
       type: String,

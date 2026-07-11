@@ -39,7 +39,7 @@
       @delete="deleteBooks"
     />
 
-    <library-navigation v-if="$vuetify.breakpoint.smAndDown" :libraryId="libraryId" bottom-navigation/>
+    <library-navigation v-if="$vuetify.breakpoint.smAndDown && !einkMode" :libraryId="libraryId" bottom-navigation/>
 
     <filter-drawer
       v-model="drawer"
@@ -90,7 +90,7 @@
 
       <template v-if="totalPages > 0">
         <v-pagination
-          v-if="totalPages > 1"
+          v-if="totalPages > 1 && !einkMode"
           v-model="page"
           :total-visible="paginationVisible"
           :length="totalPages"
@@ -308,6 +308,9 @@ export default Vue.extend({
       if (this.sortActive.key === 'readProgress.readDate') return [ItemContext.SHOW_SERIES, ItemContext.READ_DATE]
       if (this.sortActive.key === 'fileSize') return [ItemContext.SHOW_SERIES, ItemContext.FILE_SIZE]
       return [ItemContext.SHOW_SERIES]
+    },
+    einkMode(): boolean {
+      return this.$store.state.persistedState.theme === 'theme.eink'
     },
     sortOptions(): SortOption[] {
       return [

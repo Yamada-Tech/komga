@@ -17,6 +17,8 @@ export enum CLIENT_SETTING {
   WEBUI_OAUTH2_AUTO_LOGIN = 'webui.oauth2.auto_login',
   WEBUI_POSTER_STRETCH = 'webui.poster.stretch',
   WEBUI_POSTER_BLUR_UNREAD = 'webui.poster.blur_unread',
+  WEBUI_INITIAL_NAVIGATION = 'webui.initial_navigation',
+  WEBUI_LIBRARY_SORT_OPTIONS = 'webui.library_sort_options',
   WEBUI_LIBRARIES = 'webui.libraries',
   WEBUI_SERIES_GROUPS = 'webui.series_groups',
   WEBUI_RECOMMENDED = 'webui.recommended',

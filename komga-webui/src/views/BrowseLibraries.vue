@@ -18,7 +18,7 @@
 
       <v-spacer/>
 
-      <page-size-select v-model="pageSize"/>
+      <page-size-select v-if="!einkMode" v-model="pageSize"/>
 
       <v-btn icon @click="drawer = !drawer">
         <v-icon :color="sortOrFilterActive ? 'secondary' : ''">mdi-filter-variant</v-icon>
@@ -40,7 +40,7 @@
       @delete="deleteSeries"
     />
 
-    <library-navigation v-if="$vuetify.breakpoint.smAndDown" :libraryId="libraryId" bottom-navigation/>
+    <library-navigation v-if="$vuetify.breakpoint.smAndDown && !einkMode" :libraryId="libraryId" bottom-navigation/>
 
     <filter-drawer
       v-model="drawer"
@@ -72,7 +72,21 @@
     </filter-drawer>
 
     <v-container fluid>
+      <v-select
+        v-if="showInitialNavigation && einkMode"
+        :value="selectedSymbol"
+        :items="seriesGroupingOptions"
+        item-text="text"
+        item-value="value"
+        dense
+        outlined
+        hide-details
+        class="mb-4"
+        @change="filterByStarting"
+      />
+
       <alphabetical-navigation
+        v-else-if="showInitialNavigation"
         class="text-center"
         :symbols="seriesGroupingKeys"
         :selected="selectedSymbol"
@@ -102,6 +116,14 @@
           <eink-item-browser
             :items="series"
             :item-context="itemContext"
+            :reserved-height="einkReservedHeight"
+          />
+
+          <v-pagination
+            v-if="totalPages > 1"
+            v-model="page"
+            :total-visible="paginationVisible"
+            :length="totalPages"
           />
         </template>
         <template v-else>
@@ -242,6 +264,7 @@ export default Vue.extend({
       series: [] as SeriesDto[],
       seriesGroups: [] as GroupCountDto[],
       selectedSymbol: 'ALL',
+      showInitialNavigation: true,
       selectedSeries: [] as SeriesDto[],
       page: 1,
       pageSize: 20,
@@ -281,6 +304,12 @@ export default Vue.extend({
           this.loadLibrary(this.libraryId)
       },
     },
+    einkAutoPageSize() {
+      this.applyEinkPageSize()
+    },
+    einkMode() {
+      this.applyEinkPageSize()
+    },
   },
   created() {
     this.$eventHub.$on(SERIES_ADDED, this.seriesChanged)
@@ -290,6 +319,7 @@ export default Vue.extend({
     this.$eventHub.$on(LIBRARY_CHANGED, this.libraryChanged)
     this.$eventHub.$on(READPROGRESS_SERIES_CHANGED, this.readProgressChanged)
     this.$eventHub.$on(READPROGRESS_SERIES_DELETED, this.readProgressChanged)
+    this.$eventHub.$on('server-settings-changed', this.applyNavigationSettings)
   },
   beforeDestroy() {
     this.$eventHub.$off(SERIES_ADDED, this.seriesChanged)
@@ -299,16 +329,20 @@ export default Vue.extend({
     this.$eventHub.$off(LIBRARY_CHANGED, this.libraryChanged)
     this.$eventHub.$off(READPROGRESS_SERIES_CHANGED, this.readProgressChanged)
     this.$eventHub.$off(READPROGRESS_SERIES_DELETED, this.readProgressChanged)
+    this.$eventHub.$off('server-settings-changed', this.applyNavigationSettings)
   },
   async mounted() {
     this.$store.commit('setLibraryRoute', {id: this.libraryId, route: LIBRARY_ROUTE.BROWSE})
     this.pageSize = this.$store.state.persistedState.browsingPageSize || this.pageSize
+    this.loadNavigationSettings()
 
     // restore from query param
     await this.resetParams(this.$route, this.libraryId)
     if (this.$route.query.page) this.page = Number(this.$route.query.page)
     if (this.$route.query.pageSize) this.pageSize = Number(this.$route.query.pageSize)
     if (this.$route.query.nav) this.selectedSymbol = this.$route.query.nav.toString()
+
+    this.applyEinkPageSize()
 
     this.loadLibrary(this.libraryId)
 
@@ -350,6 +384,42 @@ export default Vue.extend({
     seriesGroupingKeys(): string[] {
       return ['ALL', '#', ...this.$_.keys(this.seriesGrouping)]
     },
+    seriesGroupingOptions(): {text: string, value: string}[] {
+      return this.seriesGroupingKeys.map(symbol => ({text: symbol, value: symbol}))
+    },
+    einkAutoPageSize(): number {
+      if (!this.einkMode) return this.pageSize
+      return this.einkColumns * this.einkRows
+    },
+    einkCompactMode(): boolean {
+      const width = this.$vuetify.breakpoint.width
+      const height = this.$vuetify.breakpoint.height
+      return Math.min(width, height) <= 430 || (width * height) <= 320000
+    },
+    einkColumns(): number {
+      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      const availableWidth = Math.max(220, this.$vuetify.breakpoint.width - (this.einkCompactMode ? 24 : 32))
+      const minCardWidth = this.einkCompactMode ? 130 : (isPortrait ? 170 : 180)
+      const minColumns = isPortrait ? 2 : 3
+      return Math.max(minColumns, Math.min(5, Math.floor(availableWidth / minCardWidth)))
+    },
+    einkRows(): number {
+      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      const gridPadding = this.einkCompactMode ? 16 : 24
+      const availableHeight = Math.max(180, this.$vuetify.breakpoint.height - this.einkReservedHeight - 68 - gridPadding)
+      const itemWidth = Math.max(84, Math.floor((this.$vuetify.breakpoint.width - 32) / this.einkColumns) - 10)
+      const estimatedCardHeight = Math.round((itemWidth / 0.7071) + (this.einkCompactMode ? 56 : 72))
+      const minRows = 1
+      return Math.max(minRows, Math.min(6, Math.floor(availableHeight / estimatedCardHeight)))
+    },
+    einkReservedHeight(): number {
+      if (!this.einkMode) return 220
+      const isPortrait = this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      const shortSide = Math.min(this.$vuetify.breakpoint.width, this.$vuetify.breakpoint.height)
+      if (shortSide <= 430) return isPortrait ? 140 : 90
+      if (shortSide <= 540) return isPortrait ? 160 : 100
+      return isPortrait ? 180 : 120
+    },
     seriesGroupingValues(): string[] {
       return this.$_(this.seriesGrouping).values().flatten().map(this.$_.lowerCase).toArray() as unknown as string[]
     },
@@ -365,6 +435,7 @@ export default Vue.extend({
       else return this.$t('common.all_libraries').toString()
     },
     symbolCondition(): SearchConditionSeries | undefined {
+      if (!this.showInitialNavigation) return undefined
       if (this.selectedSymbol === 'ALL') return undefined
       if (this.selectedSymbol === '#') return new SearchConditionAllOfSeries(
         this.seriesGroupingValues
@@ -382,7 +453,7 @@ export default Vue.extend({
       return []
     },
     sortOptions(): SortOption[] {
-      return [
+      const base = [
         {name: this.$t('sort.name').toString(), key: 'metadata.titleSort'},
         {name: this.$t('sort.date_added').toString(), key: 'createdDate'},
         {name: this.$t('sort.date_updated').toString(), key: 'lastModifiedDate'},
@@ -392,6 +463,15 @@ export default Vue.extend({
         {name: this.$t('sort.books_count').toString(), key: 'booksCount'},
         {name: this.$t('sort.random').toString(), key: 'random'},
       ] as SortOption[]
+      const configRaw = this.$store.getters.getClientSettings[CLIENT_SETTING.WEBUI_LIBRARY_SORT_OPTIONS]?.value
+      if (!configRaw) return base
+      try {
+        const config = JSON.parse(configRaw) as Record<string, boolean>
+        const filtered = base.filter(it => config[it.key] !== false)
+        return filtered.length > 0 ? filtered : base
+      } catch (_) {
+        return base
+      }
     },
     filterOptionsList(): FiltersOptions {
       return {
@@ -548,6 +628,11 @@ export default Vue.extend({
       return this.$store.getters.meAdmin
     },
     paginationVisible(): number {
+      if (this.einkMode) {
+        if (this.$vuetify.breakpoint.xs) return 5
+        if (this.$vuetify.breakpoint.sm) return 7
+        return 11
+      }
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
           return 5
@@ -568,7 +653,31 @@ export default Vue.extend({
     },
   },
   methods: {
+    loadNavigationSettings() {
+      this.showInitialNavigation = this.$store.getters.getClientSettings[CLIENT_SETTING.WEBUI_INITIAL_NAVIGATION]?.value !== 'false'
+      if (!this.showInitialNavigation && this.selectedSymbol !== 'ALL') {
+        this.selectedSymbol = 'ALL'
+      }
+    },
+    applyEinkPageSize() {
+      if (!this.einkMode) return
+      if (this.pageSize !== this.einkAutoPageSize) {
+        this.pageSize = this.einkAutoPageSize
+      }
+    },
+    applyNavigationSettings(settings: { enableInitialNavigation?: boolean }) {
+      if (typeof settings.enableInitialNavigation === 'boolean') {
+        this.showInitialNavigation = settings.enableInitialNavigation
+        if (!this.showInitialNavigation && this.selectedSymbol !== 'ALL') {
+          this.selectedSymbol = 'ALL'
+          this.updateRouteAndReload()
+        }
+      } else {
+        this.loadNavigationSettings()
+      }
+    },
     filterByStarting(symbol: string) {
+      if (!this.showInitialNavigation) return
       this.selectedSymbol = symbol
       this.page = 1
       this.updateRoute()
@@ -765,7 +874,7 @@ export default Vue.extend({
           page: `${this.page}`,
           pageSize: `${this.pageSize}`,
           sort: `${this.sortActive.key},${this.sortActive.order}`,
-          nav: this.selectedSymbol,
+          nav: this.showInitialNavigation ? this.selectedSymbol : undefined,
         },
       } as Location
       mergeFilterParams(this.filters, loc.query)
