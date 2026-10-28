@@ -12,6 +12,7 @@ import kotlin.time.Duration.Companion.days
 class KomgaSettingsProvider(
   private val serverSettingsDao: ServerSettingsDao,
   private val eventPublisher: ApplicationEventPublisher,
+  private val logoImageService: LogoImageService,
 ) {
   var deleteEmptyCollections: Boolean =
     serverSettingsDao.getSettingByKey(Settings.DELETE_EMPTY_COLLECTIONS.name, Boolean::class.java) ?: false
@@ -119,6 +120,27 @@ class KomgaSettingsProvider(
       serverSettingsDao.saveSetting(Settings.NEXTUI_AS_DEFAULT.name, value)
       field = value
     }
+
+  var logoImage: String? =
+    serverSettingsDao.getSettingByKey(Settings.LOGO_IMAGE.name, String::class.java)
+    set(value) {
+      serverSettingsDao.saveSetting(Settings.LOGO_IMAGE.name, value ?: "")
+      field = value
+    }
+
+  var siteName: String? =
+    serverSettingsDao.getSettingByKey(Settings.SITE_NAME.name, String::class.java)
+    set(value) {
+      serverSettingsDao.saveSetting(Settings.SITE_NAME.name, value ?: "")
+      field = value
+    }
+
+  var logoImage: String? =
+    serverSettingsDao.getSettingByKey(Settings.LOGO_IMAGE.name, String::class.java)
+    set(value) {
+      serverSettingsDao.saveSetting(Settings.LOGO_IMAGE.name, value ?: "")
+      field = value
+    }
 }
 
 private enum class Settings {
@@ -134,4 +156,6 @@ private enum class Settings {
   KOBO_PORT,
   KEPUBIFY_PATH,
   NEXTUI_AS_DEFAULT,
+  LOGO_IMAGE,
+  SITE_NAME,
 }

@@ -18,6 +18,15 @@
 
       <v-spacer/>
 
+      <v-btn icon @click="createCollection" v-if="isLoggedIn">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on">mdi-plus</v-icon>
+          </template>
+          {{ $t('common.add') }}
+        </v-tooltip>
+      </v-btn>
+
       <page-size-select v-model="pageSize"/>
     </toolbar-sticky>
 
@@ -33,6 +42,13 @@
     <library-navigation v-if="$vuetify.breakpoint.smAndDown" :libraryId="libraryId" bottom-navigation/>
 
     <v-container fluid>
+      <v-checkbox
+        v-model="showPublicCollections"
+        :label="$t('browse_collections.checkbox_show_public_collections')"
+        class="mb-2"
+        @change="loadPage(libraryId, 1)"
+      />
+
       <v-pagination
         v-if="totalPages > 1"
         v-model="page"
@@ -71,6 +87,57 @@ import {LIBRARIES_ALL, LIBRARY_ROUTE} from '@/types/library'
 import {LibrarySseDto} from '@/types/komga-sse'
 import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
 import {LibraryDto} from '@/types/komga-libraries'
+import {CollectionDto, CollectionCreationDto, CollectionUpdateDto, CollectionThumbnailDto} from '@/types/komga-collections'
+import {Page, PageRequest} from '@/types/pageable'
+
+// Define the component interface
+interface BrowseCollectionsData {
+  collections: CollectionDto[]
+  selectedCollections: CollectionDto[]
+  page: number
+  pageSize: number
+  totalPages: number
+  totalElements: number | null
+  pageUnwatch: any
+  pageSizeUnwatch: any
+  showPublicCollections: boolean
+}
+
+interface BrowseCollectionsComputed {
+  library: LibraryDto | undefined
+  toolbarTitle: string
+  isAdmin: boolean
+  isLoggedIn: boolean
+  paginationVisible: number
+}
+
+interface BrowseCollectionsMethods {
+  setWatches(): void
+  unsetWatches(): void
+  updateRouteAndReload(): void
+  updateRoute(): void
+  reloadCollections(): void
+  reloadLibrary(event: LibrarySseDto): void
+  loadLibrary(libraryId: string): Promise<void>
+  loadPage(libraryId: string, page: number): Promise<void>
+  getLibraryLazy(libraryId: string): LibraryDto | undefined
+  editSingleCollection(collection: CollectionDto): void
+  createCollection(): void
+  deleteCollections(): void
+}
+
+// Extend Vue with additional properties for type safety
+declare module 'vue' {
+  interface ComponentCustomProperties {
+    $komgaCollections: ReturnType<typeof import('@/services/komga-collections.service').default>
+    $eventHub: Vue
+    $store: any
+    $route: any
+    $router: any
+    $vuetify: any
+    $t: any
+  }
+}
 
 export default Vue.extend({
   name: 'BrowseCollections',
@@ -82,7 +149,7 @@ export default Vue.extend({
     PageSizeSelect,
     MultiSelectBar,
   },
-  data: () => {
+  data() {
     return {
       collections: [] as CollectionDto[],
       selectedCollections: [] as CollectionDto[],
@@ -92,6 +159,7 @@ export default Vue.extend({
       totalElements: null as number | null,
       pageUnwatch: null as any,
       pageSizeUnwatch: null as any,
+      showPublicCollections: true,
     }
   },
   props: {
@@ -100,12 +168,43 @@ export default Vue.extend({
       default: LIBRARIES_ALL,
     },
   },
+  computed: {
+    library(): LibraryDto | undefined {
+      if (this.libraryId !== LIBRARIES_ALL) {
+        return this.$store.getters.getLibraryById(this.libraryId)
+      } else {
+        return undefined
+      }
+    },
+    toolbarTitle(): string {
+      if (this.library) return this.library.name
+      else if (this.$store.getters.getLibrariesPinned.length > 0) return this.$t('common.pinned_libraries').toString()
+      else return this.$t('common.all_libraries').toString()
+    },
+    isAdmin(): boolean {
+      return this.$store.getters.meAdmin
+    },
+    isLoggedIn(): boolean {
+      return this.$store.getters.me !== undefined
+    },
+    paginationVisible(): number {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs':
+          return 5
+        case 'sm':
+        case 'md':
+          return 10
+        case 'lg':
+        case 'xl':
+        default:
+          return 15
+      }
+    },
+  },
   watch: {
-    '$store.getters.getLibrariesPinned': {
-      handler(val) {
-        if (this.libraryId === LIBRARIES_ALL)
-          this.loadLibrary(this.libraryId)
-      },
+    '$store.getters.getLibrariesPinned': function (val) {
+      if (this.libraryId === LIBRARIES_ALL)
+        this.loadLibrary(this.libraryId)
     },
   },
   created() {
@@ -132,7 +231,7 @@ export default Vue.extend({
 
     this.setWatches()
   },
-  beforeRouteUpdate(to, from, next) {
+  beforeRouteUpdate(to: any, from: any, next: any) {
     if (to.params.libraryId !== from.params.libraryId) {
       // reset
       this.page = 1
@@ -145,40 +244,14 @@ export default Vue.extend({
 
     next()
   },
-  computed: {
-    library(): LibraryDto | undefined {
-      return this.getLibraryLazy(this.libraryId)
-    },
-    toolbarTitle(): string {
-      if (this.library) return this.library.name
-      else if (this.$store.getters.getLibrariesPinned.length > 0) return this.$t('common.pinned_libraries').toString()
-      else return this.$t('common.all_libraries').toString()
-    },
-    isAdmin(): boolean {
-      return this.$store.getters.meAdmin
-    },
-    paginationVisible(): number {
-      switch (this.$vuetify.breakpoint.name) {
-        case 'xs':
-          return 5
-        case 'sm':
-        case 'md':
-          return 10
-        case 'lg':
-        case 'xl':
-        default:
-          return 15
-      }
-    },
-  },
   methods: {
     setWatches() {
-      this.pageSizeUnwatch = this.$watch('pageSize', (val) => {
+      this.pageSizeUnwatch = this.$watch('pageSize', (val: any) => {
         this.$store.commit('setBrowsingPageSize', val)
         this.updateRouteAndReload()
       })
 
-      this.pageUnwatch = this.$watch('page', (val) => {
+      this.pageUnwatch = this.$watch('page', (val: any) => {
         this.updateRoute()
         this.loadPage(this.libraryId, val)
       })
@@ -227,13 +300,13 @@ export default Vue.extend({
     async loadPage(libraryId: string, page: number) {
       this.selectedCollections = []
 
-      const pageRequest = {
+      const pageRequest: PageRequest = {
         page: page - 1,
         size: this.pageSize,
-      } as PageRequest
+      }
 
-      const lib = libraryId !== LIBRARIES_ALL ? [libraryId] : this.$store.getters.getLibrariesPinned.map(it => it.id)
-      const collectionsPage = await this.$komgaCollections.getCollections(lib, pageRequest)
+      const lib = libraryId !== LIBRARIES_ALL ? [libraryId] : this.$store.getters.getLibrariesPinned.map((it: any) => it.id)
+      const collectionsPage = await this.$komgaCollections.getCollections(lib, pageRequest, undefined, this.showPublicCollections)
 
       this.totalPages = collectionsPage.totalPages
       this.totalElements = collectionsPage.totalElements
@@ -248,6 +321,9 @@ export default Vue.extend({
     },
     editSingleCollection(collection: CollectionDto) {
       this.$store.dispatch('dialogEditCollection', collection)
+    },
+    createCollection() {
+      this.$store.dispatch('dialogCreateCollection')
     },
     deleteCollections() {
       this.$store.dispatch('dialogDeleteCollection', this.selectedCollections)

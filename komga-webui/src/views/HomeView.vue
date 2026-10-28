@@ -105,6 +105,16 @@
             </v-list-item-action>
           </v-list-item>
 
+          <!--   COLLECTIONS     -->
+          <v-list-item :to="{name:'browse-collections', params: {libraryId: LIBRARIES_ALL}}">
+            <v-list-item-icon>
+              <v-icon>mdi-bookmark</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{ $t('navigation.collections') }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
           <!--   UNPINNED LIBRARIES     -->
           <v-list-group no-action
                         sub-group
