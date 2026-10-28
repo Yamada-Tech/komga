@@ -232,7 +232,7 @@ tasks {
   }
 
   withType<ProcessResources> {
-    filesMatching("application*.yml") {
+    filesMatching("application.yml") {
       expand(
         mapOf(
           "version" to project.version.toString(),
