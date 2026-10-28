@@ -69,13 +69,3 @@ jobs:
         asset_path: komga/build/libs/komga-${{ github.ref_name }}.jar
         asset_name: komga-${{ github.ref_name }}.jar
         asset_content_type: application/java-archive
-
-    - name: Upload Web UI Assets
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: komga-webui/dist.zip
-        asset_name: komga-webui-${{ github.ref_name }}.zip
-        asset_content_type: application/zip

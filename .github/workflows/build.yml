@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build
 
 on:
   push:
@@ -8,30 +8,15 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        java: [17]
-        include:
-          - os: ubuntu-latest
-            java: 17
-            script: ./gradlew build
-          - os: windows-latest
-            java: 17
-            script: .\gradlew.bat build
-          - os: macos-latest
-            java: 17
-            script: ./gradlew build
-
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up JDK ${{ matrix.java }}
+    - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        java-version: ${{ matrix.java }}
+        java-version: '17'
         distribution: 'temurin'
 
     - name: Set up Node.js
@@ -54,7 +39,7 @@ jobs:
         restore-keys: ${{ runner.os }}-node-
 
     - name: Build with Gradle
-      run: ${{ matrix.script }}
+      run: ./gradlew build
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -72,6 +57,3 @@ jobs:
         name: build-artifacts
         path: |
           komga/build/libs/*.jar
-          komga-tray/build/distributions/*.zip
-          komga-tray/build/distributions/*.exe
-          komga-tray/build/distributions/*.dmg
