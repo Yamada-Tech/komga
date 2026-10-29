@@ -9,39 +9,59 @@ import java.nio.file.Paths
 
 @Service
 class LogoImageService(
-    private val imageAnalyzer: ImageAnalyzer,
-    private val komgaProperties: KomgaProperties
+  private val imageAnalyzer: ImageAnalyzer,
+  private val komgaProperties: KomgaProperties,
 ) {
-    private val LOGO_DIR: Path
-    
-    init {
-        // Use config directory from KomgaProperties
-        val configDir = komgaProperties.configDir ?: "config"
-        LOGO_DIR = Paths.get(configDir, "logos")
-        
-        // Create logos directory if it doesn't exist
-        if (!Files.exists(LOGO_DIR)) {
-            Files.createDirectories(LOGO_DIR)
-        }
+  private val logoDir: Path
+
+  init {
+    // Use config directory from KomgaProperties
+    val configDir = komgaProperties.configDir ?: "config"
+    logoDir = Paths.get(configDir, "logos")
+
+    // Create logos directory if it doesn't exist
+    if (!Files.exists(logoDir)) {
+      Files.createDirectories(logoDir)
     }
-    
-    fun saveLogoImage(imageBytes: ByteArray, fileName: String): String {
-        val logoPath = LOGO_DIR.resolve(fileName)
-        Files.write(logoPath, imageBytes)
-        return fileName
+  }
+
+  fun saveLogoImage(
+    imageBytes: ByteArray,
+    fileName: String,
+  ): String {
+    val logoPath = logoDir.resolve(fileName)
+    Files.write(logoPath, imageBytes)
+    return fileName
+  }
+
+  fun getLogoImagePath(fileName: String): Path = logoDir.resolve(fileName)
+
+  fun deleteLogoImage(fileName: String) {
+    val logoPath = logoDir.resolve(fileName)
+    if (Files.exists(logoPath)) {
+      Files.delete(logoPath)
     }
-    
-    fun getLogoImagePath(fileName: String): Path {
-        return LOGO_DIR.resolve(fileName)
+  }
+
+  fun getLogoImage(fileName: String): ByteArray? {
+    val logoPath = logoDir.resolve(fileName)
+    return if (Files.exists(logoPath)) {
+      Files.readAllBytes(logoPath)
+    } else {
+      null
     }
-    
-    fun deleteLogoImage(fileName: String) {
-        val logoPath = LOGO_DIR.resolve(fileName)
-        if (Files.exists(logoPath)) {
-            Files.delete(logoPath)
-        }
+  }
+
+  fun validateLogoImage(imageBytes: ByteArray): Boolean =
+    try {
+      val image = ImageIO.read(imageBytes.inputStream())
+      val dimension = imageAnalyzer.getDimension(imageBytes.inputStream()) ?: Dimension(0, 0)
+
+      // Validate image dimensions (512x512px)
+      dimension.width == 512 && dimension.height == 512
+    } catch (e: Exception) {
+      false
     }
-    
     fun getLogoImage(fileName: String): ByteArray? {
         val logoPath = LOGO_DIR.resolve(fileName)
         return if (Files.exists(logoPath)) {
