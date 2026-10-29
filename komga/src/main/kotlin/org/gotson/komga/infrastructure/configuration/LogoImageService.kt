@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import javax.imageio.ImageIO
 
 @Service
 class LogoImageService(
@@ -54,7 +53,6 @@ class LogoImageService(
     
     fun validateLogoImage(imageBytes: ByteArray): Boolean {
         return try {
-            val image = ImageIO.read(imageBytes.inputStream())
             val dimension = imageAnalyzer.getDimension(imageBytes.inputStream()) ?: Dimension(0, 0)
             
             // Validate image dimensions (512x512px)

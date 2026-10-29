@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.server.ResponseStatusException
 import kotlin.time.Duration.Companion.days
 
 @RestController
@@ -108,32 +110,29 @@ class SettingsController(
     @RequestPart("file") file: MultipartFile,
   ) {
     // Validate file type
-    if (file.contentType != "image/png" && !file.originalFilename?.endsWith(".png", ignoreCase = true)!!) {
-      throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Only PNG images are supported")
-    }
-    
+    val isPng =
+      file.contentType == "image/png" ||
+        file.originalFilename?.endsWith(".png", ignoreCase = true) == true
+    if (!isPng) throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Only PNG images are supported")
+
     // Validate image dimensions (512x512)
     val imageBytes = file.bytes
-    if (!logoImageService.validateLogoImage(imageBytes)) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Logo must be 512x512 pixels")
-    }
-    
+    if (!logoImageService.validateLogoImage(imageBytes)) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Logo must be 512x512 pixels")
+
     // Save the logo image
     val fileName = "logo.png"
     logoImageService.saveLogoImage(imageBytes, fileName)
-    
+
     // Update settings with logo filename
     komgaSettingsProvider.logoImage = fileName
   }
-  
-  @GetMapping("logo")
+
+  @GetMapping("logo", produces = [MediaType.IMAGE_PNG_VALUE])
   @Operation(summary = "Get logo image", description = "Get the currently uploaded logo image")
-  fun getLogoImage(): ByteArray? {
-    val logoFileName = komgaSettingsProvider.logoImage
-    return if (logoFileName != null) {
-      logoImageService.getLogoImage(logoFileName)
-    } else {
-      null
-    }
+  fun getLogoImage(): ResponseEntity<ByteArray> {
+    val logoFileName = komgaSettingsProvider.logoImage ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    return logoImageService.getLogoImage(logoFileName)
+      ?.let { ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(it) }
+      ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 }
