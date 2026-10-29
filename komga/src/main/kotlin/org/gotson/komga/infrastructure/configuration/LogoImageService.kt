@@ -54,31 +54,11 @@ class LogoImageService(
 
   fun validateLogoImage(imageBytes: ByteArray): Boolean =
     try {
-      val image = ImageIO.read(imageBytes.inputStream())
       val dimension = imageAnalyzer.getDimension(imageBytes.inputStream()) ?: Dimension(0, 0)
 
       // Validate image dimensions (512x512px)
       dimension.width == 512 && dimension.height == 512
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       false
-    }
-    fun getLogoImage(fileName: String): ByteArray? {
-        val logoPath = LOGO_DIR.resolve(fileName)
-        return if (Files.exists(logoPath)) {
-            Files.readAllBytes(logoPath)
-        } else {
-            null
-        }
-    }
-    
-    fun validateLogoImage(imageBytes: ByteArray): Boolean {
-        return try {
-            val dimension = imageAnalyzer.getDimension(imageBytes.inputStream()) ?: Dimension(0, 0)
-            
-            // Validate image dimensions (512x512px)
-            dimension.width == 512 && dimension.height == 512
-        } catch (e: Exception) {
-            false
-        }
     }
 }

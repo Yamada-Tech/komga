@@ -110,9 +110,7 @@ class SettingsController(
     @RequestPart("file") file: MultipartFile,
   ) {
     // Validate file type
-    val isPng =
-      file.contentType == "image/png" ||
-        file.originalFilename?.endsWith(".png", ignoreCase = true) == true
+    val isPng = file.contentType == "image/png" || file.originalFilename?.endsWith(".png", ignoreCase = true) == true
     if (!isPng) throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Only PNG images are supported")
 
     // Validate image dimensions (512x512)
@@ -131,8 +129,7 @@ class SettingsController(
   @Operation(summary = "Get logo image", description = "Get the currently uploaded logo image")
   fun getLogoImage(): ResponseEntity<ByteArray> {
     val logoFileName = komgaSettingsProvider.logoImage ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-    return logoImageService.getLogoImage(logoFileName)
-      ?.let { ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(it) }
-      ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    val logoBytes = logoImageService.getLogoImage(logoFileName) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(logoBytes)
   }
 }
