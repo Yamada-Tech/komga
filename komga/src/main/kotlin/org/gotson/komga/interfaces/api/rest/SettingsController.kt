@@ -111,21 +111,21 @@ class SettingsController(
     if (file.contentType != "image/png" && !file.originalFilename?.endsWith(".png", ignoreCase = true)!!) {
       throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Only PNG images are supported")
     }
-    
+
     // Validate image dimensions (512x512)
     val imageBytes = file.bytes
     if (!logoImageService.validateLogoImage(imageBytes)) {
       throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Logo must be 512x512 pixels")
     }
-    
+
     // Save the logo image
     val fileName = "logo.png"
     logoImageService.saveLogoImage(imageBytes, fileName)
-    
+
     // Update settings with logo filename
     komgaSettingsProvider.logoImage = fileName
   }
-  
+
   @GetMapping("logo")
   @Operation(summary = "Get logo image", description = "Get the currently uploaded logo image")
   fun getLogoImage(): ByteArray? {

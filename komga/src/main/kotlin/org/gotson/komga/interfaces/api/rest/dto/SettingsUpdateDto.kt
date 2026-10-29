@@ -53,6 +53,6 @@ class SettingsUpdateDto {
     }
 
   var nextUiAsDefault: Boolean? = null
-  
+
   var siteName: String? = null
 }
