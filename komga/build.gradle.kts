@@ -153,7 +153,7 @@ dependencies {
 
 kotlin {
   compilerOptions {
-    jvmTarget = JvmTarget.JVM_17
+    jvmTarget = JvmTarget.JVM_21
     freeCompilerArgs =
       listOf(
         "-Xjsr305=strict",
@@ -167,8 +167,8 @@ val webui = "$rootDir/komga-webui"
 val nextui = "$rootDir/next-ui"
 tasks {
   withType<JavaCompile> {
-    sourceCompatibility = "17"
-    targetCompatibility = "17"
+    sourceCompatibility = "21"
+    targetCompatibility = "21"
   }
 
   withType<Test> {
