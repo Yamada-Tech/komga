@@ -5,10 +5,13 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout code
@@ -20,19 +23,31 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Build with Gradle
-        run: chmod +x gradlew && ./gradlew build -x test
-
-      - name: Create release
-        run: |
-          cd komga
-          git tag -a v${GITHUB_REF#refs/tags/} -m 'Release'
-          git push origin v${GITHUB_REF#refs/tags/}
-
-      - name: Upload to GitHub Releases
-        uses: actions/upload-release-asset@v2
+      - name: Set up WebUI
+        uses: ./.github/actions/setup-web
         with:
-          upload_url: ${{steps.release.outputs.upload_url}}
-          asset_path: komga/target/komga-0.0.1-SNAPSHOT.jar
-          asset_name: komga-0.0.1-SNAPSHOT.jar
-          asset_content_type: application/java-archive
+          working-directory: komga-webui
+
+      - name: Build WebUI
+        run: npm run build
+        working-directory: komga-webui
+
+      - name: Copy WebUI into backend resources
+        run: chmod +x gradlew && ./gradlew webuiCopyDist webuiCopyIndex
+
+      - name: Build with Gradle
+        run: ./gradlew :komga:bootJar -x test
+
+      - name: Stage jar for release
+        id: prep
+        run: |
+          VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
+          cp "komga/build/libs/komga-${VERSION}.jar" "komga-${VERSION}.jar"
+          echo "jar=komga-${VERSION}.jar" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.prep.outputs.jar }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
