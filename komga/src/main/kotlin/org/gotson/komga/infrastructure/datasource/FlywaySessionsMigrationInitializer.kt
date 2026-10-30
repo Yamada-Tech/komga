@@ -23,6 +23,7 @@ class FlywaySessionsMigrationInitializer(
       .configure()
       .locations("classpath:sessions/migration/sqlite")
       .dataSource(sessionsDataSource)
+      .ignoreMigrationPatterns("*:missing", "*:future")
       .load()
       .apply {
         migrate()

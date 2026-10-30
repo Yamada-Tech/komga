@@ -17,6 +17,7 @@ class FlywayTasksMigrationInitializer(
       .configure()
       .locations("classpath:tasks/migration/sqlite")
       .dataSource(tasksDataSource)
+      .ignoreMigrationPatterns("*:missing", "*:future")
       .load()
       .apply {
         migrate()
