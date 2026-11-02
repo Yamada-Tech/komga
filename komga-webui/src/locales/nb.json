@@ -847,6 +847,7 @@
     "title": "Måleverdier"
   },
   "navigation": {
+    "collections": "Samlinger",
     "home": "Hjem",
     "libraries": "Bibliotek",
     "logout": "Logg ut"

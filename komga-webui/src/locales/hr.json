@@ -928,6 +928,7 @@
     "title": "Posteri koji nedostaju"
   },
   "navigation": {
+    "collections": "Zbirke",
     "home": "Početna stranica",
     "libraries": "Biblioteke",
     "logout": "Odjavi se",

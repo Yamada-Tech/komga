@@ -928,6 +928,7 @@
     "title": "Couvertures manquantes"
   },
   "navigation": {
+    "collections": "Collections",
     "home": "Accueil",
     "libraries": "Bibliothèques",
     "logout": "Déconnexion"

@@ -900,6 +900,7 @@
     "title": "Statystyki"
   },
   "navigation": {
+    "collections": "Kolekcje",
     "home": "Ekran główny",
     "libraries": "Biblioteki",
     "logout": "Wyloguj się"

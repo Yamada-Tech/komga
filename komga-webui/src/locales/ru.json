@@ -842,6 +842,7 @@
     "title": "Отсутствующие обложки"
   },
   "navigation": {
+    "collections": "Коллекции",
     "home": "Главная",
     "libraries": "Библиотеки",
     "logout": "Выйти",

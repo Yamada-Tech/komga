@@ -928,6 +928,7 @@
     "title": "Pósteres em falta"
   },
   "navigation": {
+    "collections": "Coleções",
     "home": "Entrada",
     "libraries": "Bibliotecas",
     "logout": "Sair"

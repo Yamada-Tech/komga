@@ -928,6 +928,7 @@
     "title": "Poster Hilang"
   },
   "navigation": {
+    "collections": "Koleksi",
     "home": "Beranda",
     "libraries": "Pustaka",
     "logout": "Keluar"

@@ -875,6 +875,7 @@
     "tasks_total_time": "Opgaver total tid"
   },
   "navigation": {
+    "collections": "Samlinger",
     "home": "Hjem",
     "libraries": "Biblioteker",
     "logout": "Log ud"

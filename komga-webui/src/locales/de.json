@@ -928,6 +928,7 @@
     "title": "Fehlende Titelbilder"
   },
   "navigation": {
+    "collections": "Sammlungen",
     "home": "Startseite",
     "libraries": "Bibliotheken",
     "logout": "Abmelden",

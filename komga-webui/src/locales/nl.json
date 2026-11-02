@@ -919,6 +919,7 @@
     "title": "Ontbrekende posters"
   },
   "navigation": {
+    "collections": "Verzamelingen",
     "home": "Beginscherm",
     "libraries": "Bibliotheken",
     "logout": "Afmelden"

@@ -844,6 +844,7 @@
     "title": "Mètriques"
   },
   "navigation": {
+    "collections": "Col·leccions",
     "home": "Inici",
     "libraries": "Biblioteques",
     "logout": "Tanca la sessió"

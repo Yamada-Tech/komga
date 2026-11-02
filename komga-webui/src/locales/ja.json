@@ -928,6 +928,7 @@
     "title": "欠けているポスター"
   },
   "navigation": {
+    "collections": "コレクション",
     "home": "ホーム",
     "libraries": "ライブラリ",
     "logout": "ログアウト",

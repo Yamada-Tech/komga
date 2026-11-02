@@ -927,6 +927,7 @@
     "title": "Липсващ Постер"
   },
   "navigation": {
+    "collections": "Колекции",
     "home": "Начало",
     "libraries": "Библиотеки",
     "logout": "Изход"

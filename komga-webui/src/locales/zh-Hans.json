@@ -928,6 +928,7 @@
     "title": "缺少海报"
   },
   "navigation": {
+    "collections": "收藏",
     "home": "主页",
     "libraries": "库",
     "logout": "退出登录",

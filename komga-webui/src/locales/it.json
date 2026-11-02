@@ -928,6 +928,7 @@
     "title": "Locandine mancanti"
   },
   "navigation": {
+    "collections": "Raccolte",
     "home": "Home",
     "libraries": "Librerie",
     "logout": "Esci",

@@ -719,6 +719,7 @@
     "title": "Chỉ số"
   },
   "navigation": {
+    "collections": "Bộ sưu tập",
     "home": "Trang Chủ",
     "libraries": "Thư viện",
     "logout": "Đăng xuất"

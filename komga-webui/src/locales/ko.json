@@ -928,6 +928,7 @@
     "title": "표지 없음"
   },
   "navigation": {
+    "collections": "모음집",
     "home": "홈",
     "libraries": "서재",
     "logout": "로그아웃",

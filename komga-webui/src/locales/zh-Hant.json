@@ -928,6 +928,7 @@
     "title": "沒有海報"
   },
   "navigation": {
+    "collections": "收藏",
     "home": "主頁",
     "libraries": "書庫",
     "logout": "登出"

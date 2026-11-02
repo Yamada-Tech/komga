@@ -928,6 +928,7 @@
     "title": "โปสเตอร์ที่หายไป"
   },
   "navigation": {
+    "collections": "คอลเลกชัน",
     "home": "หน้าแรก",
     "libraries": "ไลบรารี",
     "logout": "ออกจากระบบ"

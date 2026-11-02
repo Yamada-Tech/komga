@@ -928,6 +928,7 @@
     "title": "Puuttuvia julisteita"
   },
   "navigation": {
+    "collections": "Kokoelmat",
     "home": "Koti",
     "libraries": "Kirjastot",
     "logout": "Kirjaudu ulos",

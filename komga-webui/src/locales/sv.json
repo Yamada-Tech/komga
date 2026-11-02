@@ -885,6 +885,7 @@
     "title": "Mätvärden"
   },
   "navigation": {
+    "collections": "Samlingar",
     "home": "Hem",
     "libraries": "Bibliotek",
     "logout": "Logga ut"
