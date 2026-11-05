@@ -232,7 +232,9 @@ tasks {
   }
 
   withType<ProcessResources> {
-    filesMatching("application.yml") {
+    // must match application*.yml so that test resources (application-test.yml) are also expanded,
+    // otherwise the "\${...}" escapes stay literal and SnakeYAML fails to parse them
+    filesMatching("application*.yml") {
       expand(
         mapOf(
           "version" to project.version.toString(),
