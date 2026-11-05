@@ -931,8 +931,7 @@
     "collections": "Zbierky",
     "home": "Domov",
     "libraries": "Knižnice",
-    "logout": "Odhlásiť sa",
-    "try_new_ui": "Vyskúšajte nové používateľské rozhranie"
+    "logout": "Odhlásiť sa"
   },
   "no_libraries_pinned": {
     "subtitle": "Knižnicu môžete pripnúť z menu s tromi bodkami",

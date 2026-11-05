@@ -641,7 +641,7 @@ class SeriesController(
     contentRestrictionChecker.checkContentRestrictionSeries(principal.user, seriesId)
 
     return collectionRepository
-      .findAllContainingSeriesId(seriesId, SearchContext(principal.user))
+      .findAllContainingSeriesId(seriesId, SearchContext(principal.user), includePrivate = principal.user.isAdmin)
       .map { it.toDto() }
   }
 

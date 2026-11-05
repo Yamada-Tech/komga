@@ -317,6 +317,7 @@
 
 <script lang="ts">
 import {debounce} from 'lodash'
+import {siteTitle} from '@/functions/branding'
 import SettingsSelect from '@/components/SettingsSelect.vue'
 import SettingsSwitch from '@/components/SettingsSwitch.vue'
 import ThumbnailExplorerDialog from '@/components/dialogs/ThumbnailExplorerDialog.vue'
@@ -696,9 +697,9 @@ export default Vue.extend({
 
       if (this?.context.origin === ContextOrigin.READLIST) {
         this.contextName = (await (this.$komgaReadLists.getOneReadList(this.context.id))).name
-        document.title = `Komga - ${this.contextName} - ${this.book.metadata.title}`
+        document.title = siteTitle(`${this.contextName} - ${this.book.metadata.title}`)
       } else {
-        document.title = `Komga - ${this.bookTitle}`
+        document.title = siteTitle(`${this.bookTitle}`)
       }
 
       // parse query params to get incognito mode

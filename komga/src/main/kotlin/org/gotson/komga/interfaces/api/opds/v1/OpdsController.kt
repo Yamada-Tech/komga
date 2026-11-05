@@ -445,7 +445,7 @@ class OpdsController(
     @Parameter(hidden = true) page: Pageable,
   ): OpdsFeed {
     val pageable = PageRequest.of(page.pageNumber, page.pageSize, Sort.by(Sort.Order.asc("name")))
-    val collections = collectionRepository.findAll(SearchContext(principal.user), pageable, principal.user.getAuthorizedLibraryIds(null))
+    val collections = collectionRepository.findAll(SearchContext(principal.user), pageable, principal.user.getAuthorizedLibraryIds(null), includePrivate = principal.user.isAdmin)
 
     val uriBuilder = uriBuilder(ROUTE_COLLECTIONS_ALL)
 
@@ -610,7 +610,7 @@ class OpdsController(
     @PathVariable id: String,
     @Parameter(hidden = true) page: Pageable,
   ): OpdsFeed =
-    collectionRepository.findByIdOrNull(id, SearchContext(principal.user))?.let { collection ->
+    collectionRepository.findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)?.let { collection ->
       val sort =
         if (collection.ordered)
           Sort.by(Sort.Order.asc("collection.number"))

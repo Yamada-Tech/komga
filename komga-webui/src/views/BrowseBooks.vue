@@ -117,6 +117,7 @@
 
 <script lang="ts">
 import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
+import {siteTitle} from '@/functions/branding'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ItemBrowser from '@/components/ItemBrowser.vue'
@@ -560,7 +561,7 @@ export default Vue.extend({
       if (this.books.some(b => b.id === event.seriesId)) this.reloadPage()
     },
     async loadLibrary(libraryId: string) {
-      if (this.library != undefined) document.title = `Komga - ${this.library.name}`
+      if (this.library != undefined) document.title = siteTitle(`${this.library.name}`)
 
       await this.loadPage(libraryId, this.page, this.sortActive)
     },

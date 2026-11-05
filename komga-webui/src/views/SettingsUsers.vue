@@ -10,11 +10,11 @@
     </v-row>
 
     <v-row>
-      <v-col class="text-h5">{{ $t('users.authentication_activity') }}</v-col>
+      <v-col class="text-h5">{{ $t('recent_reads.title') }}</v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <authentication-activity-table/>
+        <recent-reads-table/>
       </v-col>
     </v-row>
   </v-container>
@@ -22,12 +22,12 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import AuthenticationActivityTable from '@/components/AuthenticationActivityTable.vue'
+import RecentReadsTable from '@/components/RecentReadsTable.vue'
 import UsersList from '@/components/UsersList.vue'
 
 export default Vue.extend({
   name: 'SettingsUsers',
-  components: {UsersList, AuthenticationActivityTable  },
+  components: {UsersList, RecentReadsTable},
 })
 </script>
 

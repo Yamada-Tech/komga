@@ -1,4 +1,5 @@
 import urls from '@/functions/urls'
+import {siteTitle} from '@/functions/branding'
 import Vue from 'vue'
 import Router from 'vue-router'
 import store from './store'
@@ -185,11 +186,6 @@ const router = new Router({
           component: () => import(/* webpackChunkName: "account-settings-ui" */ './views/UIUserSettings.vue'),
         },
         {
-          path: '/account/authentication-activity',
-          name: 'account-activity',
-          component: () => import(/* webpackChunkName: "account-activity" */ './views/SelfAuthenticationActivity.vue'),
-        },
-        {
           path: '/libraries/:libraryId?',
           name: 'libraries',
           redirect: (route) => ({
@@ -325,7 +321,7 @@ router.beforeEach((to, from, next) => {
   if (!['read-book', 'read-epub', 'browse-book', 'browse-oneshot', 'browse-series', 'browse-libraries', 'browse-books',
     'recommended-libraries', 'browse-collection', 'browse-collections', 'browse-readlist', 'browse-readlists'].includes(<string>to.name)
   ) {
-    document.title = 'Komga'
+    document.title = siteTitle()
   }
 
   if (window.opener !== null &&

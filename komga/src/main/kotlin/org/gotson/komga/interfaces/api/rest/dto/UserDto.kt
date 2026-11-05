@@ -1,10 +1,13 @@
 package org.gotson.komga.interfaces.api.rest.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
 import org.gotson.komga.domain.model.AgeRestriction
 import org.gotson.komga.domain.model.AllowExclude
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
+import org.gotson.komga.language.toUTC
+import java.time.LocalDateTime
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class UserDto(
@@ -16,6 +19,8 @@ data class UserDto(
   val labelsAllow: Set<String>,
   val labelsExclude: Set<String>,
   val ageRestriction: AgeRestrictionDto?,
+  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+  val lastLoginDate: LocalDateTime? = null,
 )
 
 data class AgeRestrictionDto(
@@ -35,6 +40,7 @@ fun KomgaUser.toDto() =
     labelsAllow = restrictions.labelsAllow,
     labelsExclude = restrictions.labelsExclude,
     ageRestriction = restrictions.ageRestriction?.toDto(),
+    lastLoginDate = lastLoginDate?.toUTC(),
   )
 
 fun KomgaPrincipal.toDto() = user.toDto()

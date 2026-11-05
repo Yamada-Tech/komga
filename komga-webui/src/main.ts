@@ -85,6 +85,8 @@ Vue.use(komgaFonts, {http: Vue.prototype.$http})
 
 Vue.config.productionTip = false
 
+store.dispatch('getBranding').catch(() => {})
+
 sync(store, router)
 
 new Vue({

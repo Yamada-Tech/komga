@@ -13,24 +13,30 @@ class IndexController(
 ) {
   private val baseUrl: String = "${servletContext.contextPath}/"
 
+  private fun addBranding(model: Model) {
+    model.addAttribute("baseUrl", baseUrl)
+    model.addAttribute("siteName", komgaSettingsProvider.siteName)
+    model.addAttribute("logoAvailable", komgaSettingsProvider.logoImage != null)
+  }
+
   @GetMapping("/")
   fun index(
     model: Model,
   ): String {
-    model.addAttribute("baseUrl", baseUrl)
+    addBranding(model)
 
     return if (komgaSettingsProvider.nextUiAsDefault) "index-next" else "index"
   }
 
   @GetMapping(value = ["/classic", "/classic/**"])
   fun indexClassic(model: Model): String {
-    model.addAttribute("baseUrl", baseUrl)
+    addBranding(model)
     return "index"
   }
 
   @GetMapping(value = ["/next", "/next/**"])
   fun indexNext(model: Model): String {
-    model.addAttribute("baseUrl", baseUrl)
+    addBranding(model)
     return "index-next"
   }
 }

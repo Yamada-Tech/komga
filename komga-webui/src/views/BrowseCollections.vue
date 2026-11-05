@@ -43,8 +43,9 @@
 
     <v-container fluid>
       <v-checkbox
-        v-model="showPublicCollections"
-        :label="$t('browse_collections.checkbox_show_public_collections')"
+        v-if="isAdmin"
+        v-model="showPrivateCollections"
+        :label="$t('browse_collections.checkbox_show_private_collections')"
         class="mb-2"
         @change="loadPage(libraryId, 1)"
       />
@@ -76,6 +77,7 @@
 
 <script lang="ts">
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
+import {siteTitle} from '@/functions/branding'
 import ItemBrowser from '@/components/ItemBrowser.vue'
 import LibraryNavigation from '@/components/LibraryNavigation.vue'
 import LibraryActionsMenu from '@/components/menus/LibraryActionsMenu.vue'
@@ -100,7 +102,7 @@ interface BrowseCollectionsData {
   totalElements: number | null
   pageUnwatch: any
   pageSizeUnwatch: any
-  showPublicCollections: boolean
+  showPrivateCollections: boolean
 }
 
 interface BrowseCollectionsComputed {
@@ -159,7 +161,7 @@ export default Vue.extend({
       totalElements: null as number | null,
       pageUnwatch: null as any,
       pageSizeUnwatch: null as any,
-      showPublicCollections: true,
+      showPrivateCollections: true,
     }
   },
   props: {
@@ -290,7 +292,7 @@ export default Vue.extend({
       }
     },
     async loadLibrary(libraryId: string) {
-      if (this.library != undefined) document.title = `Komga - ${this.library.name}`
+      if (this.library != undefined) document.title = siteTitle(`${this.library.name}`)
       await this.loadPage(libraryId, this.page)
 
       if (this.totalElements === 0) {
@@ -306,7 +308,7 @@ export default Vue.extend({
       }
 
       const lib = libraryId !== LIBRARIES_ALL ? [libraryId] : this.$store.getters.getLibrariesPinned.map((it: any) => it.id)
-      const collectionsPage = await this.$komgaCollections.getCollections(lib, pageRequest, undefined, this.showPublicCollections)
+      const collectionsPage = await this.$komgaCollections.getCollections(lib, pageRequest, undefined, this.showPrivateCollections)
 
       this.totalPages = collectionsPage.totalPages
       this.totalElements = collectionsPage.totalElements

@@ -9,6 +9,13 @@ export interface SettingsDto {
   koboProxy: boolean,
   koboPort?: number,
   kepubifyPath: SettingMultiSource<string>,
+  siteName?: string,
+  logoImage?: string,
+}
+
+export interface BrandingDto {
+  siteName?: string,
+  logoAvailable: boolean,
 }
 
 export interface SettingMultiSource<T> {
@@ -29,6 +36,7 @@ export interface SettingsUpdateDto {
   koboProxy?: boolean,
   koboPort?: number,
   kepubifyPath?: string,
+  siteName?: string | null,
 }
 
 export enum ThumbnailSizeDto {

@@ -904,8 +904,7 @@
     "collections": "Koleksiyonlar",
     "home": "Anasayfa",
     "libraries": "Kütüphaneler",
-    "logout": "Çıkış Yap",
-    "try_new_ui": "Yeni arayüzü dene"
+    "logout": "Çıkış Yap"
   },
   "page_not_found": {
     "go_back_to_home_page": "Ana sayfaya geri dön",

@@ -931,8 +931,7 @@
     "collections": "Gyűjtemények",
     "home": "Főoldal",
     "libraries": "Könyvtárak",
-    "logout": "Kijelentkezés",
-    "try_new_ui": "Próbáld ki az új felületet"
+    "logout": "Kijelentkezés"
   },
   "no_libraries_pinned": {
     "subtitle": "Könyvtárat a 3 pontos menüből tudsz kitűzni",

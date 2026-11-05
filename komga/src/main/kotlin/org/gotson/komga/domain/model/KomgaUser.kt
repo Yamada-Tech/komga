@@ -21,6 +21,7 @@ data class KomgaUser(
   val id: String = TsidCreator.getTsid256().toString(),
   override val createdDate: LocalDateTime = LocalDateTime.now(),
   override val lastModifiedDate: LocalDateTime = createdDate,
+  val lastLoginDate: LocalDateTime? = null,
 ) : Auditable,
   Serializable {
   val isAdmin: Boolean
@@ -93,7 +94,7 @@ data class KomgaUser(
     return !ageDenied && !labelDenied
   }
 
-  override fun toString(): String = "KomgaUser(createdDate=$createdDate, email='$email', roles=$roles, sharedLibrariesIds=$sharedLibrariesIds, sharedAllLibraries=$sharedAllLibraries, restrictions=$restrictions, id='$id', lastModifiedDate=$lastModifiedDate)"
+  override fun toString(): String = "KomgaUser(createdDate=$createdDate, email='$email', roles=$roles, sharedLibrariesIds=$sharedLibrariesIds, sharedAllLibraries=$sharedAllLibraries, restrictions=$restrictions, id='$id', lastModifiedDate=$lastModifiedDate, lastLoginDate=$lastLoginDate)"
 
   companion object {
     @Serial

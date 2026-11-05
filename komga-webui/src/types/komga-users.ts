@@ -12,6 +12,7 @@ export interface UserDto {
     age: number,
     restriction: AllowExclude,
   },
+  lastLoginDate?: Date,
 }
 
 export interface UserCreationDto {
@@ -37,17 +38,17 @@ export interface UserUpdateDto {
   labelsExclude?: string[],
 }
 
-export interface AuthenticationActivityDto {
-  userId?: string,
-  email?: string,
-  apiKeyId?: string,
-  apiKeyComment?: string,
-  ip?: string,
-  userAgent?: string,
-  success: Boolean,
-  error?: string,
-  dateTime: Date,
-  source?: string,
+export interface RecentReadDto {
+  userId: string,
+  userEmail: string,
+  bookId: string,
+  bookTitle: string,
+  seriesId: string,
+  seriesTitle: string,
+  page: number,
+  pagesCount?: number,
+  completed: boolean,
+  readDate: Date,
 }
 
 export interface ApiKeyDto {

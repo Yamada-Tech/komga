@@ -20,18 +20,6 @@
                     })
                   }}
                 </v-list-item-subtitle>
-                <v-list-item-subtitle v-if="apiKeyLastActivity[apiKey.id] !== undefined">
-                  {{
-                    $t('settings_user.latest_activity', {
-                      date:
-                        new Intl.DateTimeFormat($i18n.locale, {
-                          dateStyle: 'medium',
-                          timeStyle: 'short'
-                        }).format(apiKeyLastActivity[apiKey.id])
-                    })
-                  }}
-                </v-list-item-subtitle>
-                <v-list-item-subtitle v-else>{{ $t('settings_user.no_recent_activity') }}</v-list-item-subtitle>
               </v-list-item-content>
 
               <v-list-item-action>
@@ -131,7 +119,6 @@ export default Vue.extend({
       modalDeleteApiKey: false,
       modalDeleteSyncPoints: false,
       modalGenerateApiKey: false,
-      apiKeyLastActivity: {} as any,
     }
   },
   mounted() {
@@ -141,12 +128,6 @@ export default Vue.extend({
     async loadApiKeys() {
       try {
         this.apiKeys = await this.$komgaUsers.getApiKeys()
-        this.apiKeys.forEach((a: ApiKeyDto) => {
-          this.$komgaUsers.getLatestAuthenticationActivityForUser(a.userId, a.id)
-            .then(value => this.$set(this.apiKeyLastActivity, `${a.id}`, value.dateTime))
-            .catch(e => {
-            })
-        })
       } catch (e) {
         this.$eventHub.$emit(ERROR, {message: e.message} as ErrorEvent)
       }

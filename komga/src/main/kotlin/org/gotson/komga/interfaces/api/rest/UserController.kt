@@ -1,37 +1,30 @@
 package org.gotson.komga.interfaces.api.rest
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
 import jakarta.validation.Valid
-import org.gotson.komga.application.query.UnpagedSorted
 import org.gotson.komga.domain.model.AgeRestriction
 import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.DuplicateNameException
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.model.UserEmailAlreadyExistsException
 import org.gotson.komga.domain.model.UserRoles
-import org.gotson.komga.domain.persistence.AuthenticationActivityRepository
 import org.gotson.komga.domain.persistence.KomgaUserRepository
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.service.KomgaUserLifecycle
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
+import org.gotson.komga.interfaces.api.persistence.RecentReadsDtoRepository
 import org.gotson.komga.interfaces.api.rest.dto.AllowExcludeDto
 import org.gotson.komga.interfaces.api.rest.dto.ApiKeyDto
 import org.gotson.komga.interfaces.api.rest.dto.ApiKeyRequestDto
-import org.gotson.komga.interfaces.api.rest.dto.AuthenticationActivityDto
 import org.gotson.komga.interfaces.api.rest.dto.PasswordUpdateDto
+import org.gotson.komga.interfaces.api.rest.dto.RecentReadDto
 import org.gotson.komga.interfaces.api.rest.dto.UserCreationDto
 import org.gotson.komga.interfaces.api.rest.dto.UserDto
 import org.gotson.komga.interfaces.api.rest.dto.UserUpdateDto
 import org.gotson.komga.interfaces.api.rest.dto.redacted
 import org.gotson.komga.interfaces.api.rest.dto.toDto
-import org.springdoc.core.converters.models.PageableAsQueryParam
 import org.springframework.core.env.Environment
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -54,7 +47,7 @@ class UserController(
   private val userLifecycle: KomgaUserLifecycle,
   private val userRepository: KomgaUserRepository,
   private val libraryRepository: LibraryRepository,
-  private val authenticationActivityRepository: AuthenticationActivityRepository,
+  private val recentReadsDtoRepository: RecentReadsDtoRepository,
   env: Environment,
 ) {
   private val demo = env.activeProfiles.contains("demo")
@@ -212,73 +205,12 @@ class UserController(
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 
-  @GetMapping("me/authentication-activity")
-  @PageableAsQueryParam
-  @Operation(summary = "Retrieve authentication activity for the current user", tags = [TagNames.CURRENT_USER])
-  fun getAuthenticationActivityForCurrentUser(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
-    @Parameter(hidden = true) page: Pageable,
-  ): Page<AuthenticationActivityDto> {
-    if (demo && !principal.user.isAdmin) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    val sort =
-      if (page.sort.isSorted)
-        page.sort
-      else
-        Sort.by(Sort.Order.desc("dateTime"))
-
-    val pageRequest =
-      if (unpaged)
-        UnpagedSorted(sort)
-      else
-        PageRequest.of(
-          page.pageNumber,
-          page.pageSize,
-          sort,
-        )
-
-    return authenticationActivityRepository.findAllByUser(principal.user, pageRequest).map { it.toDto() }
-  }
-
-  @GetMapping("authentication-activity")
-  @PageableAsQueryParam
+  @GetMapping("recent-reads")
   @PreAuthorize("hasRole('ADMIN')")
-  @Operation(summary = "Retrieve authentication activity", tags = [TagNames.USERS])
-  fun getAuthenticationActivity(
-    @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
-    @Parameter(hidden = true) page: Pageable,
-  ): Page<AuthenticationActivityDto> {
-    val sort =
-      if (page.sort.isSorted)
-        page.sort
-      else
-        Sort.by(Sort.Order.desc("dateTime"))
-
-    val pageRequest =
-      if (unpaged)
-        UnpagedSorted(sort)
-      else
-        PageRequest.of(
-          page.pageNumber,
-          page.pageSize,
-          sort,
-        )
-
-    return authenticationActivityRepository.findAll(pageRequest).map { it.toDto() }
-  }
-
-  @GetMapping("{id}/authentication-activity/latest")
-  @PreAuthorize("hasRole('ADMIN') or #principal.user.id == #id")
-  @Operation(summary = "Retrieve latest authentication activity for a user", tags = [TagNames.USERS])
-  fun getLatestAuthenticationActivityByUserId(
-    @PathVariable id: String,
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(required = false, name = "apikey_id") apiKeyId: String?,
-  ): AuthenticationActivityDto =
-    userRepository.findByIdOrNull(id)?.let { user ->
-      authenticationActivityRepository.findMostRecentByUser(user, apiKeyId)?.toDto()
-        ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  @Operation(summary = "Retrieve the most recently read books across all users", tags = [TagNames.USERS])
+  fun getRecentReads(
+    @RequestParam(name = "limit", required = false) limit: Int = 10,
+  ): List<RecentReadDto> = recentReadsDtoRepository.findRecentReads(limit.coerceIn(1, 100))
 
   @GetMapping("me/api-keys")
   @Operation(summary = "Retrieve API keys", tags = [TagNames.API_KEYS])

@@ -1,19 +1,25 @@
 <template>
   <div class="pa-6">
     <v-row align="center" justify="center">
-      <v-img src="../assets/logo.svg"
-             :max-width="logoWidth"
-      />
+      <app-logo :max-width="logoWidth"/>
+    </v-row>
+    <v-row align="center" justify="center">
+      <div class="text-h5 mt-4">{{ siteName }}</div>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import AppLogo from '@/components/AppLogo.vue'
 
 export default Vue.extend({
   name: 'StartupView',
+  components: {AppLogo},
   computed: {
+    siteName(): string {
+      return this.$store.getters.siteName
+    },
     logoWidth(): number {
       let l = 100
       switch (this.$vuetify.breakpoint.name) {

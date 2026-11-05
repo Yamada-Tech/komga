@@ -135,6 +135,7 @@
 
 <script lang="ts">
 import CollectionActionsMenu from '@/components/menus/CollectionActionsMenu.vue'
+import {siteTitle} from '@/functions/branding'
 import ItemBrowser from '@/components/ItemBrowser.vue'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import {
@@ -477,7 +478,7 @@ export default Vue.extend({
       this.$komgaCollections.getOneCollection(collectionId)
         .then(v => {
           this.collection = v
-          document.title = `Komga - ${v.name}`
+          document.title = siteTitle(`${v.name}`)
         })
 
       await this.loadPage(collectionId, this.page)

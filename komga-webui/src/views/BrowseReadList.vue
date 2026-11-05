@@ -158,6 +158,7 @@
 
 <script lang="ts">
 import ItemBrowser from '@/components/ItemBrowser.vue'
+import {siteTitle} from '@/functions/branding'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import {
   BOOK_CHANGED,
@@ -447,7 +448,7 @@ export default Vue.extend({
       this.$komgaReadLists.getOneReadList(readListId)
         .then(v => {
           this.readList = v
-          document.title = `Komga - ${v.name}`
+          document.title = siteTitle(`${v.name}`)
         })
 
       await this.loadPage(readListId, this.page)

@@ -931,8 +931,7 @@
     "collections": "Sbírky",
     "home": "Úvod",
     "libraries": "Knihovny",
-    "logout": "Odhlásit se",
-    "try_new_ui": "Vyzkoušej nové UI"
+    "logout": "Odhlásit se"
   },
   "no_libraries_pinned": {
     "subtitle": "Můžete připnout knihovnu pomocí třítečkového menu",

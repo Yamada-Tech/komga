@@ -9,6 +9,7 @@ data class CollectionDto(
   val id: String,
   val name: String,
   val ordered: Boolean,
+  val public: Boolean,
   val seriesIds: List<String>,
   @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
   val createdDate: LocalDateTime,
@@ -22,6 +23,7 @@ fun SeriesCollection.toDto() =
     id = id,
     name = name,
     ordered = ordered,
+    public = public,
     seriesIds = seriesIds,
     createdDate = createdDate.toUTC(),
     lastModifiedDate = lastModifiedDate.toUTC(),

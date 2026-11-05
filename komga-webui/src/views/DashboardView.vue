@@ -112,6 +112,7 @@
 
 <script lang="ts">
 import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
+import {siteTitle} from '@/functions/branding'
 import EmptyState from '@/components/EmptyState.vue'
 import HorizontalScroller from '@/components/HorizontalScroller.vue'
 import ItemBrowser from '@/components/ItemBrowser.vue'
@@ -460,7 +461,7 @@ export default Vue.extend({
     },
     loadAll(reload: boolean = false) {
       this.loading = true
-      if (this.library != undefined) document.title = `Komga - ${this.library.name}`
+      if (this.library != undefined) document.title = siteTitle(`${this.library.name}`)
       this.selectedSeries = []
       this.selectedBooks = []
 

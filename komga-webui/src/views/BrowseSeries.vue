@@ -501,6 +501,7 @@
 
 <script lang="ts">
 import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
+import {siteTitle} from '@/functions/branding'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import CollectionsExpansionPanels from '@/components/CollectionsExpansionPanels.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -803,7 +804,7 @@ export default Vue.extend({
   watch: {
     series(val) {
       if (this.$_.has(val, 'metadata.title')) {
-        document.title = `Komga - ${val.metadata.title}`
+        document.title = siteTitle(`${val.metadata.title}`)
       }
     },
   },

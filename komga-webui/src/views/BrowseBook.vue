@@ -440,6 +440,7 @@
 
 <script lang="ts">
 import BookActionsMenu from '@/components/menus/BookActionsMenu.vue'
+import {siteTitle} from '@/functions/branding'
 import ItemCard from '@/components/ItemCard.vue'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import {groupAuthorsByRole} from '@/functions/authors'
@@ -660,7 +661,7 @@ export default Vue.extend({
         .then(v => this.readLists = v)
 
       if (this.$_.has(this.book, 'metadata.title')) {
-        document.title = `Komga - ${getBookTitleCompact(this.book.metadata.title, this.book.seriesTitle, this.book.oneshot ? undefined : this.book.metadata.number)}`
+        document.title = siteTitle(`${getBookTitleCompact(this.book.metadata.title, this.book.seriesTitle, this.book.oneshot ? undefined : this.book.metadata.number)}`)
       }
 
       if (this?.context.origin === ContextOrigin.READLIST) {

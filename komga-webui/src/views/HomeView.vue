@@ -21,12 +21,12 @@
     <v-navigation-drawer app v-model="drawerVisible" :right="$vuetify.rtl">
       <v-list-item @click="$router.push({name: 'home'})" inactive class="pb-2">
         <v-list-item-avatar>
-          <v-img src="../assets/logo.svg"/>
+          <app-logo/>
         </v-list-item-avatar>
 
         <v-list-item-content>
           <v-list-item-title class="title">
-            Komga
+            {{ siteName }}
           </v-list-item-title>
         </v-list-item-content>
 
@@ -305,10 +305,6 @@
             <v-list-item :to="{name: 'account-settings-ui'}">
               <v-list-item-title>{{ $t('common.ui') }}</v-list-item-title>
             </v-list-item>
-
-            <v-list-item :to="{name: 'account-activity'}">
-              <v-list-item-title>{{ $t('users.authentication_activity') }}</v-list-item-title>
-            </v-list-item>
           </v-list-group>
 
           <v-list-item @click="logout">
@@ -317,15 +313,6 @@
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>{{ $t('navigation.logout') }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item :href="nextUrl">
-            <v-list-item-icon>
-              <v-icon>mdi-ab-testing</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title>{{ $t('navigation.try_new_ui') }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -390,6 +377,7 @@
 </template>
 
 <script lang="ts">
+import AppLogo from '@/components/AppLogo.vue'
 import ReusableDialogs from '@/components/ReusableDialogs.vue'
 import LibraryActionsMenu from '@/components/menus/LibraryActionsMenu.vue'
 import SearchBox from '@/components/SearchBox.vue'
@@ -402,11 +390,11 @@ import {LibraryDto} from '@/types/komga-libraries'
 import {BookSearch, SearchConditionAnyOfBook, SearchConditionMediaStatus, SearchOperatorIs} from '@/types/komga-search'
 import LibrariesActionsMenu from '@/components/menus/LibrariesActionsMenu.vue'
 import ReorderLibraries from '@/components/ReorderLibraries.vue'
-import urls from '@/functions/urls'
 
 export default Vue.extend({
   name: 'HomeView',
   components: {
+    AppLogo,
     ReorderLibraries,
     LibrariesActionsMenu,
     ToasterNotification,
@@ -416,7 +404,6 @@ export default Vue.extend({
   },
   data: function () {
     return {
-      nextUrl: `${urls.originNoSlash}/next`,
       LIBRARIES_ALL,
       drawerVisible: this.$vuetify.breakpoint.lgAndUp,
       locales: this.$i18n.availableLocales.map((x: any) => ({text: this.$i18n.t('common.locale_name', x), value: x})),
@@ -453,6 +440,9 @@ export default Vue.extend({
     },
   },
   computed: {
+    siteName(): string {
+      return this.$store.getters.siteName
+    },
     taskCount(): number {
       return this.$store.state.komgaSse.taskCount
     },

@@ -526,6 +526,7 @@
 
 <script lang="ts">
 import ItemCard from '@/components/ItemCard.vue'
+import {siteTitle} from '@/functions/branding'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import {groupAuthorsByRole} from '@/functions/authors'
 import {getBookFormatFromMedia, getBookReadRouteFromMedia} from '@/functions/book-format'
@@ -823,7 +824,7 @@ export default Vue.extend({
         .then(v => this.readLists = v)
 
       if (this.$_.has(this.book, 'metadata.title')) {
-        document.title = `Komga - ${getBookTitleCompact(this.book.metadata.title, this.book.seriesTitle)}`
+        document.title = siteTitle(`${getBookTitleCompact(this.book.metadata.title, this.book.seriesTitle)}`)
       }
 
       if (this?.context.origin === ContextOrigin.READLIST) {

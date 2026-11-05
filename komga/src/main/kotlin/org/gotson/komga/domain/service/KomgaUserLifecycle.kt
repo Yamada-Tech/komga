@@ -6,7 +6,6 @@ import org.gotson.komga.domain.model.DomainEvent
 import org.gotson.komga.domain.model.DuplicateNameException
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.model.UserEmailAlreadyExistsException
-import org.gotson.komga.domain.persistence.AuthenticationActivityRepository
 import org.gotson.komga.domain.persistence.KomgaUserRepository
 import org.gotson.komga.domain.persistence.ReadProgressRepository
 import org.gotson.komga.domain.persistence.SyncPointRepository
@@ -26,7 +25,6 @@ private val logger = KotlinLogging.logger {}
 class KomgaUserLifecycle(
   private val userRepository: KomgaUserRepository,
   private val readProgressRepository: ReadProgressRepository,
-  private val authenticationActivityRepository: AuthenticationActivityRepository,
   private val syncPointRepository: SyncPointRepository,
   private val passwordEncoder: PasswordEncoder,
   private val tokenEncoder: TokenEncoder,
@@ -88,7 +86,6 @@ class KomgaUserLifecycle(
     transactionTemplate.executeWithoutResult {
       clientSettingsDtoDao.deleteByUserId(user.id)
       readProgressRepository.deleteByUserId(user.id)
-      authenticationActivityRepository.deleteByUser(user)
       syncPointRepository.deleteByUserId(user.id)
       userRepository.delete(user.id)
     }

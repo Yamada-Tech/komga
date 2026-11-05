@@ -45,6 +45,17 @@
                   </v-col>
                 </v-row>
 
+                <v-row>
+                  <v-col>
+                    <div class="text-body-2">{{ $t('dialog.edit_collection.label_public') }}</div>
+                    <v-checkbox
+                      v-model="form.public"
+                      :label="$t('dialog.edit_collection.field_public')"
+                      hide-details
+                    />
+                  </v-col>
+                </v-row>
+
               </v-container>
             </v-card>
           </v-tab-item>
@@ -115,6 +126,7 @@ export default Vue.extend({
       form: {
         name: '',
         ordered: false,
+        public: true,
       },
       poster: {
         selectedThumbnail: '',
@@ -164,6 +176,7 @@ export default Vue.extend({
       this.tab = 0
       this.form.name = collection.name
       this.form.ordered = collection.ordered
+      this.form.public = collection.public ?? true
 
       this.poster.selectedThumbnail = ''
       this.poster.deleteQueue = []
@@ -210,6 +223,7 @@ export default Vue.extend({
         const update = {
           name: this.form.name,
           ordered: this.form.ordered,
+          public: this.form.public,
         } as CollectionUpdateDto
 
         await this.$komgaCollections.patchCollection(this.collection.id, update)

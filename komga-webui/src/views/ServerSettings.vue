@@ -163,6 +163,53 @@
           </template>
         </v-text-field>
 
+        <v-divider class="mt-6 mb-4"/>
+
+        <span class="text-subtitle-1">{{ $t('server_settings.branding') }}</span>
+
+        <v-text-field
+          v-model="form.siteName"
+          @input="$v.form.siteName.$touch()"
+          @blur="$v.form.siteName.$touch()"
+          :placeholder="defaultSiteName"
+          :persistent-placeholder="true"
+          clearable
+          :label="$t('server_settings.label_site_name')"
+          :hint="$t('server_settings.hint_site_name')"
+          persistent-hint
+          class="mt-4"
+        />
+
+        <div class="mt-4">
+          <div class="text-body-2 mb-2">{{ $t('server_settings.label_logo') }}</div>
+          <div class="d-flex align-center">
+            <v-avatar tile size="72" color="grey lighten-4">
+              <v-img :src="logoPreviewSrc" contain/>
+            </v-avatar>
+            <div class="ml-4">
+              <v-btn small
+                     color="primary"
+                     outlined
+                     @click="pickLogo"
+              >{{ $t('server_settings.btn_upload_logo') }}
+              </v-btn>
+              <v-btn small
+                     outlined
+                     class="ml-2"
+                     :disabled="!logoAvailable"
+                     @click="removeLogo"
+              >{{ $t('server_settings.btn_delete_logo') }}
+              </v-btn>
+              <input ref="logoInput"
+                     hidden
+                     type="file"
+                     accept="image/png"
+                     @change="logoFileSelected">
+            </div>
+          </div>
+          <div class="text-caption mt-2">{{ $t('server_settings.hint_logo') }}</div>
+        </div>
+
       </v-col>
     </v-row>
     <v-row>
@@ -191,6 +238,17 @@
       @confirm="regenerateThumbnails(true)"
       @alternate="regenerateThumbnails(false)"
     />
+
+    <v-snackbar v-model="snackbar">
+      {{ snackText }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text
+               v-bind="attrs"
+               @click="snackbar = false"
+        >{{ $t('common.close') }}
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -200,6 +258,8 @@ import Vue from 'vue'
 import {helpers, maxValue, minValue, required} from 'vuelidate/lib/validators'
 import ConfirmationDialog from '@/components/dialogs/ConfirmationDialog.vue'
 import FileBrowserDialog from '@/components/dialogs/FileBrowserDialog.vue'
+import {DEFAULT_SITE_NAME, logoUrl} from '@/functions/branding'
+import defaultLogo from '../assets/logo.svg'
 
 const contextPath = helpers.regex('contextPath', /^\/[-a-zA-Z0-9_\/]*[a-zA-Z0-9]$/)
 
@@ -219,10 +279,15 @@ export default Vue.extend({
       koboProxy: false,
       koboPort: undefined,
       kepubifyPath: undefined,
+      siteName: '',
     },
     existingSettings: {} as SettingsDto,
     dialogRegenerateThumbnails: false,
     modalFileBrowserKepubify: false,
+    defaultSiteName: DEFAULT_SITE_NAME,
+    snackbar: false,
+    snackText: '',
+    logoPendingUpload: false,
   }),
   validations: {
     form: {
@@ -251,12 +316,19 @@ export default Vue.extend({
         maxValue: maxValue(65535),
       },
       kepubifyPath: {},
+      siteName: {},
     },
   },
   mounted() {
     this.refreshSettings()
   },
   computed: {
+    logoAvailable(): boolean {
+      return this.$store.getters.logoAvailable
+    },
+    logoPreviewSrc(): string {
+      return this.logoAvailable ? logoUrl(this.$store.getters.logoVersion) : defaultLogo
+    },
     thumbnailSizes(): any[] {
       return Object.keys(ThumbnailSizeDto).map(x => ({
         text: this.$t(`enums.thumbnail_size.${x}`),
@@ -309,8 +381,40 @@ export default Vue.extend({
       this.form.serverPort = settings.serverPort.databaseSource
       this.form.serverContextPath = settings.serverContextPath.databaseSource
       this.form.kepubifyPath = settings.kepubifyPath.databaseSource
+      this.form.siteName = settings.siteName ?? ''
       this.$_.merge(this.existingSettings, settings)
+      await this.$store.dispatch('getBranding')
+      this.logoPendingUpload = false
       this.$v.form.$reset()
+    },
+    pickLogo() {
+      (this.$refs.logoInput as HTMLInputElement).click()
+    },
+    async logoFileSelected(event: Event) {
+      const input = event.target as HTMLInputElement
+      const file = input.files?.item(0)
+      if (!file) return
+      try {
+        await this.$komgaSettings.uploadLogo(file)
+        await this.$store.dispatch('getBranding')
+        this.logoPendingUpload = true
+        this.snackText = this.$t('server_settings.logo_uploaded').toString()
+      } catch (e) {
+        this.snackText = (e as Error).message
+      } finally {
+        input.value = ''
+        this.snackbar = true
+      }
+    },
+    async removeLogo() {
+      try {
+        await this.$komgaSettings.deleteLogo()
+        await this.$store.dispatch('getBranding')
+        this.snackText = this.$t('server_settings.logo_deleted').toString()
+      } catch (e) {
+        this.snackText = (e as Error).message
+      }
+      this.snackbar = true
     },
     async saveSettings() {
       const newSettings = {}
@@ -341,7 +445,9 @@ export default Vue.extend({
         this.$_.merge(newSettings, {koboPort: this.form.koboPort})
       if (this.$v.form?.kepubifyPath?.$dirty)
         this.$_.merge(newSettings, {kepubifyPath: this.form.kepubifyPath})
-
+      if (this.$v.form?.siteName?.$dirty)
+        // empty string means: revert to the default site name
+        this.$_.merge(newSettings, {siteName: this.form.siteName || null})
 
       await this.$komgaSettings.updateSettings(newSettings)
       await this.refreshSettings()

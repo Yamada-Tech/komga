@@ -60,6 +60,7 @@
 
 <script lang="ts">
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
+import {siteTitle} from '@/functions/branding'
 import ItemBrowser from '@/components/ItemBrowser.vue'
 import LibraryNavigation from '@/components/LibraryNavigation.vue'
 import LibraryActionsMenu from '@/components/menus/LibraryActionsMenu.vue'
@@ -218,7 +219,7 @@ export default Vue.extend({
       }
     },
     async loadLibrary(libraryId: string) {
-      if (this.library != undefined) document.title = `Komga - ${this.library.name}`
+      if (this.library != undefined) document.title = siteTitle(`${this.library.name}`)
       await this.loadPage(libraryId, this.page)
 
       if (this.totalElements === 0) {

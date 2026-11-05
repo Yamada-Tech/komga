@@ -54,5 +54,8 @@ class SettingsUpdateDto {
 
   var nextUiAsDefault: Boolean? = null
 
-  var siteName: String? = null
+  var siteName: String?
+    by Delegates.observable(null) { prop, _, _ ->
+      isSet[prop.name] = true
+    }
 }

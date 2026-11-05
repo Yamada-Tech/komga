@@ -306,6 +306,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import {siteTitle} from '@/functions/branding'
 import D2Reader, {Locator} from '@d-i-t-a/reader'
 import urls, {bookManifestUrl, bookPositionsUrl} from '@/functions/urls'
 import {BookDto} from '@/types/komga-books'
@@ -740,10 +741,10 @@ export default Vue.extend({
         this.book.context = this.context
         if (this?.context.origin === ContextOrigin.READLIST) {
           this.contextName = (await (this.$komgaReadLists.getOneReadList(this.context.id))).name
-          document.title = `Komga - ${this.contextName} - ${this.book.metadata.title}`
+          document.title = siteTitle(`${this.contextName} - ${this.book.metadata.title}`)
         }
       } else {
-        document.title = `Komga - ${this.bookTitle}`
+        document.title = siteTitle(`${this.bookTitle}`)
       }
 
       // parse query params to get incognito mode

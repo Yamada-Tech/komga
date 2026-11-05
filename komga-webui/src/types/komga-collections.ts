@@ -2,6 +2,7 @@ interface CollectionDto {
   id: string,
   name: string,
   ordered: boolean,
+  public: boolean,
   filtered: boolean,
   seriesIds: string[],
   createdDate: Date,
@@ -11,12 +12,14 @@ interface CollectionDto {
 interface CollectionCreationDto {
   name: string,
   ordered: boolean,
+  public?: boolean,
   seriesIds: string[]
 }
 
 interface CollectionUpdateDto {
   name?: string,
   ordered?: boolean,
+  public?: boolean,
   seriesIds?: string[]
 }
 

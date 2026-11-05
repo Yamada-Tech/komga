@@ -12,6 +12,7 @@ import org.gotson.komga.infrastructure.kobo.KepubConverter
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
 import org.gotson.komga.infrastructure.web.WebServerEffectiveSettings
+import org.gotson.komga.interfaces.api.rest.dto.BrandingDto
 import org.gotson.komga.interfaces.api.rest.dto.SettingMultiSource
 import org.gotson.komga.interfaces.api.rest.dto.SettingsDto
 import org.gotson.komga.interfaces.api.rest.dto.SettingsUpdateDto
@@ -25,6 +26,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -70,6 +72,8 @@ class SettingsController(
         SettingMultiSource(kepubConverter.kepubifyConfigurationPath, komgaSettingsProvider.kepubifyPath, kepubConverter.kepubifyPath?.toString()),
         multipartProperties.maxFileSize?.toBytes(),
         komgaSettingsProvider.nextUiAsDefault,
+        komgaSettingsProvider.siteName,
+        komgaSettingsProvider.logoImage,
       )
 
     return if (principal.user.isAdmin) settingsDto else settingsDto.public()
@@ -98,8 +102,16 @@ class SettingsController(
     if (newSettings.isSet("koboPort")) komgaSettingsProvider.koboPort = newSettings.koboPort
     if (newSettings.isSet("kepubifyPath")) komgaSettingsProvider.kepubifyPath = newSettings.kepubifyPath
     newSettings.nextUiAsDefault?.let { komgaSettingsProvider.nextUiAsDefault = it }
-    newSettings.siteName?.let { komgaSettingsProvider.siteName = it }
+    if (newSettings.isSet("siteName")) komgaSettingsProvider.siteName = newSettings.siteName?.ifBlank { null }
   }
+
+  @GetMapping("branding", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @Operation(summary = "Retrieve branding information", description = "Retrieve the site name and whether a custom logo is available. Accessible without authentication.")
+  fun getBranding(): BrandingDto =
+    BrandingDto(
+      siteName = komgaSettingsProvider.siteName,
+      logoAvailable = komgaSettingsProvider.logoImage != null,
+    )
 
   @PostMapping("logo")
   @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -131,5 +143,14 @@ class SettingsController(
     val logoFileName = komgaSettingsProvider.logoImage ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     val logoBytes = logoImageService.getLogoImage(logoFileName) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(logoBytes)
+  }
+
+  @DeleteMapping("logo")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Delete logo image", description = "Delete the currently uploaded logo image and fall back to the default logo")
+  @PreAuthorize("hasRole('ADMIN')")
+  fun deleteLogo() {
+    komgaSettingsProvider.logoImage?.let { logoImageService.deleteLogoImage(it) }
+    komgaSettingsProvider.logoImage = null
   }
 }

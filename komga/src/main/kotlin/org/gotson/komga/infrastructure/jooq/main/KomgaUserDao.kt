@@ -97,6 +97,7 @@ class KomgaUserDao(
           id = userRecord.id,
           createdDate = userRecord.createdDate.toCurrentTimeZone(),
           lastModifiedDate = userRecord.lastModifiedDate.toCurrentTimeZone(),
+          lastLoginDate = userRecord.lastLoginDate?.toCurrentTimeZone(),
         )
       }
 
@@ -170,6 +171,14 @@ class KomgaUserDao(
     dslRW.insertRoles(user)
     dslRW.insertSharedLibraries(user)
     dslRW.insertSharingRestrictions(user)
+  }
+
+  override fun updateLastLoginDate(userId: String) {
+    dslRW
+      .update(u)
+      .set(u.LAST_LOGIN_DATE, LocalDateTime.now(ZoneId.of("Z")))
+      .where(u.ID.eq(userId))
+      .execute()
   }
 
   override fun saveAnnouncementIdsRead(

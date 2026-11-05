@@ -16,15 +16,25 @@ data class SettingsDto(
   val kepubifyPath: SettingMultiSource<String>? = null,
   val maxUploadFileSizeBytes: Long? = null,
   val nextUiAsDefault: Boolean? = null,
+  val siteName: String? = null,
+  val logoImage: String? = null,
 )
 
 fun SettingsDto.public() =
   SettingsDto(
     maxUploadFileSizeBytes = this.maxUploadFileSizeBytes,
+    siteName = this.siteName,
+    logoImage = this.logoImage,
   )
 
 data class SettingMultiSource<T>(
   val configurationSource: T?,
   val databaseSource: T?,
   val effectiveValue: T?,
+)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class BrandingDto(
+  val siteName: String? = null,
+  val logoAvailable: Boolean = false,
 )

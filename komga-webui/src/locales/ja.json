@@ -34,15 +34,13 @@
     "mark_read": "既読にする",
     "tab_title": "お知らせ"
   },
-  "authentication_activity": {
-    "api_key": "APIキー",
-    "datetime": "日 / 時",
-    "email": "メールアドレス",
-    "error": "エラー",
-    "ip": "IP",
-    "source": "ソース",
-    "success": "成功",
-    "user_agent": "ユーザーエージェント"
+  "recent_reads": {
+    "book": "本",
+    "progress": "進捗",
+    "read_date": "読んだ日時",
+    "series": "シリーズ",
+    "title": "ユーザの最近の閲覧",
+    "user": "ユーザ"
   },
   "author_roles": {
     "colorist": "カラリスト",
@@ -187,6 +185,9 @@
     "remove_from_collection": "コレクションから本を削除",
     "remove_from_readlist": "読書リストから本を削除",
     "size": "サイズ"
+  },
+  "browse_collections": {
+    "checkbox_show_private_collections": "非公開コレクションも表示"
   },
   "browse_collection": {
     "edit_collection": "コレクションの編集",
@@ -449,7 +450,9 @@
       "button_confirm": "変更を保存",
       "dialog_title": "コレクションを編集",
       "field_manual_ordering": "手動で並べる",
+      "field_public": "公開コレクション",
       "label_ordering": "コレクション中のシリーズは、デフォルトでは名前順に並びます。並び順を自分で決めるために、手動で並べることができます。",
+      "label_public": "公開コレクションはすべてのユーザーに表示されます。非公開のコレクションは管理者のみに表示されます。",
       "tab_general": "一般",
       "tab_poster": "ポスター"
     },
@@ -931,8 +934,7 @@
     "collections": "コレクション",
     "home": "ホーム",
     "libraries": "ライブラリ",
-    "logout": "ログアウト",
-    "try_new_ui": "新しい UI をお試しください"
+    "logout": "ログアウト"
   },
   "no_libraries_pinned": {
     "subtitle": "ライブラリは3点メニューからピン留めできます",
@@ -1003,7 +1005,16 @@
     "label_task_pool_size": "タスクのスレッド数",
     "label_thumbnail_size": "サムネイルサイズ",
     "requires_restart": "変更の適用には再起動が必要です",
-    "server_settings": "サーバ設定"
+    "server_settings": "サーバ設定",
+    "branding": "ブランディング",
+    "label_site_name": "サイト名",
+    "hint_site_name": "ブラウザのタイトルやサイドバーに表示される名前を変更します。空の場合はデフォルトです。",
+    "label_logo": "ロゴ",
+    "btn_upload_logo": "ロゴをアップロード",
+    "btn_delete_logo": "ロゴを削除",
+    "hint_logo": "512x512のPNG画像である必要があります。サイドバー、ログイン画面、ファビコンに使用されます。",
+    "logo_uploaded": "ロゴをアップロードしました",
+    "logo_deleted": "ロゴを削除しました。デフォルトのロゴを使用します"
   },
   "settings_user": {
     "change_password": "パスワードを変更",
@@ -1077,7 +1088,6 @@
   },
   "users": {
     "api_keys": "APIキー",
-    "authentication_activity": "認証アクティビティ",
     "users": "ユーザ"
   },
   "validation": {

@@ -23,14 +23,14 @@
             <v-list-item-title>
               {{ u.email }}
             </v-list-item-title>
-            <v-list-item-subtitle v-if="usersLastActivity[u.id] !== undefined">
+            <v-list-item-subtitle v-if="u.lastLoginDate">
               {{
                 $t('settings_user.latest_activity', {
                   date:
                     new Intl.DateTimeFormat($i18n.locale, {
                       dateStyle: 'medium',
                       timeStyle: 'short'
-                    }).format(usersLastActivity[u.id])
+                    }).format(u.lastLoginDate)
                 })
               }}
             </v-list-item-subtitle>
@@ -148,7 +148,6 @@ export default Vue.extend({
     userToEdit: {} as UserDto,
     modalChangePassword: false,
     userToChangePassword: {} as UserDto,
-    usersLastActivity: {} as any,
   }),
   computed: {
     users(): UserDto[] {
@@ -156,16 +155,6 @@ export default Vue.extend({
     },
     me(): UserDto {
       return this.$store.state.komgaUsers.me
-    },
-  },
-  watch: {
-    users(val) {
-      val.forEach((u: UserDto) => {
-        this.$komgaUsers.getLatestAuthenticationActivityForUser(u.id)
-          .then(value => this.$set(this.usersLastActivity, `${u.id}`, value.dateTime))
-          .catch(e => {
-          })
-      })
     },
   },
   async mounted() {

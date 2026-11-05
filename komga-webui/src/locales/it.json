@@ -931,8 +931,7 @@
     "collections": "Raccolte",
     "home": "Home",
     "libraries": "Librerie",
-    "logout": "Esci",
-    "try_new_ui": "Prova la nuova interfaccia"
+    "logout": "Esci"
   },
   "no_libraries_pinned": {
     "subtitle": "Puoi bloccare una libreria dal menu a 3 punti",

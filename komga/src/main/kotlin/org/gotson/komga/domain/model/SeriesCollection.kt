@@ -10,6 +10,11 @@ data class SeriesCollection(
    */
   val ordered: Boolean = false,
   val seriesIds: List<String> = emptyList(),
+  /**
+   * Indicates whether the collection is visible to non-admin users.
+   * A private collection is only visible to administrators.
+   */
+  val public: Boolean = true,
   val id: String = TsidCreator.getTsid256().toString(),
   override val createdDate: LocalDateTime = LocalDateTime.now(),
   override val lastModifiedDate: LocalDateTime = createdDate,

@@ -2,9 +2,10 @@
   <div class="ma-3">
     <v-container style="max-width: 550px">
       <v-row align="center" justify="center" class="ma-3">
-        <v-img src="../assets/logo.svg"
-               :max-width="logoWidth"
-        />
+        <app-logo :max-width="logoWidth"/>
+      </v-row>
+      <v-row align="center" justify="center" class="mb-3">
+        <div class="text-h5">{{ siteName }}</div>
       </v-row>
 
       <form novalidate @submit.prevent="performLogin">
@@ -137,6 +138,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import AppLogo from '@/components/AppLogo.vue'
 import {email, required} from 'vuelidate/lib/validators'
 import {Theme} from '@/types/themes'
 import {OAuth2ClientDto} from '@/types/komga-oauth2'
@@ -147,6 +149,7 @@ import {CLIENT_SETTING} from '@/types/komga-clientsettings'
 
 export default Vue.extend({
   name: 'LoginView',
+  components: {AppLogo},
   data: function () {
     return {
       urls,
@@ -170,6 +173,9 @@ export default Vue.extend({
     },
   },
   computed: {
+    siteName(): string {
+      return this.$store.getters.siteName
+    },
     hideLogin(): boolean {
       return !this.unclaimed
         && this.oauth2Providers.length > 0

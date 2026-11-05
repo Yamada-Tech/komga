@@ -2,14 +2,12 @@ import {AxiosInstance} from 'axios'
 import {
   ApiKeyDto,
   ApiKeyRequestDto,
-  AuthenticationActivityDto,
   PasswordUpdateDto,
+  RecentReadDto,
   UserCreationDto,
   UserDto,
   UserUpdateDto,
 } from '@/types/komga-users'
-
-const qs = require('qs')
 
 const API_USERS = '/api/v2/users'
 
@@ -134,46 +132,12 @@ export default class KomgaUsersService {
     }
   }
 
-  async getMyAuthenticationActivity(pageRequest?: PageRequest): Promise<Page<AuthenticationActivityDto>> {
+  async getRecentReads(limit = 10): Promise<RecentReadDto[]> {
     try {
-      return (await this.http.get(`${API_USERS}/me/authentication-activity`, {
-        params: pageRequest,
-        paramsSerializer: params => qs.stringify(params, {indices: false}),
-      })).data
+      return (await this.http.get(`${API_USERS}/recent-reads`, {params: {limit}})).data
     } catch (e) {
-      let msg = 'An error occurred while trying to retrieve authentication activity'
-      if (e.response.data.message) {
-        msg += `: ${e.response.data.message}`
-      }
-      throw new Error(msg)
-    }
-  }
-
-  async getAuthenticationActivity(pageRequest?: PageRequest): Promise<Page<AuthenticationActivityDto>> {
-    try {
-      return (await this.http.get(`${API_USERS}/authentication-activity`, {
-        params: pageRequest,
-        paramsSerializer: params => qs.stringify(params, {indices: false}),
-      })).data
-    } catch (e) {
-      let msg = 'An error occurred while trying to retrieve authentication activity'
-      if (e.response.data.message) {
-        msg += `: ${e.response.data.message}`
-      }
-      throw new Error(msg)
-    }
-  }
-
-  async getLatestAuthenticationActivityForUser(userId: string, apiKeyId?: string): Promise<AuthenticationActivityDto> {
-    try {
-      const params = {} as any
-      if (apiKeyId) {
-        params.apikey_id = apiKeyId
-      }
-      return (await this.http.get(`${API_USERS}/${userId}/authentication-activity/latest`, {params: params})).data
-    } catch (e) {
-      let msg = `An error occurred while trying to retrieve latest authentication activity for user ${userId}`
-      if (e.response.data.message) {
+      let msg = 'An error occurred while trying to retrieve recent reads'
+      if (e.response?.data?.message) {
         msg += `: ${e.response.data.message}`
       }
       throw new Error(msg)

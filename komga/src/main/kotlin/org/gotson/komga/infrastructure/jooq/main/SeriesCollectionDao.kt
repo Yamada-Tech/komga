@@ -20,6 +20,7 @@ import org.gotson.komga.language.toCurrentTimeZone
 import org.jooq.DSLContext
 import org.jooq.Record
 import org.jooq.ResultQuery
+import org.jooq.impl.DSL
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
@@ -55,12 +56,14 @@ class SeriesCollectionDao(
   override fun findByIdOrNull(
     collectionId: String,
     context: SearchContext,
+    includePrivate: Boolean,
   ): SeriesCollection? =
     dslRO
       .selectBase(context.restrictions.isRestricted)
       .where(c.ID.eq(collectionId))
       .apply { context.libraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
       .apply { if (context.restrictions.isRestricted) and(context.restrictions.toCondition()) }
+      .apply { if (!includePrivate) and(c.PUBLIC.eq(true)) }
       .fetchAndMap(dslRO, context.libraryIds, context.restrictions)
       .firstOrNull()
 
@@ -69,15 +72,18 @@ class SeriesCollectionDao(
     pageable: Pageable,
     belongsToLibraryIds: Collection<String>?,
     search: String?,
+    includePrivate: Boolean,
   ): Page<SeriesCollection> {
     val collectionIds = luceneHelper.searchEntitiesIds(search, LuceneEntity.Collection)
     val searchCondition = c.ID.inOrNoCondition(collectionIds)
+    val publicCondition = if (includePrivate) DSL.noCondition() else c.PUBLIC.eq(true)
 
     val conditions =
       searchCondition
         .and(s.LIBRARY_ID.inOrNoCondition(belongsToLibraryIds))
         .and(s.LIBRARY_ID.inOrNoCondition(context.libraryIds))
         .and(context.restrictions.toCondition())
+        .and(publicCondition)
 
     val queryIds =
       if (belongsToLibraryIds == null && context.libraryIds == null && !context.restrictions.isRestricted)
@@ -118,7 +124,7 @@ class SeriesCollectionDao(
       when {
         pageable.isUnpaged -> items.size
         queryIds != null -> dslRO.fetchCount(queryIds)
-        else -> dslRO.fetchCount(c, searchCondition)
+        else -> dslRO.fetchCount(c, searchCondition.and(publicCondition))
       }
 
     val pageSort = if (orderBy.isNotEmpty()) pageable.sort else Sort.unsorted()
@@ -135,6 +141,7 @@ class SeriesCollectionDao(
   override fun findAllContainingSeriesId(
     containsSeriesId: String,
     context: SearchContext,
+    includePrivate: Boolean,
   ): Collection<SeriesCollection> {
     val queryIds =
       dslRO
@@ -151,6 +158,7 @@ class SeriesCollectionDao(
       .where(c.ID.`in`(queryIds))
       .apply { context.libraryIds?.let { and(s.LIBRARY_ID.`in`(it)) } }
       .apply { if (context.restrictions.isRestricted) and(context.restrictions.toCondition()) }
+      .apply { if (!includePrivate) and(c.PUBLIC.eq(true)) }
       .fetchAndMap(dslRO, context.libraryIds, context.restrictions)
   }
 
@@ -217,6 +225,7 @@ class SeriesCollectionDao(
       .set(c.NAME, collection.name)
       .set(c.ORDERED, collection.ordered)
       .set(c.SERIES_COUNT, collection.seriesIds.size)
+      .set(c.PUBLIC, collection.public)
       .execute()
 
     dslRW.insertSeries(collection)
@@ -240,6 +249,7 @@ class SeriesCollectionDao(
       .set(c.NAME, collection.name)
       .set(c.ORDERED, collection.ordered)
       .set(c.SERIES_COUNT, collection.seriesIds.size)
+      .set(c.PUBLIC, collection.public)
       .set(c.LAST_MODIFIED_DATE, LocalDateTime.now(ZoneId.of("Z")))
       .where(c.ID.eq(collection.id))
       .execute()
@@ -299,6 +309,7 @@ class SeriesCollectionDao(
       name = name,
       ordered = ordered,
       seriesIds = seriesIds,
+      public = public,
       id = id,
       createdDate = createdDate.toCurrentTimeZone(),
       lastModifiedDate = lastModifiedDate.toCurrentTimeZone(),

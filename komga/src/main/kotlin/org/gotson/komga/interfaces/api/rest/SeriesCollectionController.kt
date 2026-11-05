@@ -84,6 +84,7 @@ class SeriesCollectionController(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @RequestParam(name = "search", required = false) searchTerm: String?,
     @RequestParam(name = "library_id", required = false) libraryIds: List<String>?,
+    @RequestParam(name = "show_public_collections", required = false) showPublicCollections: Boolean? = null,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) page: Pageable,
   ): Page<CollectionDto> {
@@ -104,9 +105,20 @@ class SeriesCollectionController(
           sort,
         )
 
+    val includePrivate =
+      when {
+        !principal.user.isAdmin -> false
+        else -> showPublicCollections ?: true
+      }
+
     return collectionRepository
-      .findAll(SearchContext(principal.user), pageRequest, principal.user.getAuthorizedLibraryIds(libraryIds), searchTerm)
-      .map { it.toDto() }
+      .findAll(
+        SearchContext(principal.user),
+        pageRequest,
+        principal.user.getAuthorizedLibraryIds(libraryIds),
+        searchTerm,
+        includePrivate,
+      ).map { it.toDto() }
   }
 
   @Operation(summary = "Get collection details", tags = [OpenApiConfiguration.TagNames.COLLECTIONS])
@@ -116,7 +128,7 @@ class SeriesCollectionController(
     @PathVariable id: String,
   ): CollectionDto =
     collectionRepository
-      .findByIdOrNull(id, SearchContext(principal.user))
+      .findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)
       ?.toDto()
       ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
@@ -127,7 +139,7 @@ class SeriesCollectionController(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @PathVariable id: String,
   ): ResponseEntity<ByteArray> {
-    collectionRepository.findByIdOrNull(id, SearchContext(principal.user))?.let {
+    collectionRepository.findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)?.let {
       return ResponseEntity
         .ok()
         .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate())
@@ -143,7 +155,7 @@ class SeriesCollectionController(
     @PathVariable(name = "id") id: String,
     @PathVariable(name = "thumbnailId") thumbnailId: String,
   ): ByteArray {
-    collectionRepository.findByIdOrNull(id, SearchContext(principal.user))?.let { collection ->
+    collectionRepository.findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)?.let { collection ->
       thumbnailSeriesCollectionRepository.findByIdOrNull(thumbnailId)?.let { poster ->
         if (poster.collectionId != collection.id) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         return poster.thumbnail
@@ -157,7 +169,7 @@ class SeriesCollectionController(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @PathVariable(name = "id") id: String,
   ): Collection<ThumbnailSeriesCollectionDto> {
-    collectionRepository.findByIdOrNull(id, SearchContext(principal.user))?.let {
+    collectionRepository.findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)?.let {
       return thumbnailSeriesCollectionRepository.findAllByCollectionId(id).map { it.toDto() }
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
@@ -171,7 +183,7 @@ class SeriesCollectionController(
     @RequestParam("file") file: MultipartFile,
     @RequestParam("selected") selected: Boolean = true,
   ): ThumbnailSeriesCollectionDto {
-    collectionRepository.findByIdOrNull(id, SearchContext(principal.user))?.let { collection ->
+    collectionRepository.findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)?.let { collection ->
 
       val mediaType = file.inputStream.buffered().use { contentDetector.detectMediaType(it) }
       if (!contentDetector.isImage(mediaType))
@@ -201,7 +213,7 @@ class SeriesCollectionController(
     @PathVariable(name = "id") id: String,
     @PathVariable(name = "thumbnailId") thumbnailId: String,
   ) {
-    collectionRepository.findByIdOrNull(id, SearchContext(principal.user))?.let { collection ->
+    collectionRepository.findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)?.let { collection ->
       thumbnailSeriesCollectionRepository.findByIdOrNull(thumbnailId)?.let { poster ->
         if (poster.collectionId != collection.id) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         collectionLifecycle.markSelectedThumbnail(poster)
@@ -219,7 +231,7 @@ class SeriesCollectionController(
     @PathVariable(name = "id") id: String,
     @PathVariable(name = "thumbnailId") thumbnailId: String,
   ) {
-    collectionRepository.findByIdOrNull(id, SearchContext(principal.user))?.let { collection ->
+    collectionRepository.findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)?.let { collection ->
       thumbnailSeriesCollectionRepository.findByIdOrNull(thumbnailId)?.let { poster ->
         if (poster.collectionId != collection.id) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         collectionLifecycle.deleteThumbnail(poster)
@@ -241,6 +253,7 @@ class SeriesCollectionController(
             name = collection.name,
             ordered = collection.ordered,
             seriesIds = collection.seriesIds,
+            public = collection.public,
           ),
         ).toDto()
     } catch (e: DuplicateNameException) {
@@ -262,6 +275,7 @@ class SeriesCollectionController(
         existing.copy(
           name = collection.name ?: existing.name,
           ordered = collection.ordered ?: existing.ordered,
+          public = collection.public ?: existing.public,
           seriesIds = collection.seriesIds ?: existing.seriesIds,
         )
       try {
@@ -307,7 +321,7 @@ class SeriesCollectionController(
     @Parameter(hidden = true) @Authors authors: List<Author>?,
     @Parameter(hidden = true) page: Pageable,
   ): Page<SeriesDto> =
-    collectionRepository.findByIdOrNull(id, SearchContext(principal.user))?.let { collection ->
+    collectionRepository.findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)?.let { collection ->
       val sort =
         if (collection.ordered)
           Sort.by(Sort.Order.asc("collection.number"))

@@ -931,8 +931,7 @@
     "collections": "收藏",
     "home": "主页",
     "libraries": "库",
-    "logout": "退出登录",
-    "try_new_ui": "试用新的用户界面"
+    "logout": "退出登录"
   },
   "no_libraries_pinned": {
     "subtitle": "您可以通过3点菜单中固定库",

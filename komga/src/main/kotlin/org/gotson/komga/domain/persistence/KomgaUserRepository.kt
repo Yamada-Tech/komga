@@ -34,6 +34,8 @@ interface KomgaUserRepository {
 
   fun update(user: KomgaUser)
 
+  fun updateLastLoginDate(userId: String)
+
   fun delete(userId: String)
 
   fun deleteAll()

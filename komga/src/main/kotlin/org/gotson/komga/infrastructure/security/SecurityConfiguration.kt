@@ -97,6 +97,9 @@ class SecurityConfiguration(
             "/opds/v2/auth",
             // KOReader user creation
             "/koreader/users/create",
+            // branding (site name and logo) - used by the login page and the HTML shell, so must be accessible anonymously
+            "/api/v1/settings/branding",
+            "/api/v1/settings/logo",
           ).permitAll()
 
         // all other endpoints are restricted to authenticated users

@@ -34,15 +34,13 @@
     "mark_read": "Mark as read",
     "tab_title": "Announcements"
   },
-  "authentication_activity": {
-    "api_key": "API Key",
-    "datetime": "Date Time",
-    "email": "Email",
-    "error": "Error",
-    "ip": "IP",
-    "source": "Source",
-    "success": "Success",
-    "user_agent": "User Agent"
+  "recent_reads": {
+    "book": "Book",
+    "progress": "Progress",
+    "read_date": "Read date",
+    "series": "Series",
+    "title": "Recently Read by Users",
+    "user": "User"
   },
   "author_roles": {
     "colorist": "colorists",
@@ -187,6 +185,9 @@
     "remove_from_collection": "Remove book from collection",
     "remove_from_readlist": "Remove book from read list",
     "size": "SIZE"
+  },
+  "browse_collections": {
+    "checkbox_show_private_collections": "Show private collections"
   },
   "browse_collection": {
     "edit_collection": "Edit collection",
@@ -449,7 +450,9 @@
       "button_confirm": "Save changes",
       "dialog_title": "Edit collection",
       "field_manual_ordering": "Manual ordering",
+      "field_public": "Public collection",
       "label_ordering": "By default, series in a collection will be ordered by name. You can enable manual ordering to define your own order.",
+      "label_public": "Public collections are visible to all users. Private collections are only visible to administrators.",
       "tab_general": "General",
       "tab_poster": "Poster"
     },
@@ -931,8 +934,7 @@
     "collections": "Collections",
     "home": "Home",
     "libraries": "Libraries",
-    "logout": "Log Out",
-    "try_new_ui": "Try the new UI"
+    "logout": "Log Out"
   },
   "no_libraries_pinned": {
     "title": "No pinned libraries",
@@ -1003,7 +1005,16 @@
     "label_task_pool_size": "Task threads",
     "label_thumbnail_size": "Thumbnails size",
     "requires_restart": "Requires restart to take effect",
-    "server_settings": "Server Settings"
+    "server_settings": "Server Settings",
+    "branding": "Branding",
+    "label_site_name": "Site name",
+    "hint_site_name": "Customizes the name shown in the browser title and the sidebar. Leave empty for the default.",
+    "label_logo": "Logo",
+    "btn_upload_logo": "Upload logo",
+    "btn_delete_logo": "Delete logo",
+    "hint_logo": "Must be a 512x512 PNG image. Used for the sidebar, login screen, and favicon.",
+    "logo_uploaded": "Logo uploaded",
+    "logo_deleted": "Logo deleted, using the default one"
   },
   "settings_user": {
     "change_password": "Change password",
@@ -1077,7 +1088,6 @@
   },
   "users": {
     "api_keys": "API Keys",
-    "authentication_activity": "Authentication Activity",
     "users": "Users"
   },
   "validation": {

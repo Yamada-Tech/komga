@@ -155,7 +155,7 @@ class Opds2Controller(
   ): List<WPLinkDto> {
     val uriBuilder = uriBuilder("libraries${if (libraryId != null) "/$libraryId" else ""}")
 
-    val collections = collectionRepository.findAll(SearchContext(user), Pageable.ofSize(1), libraryId?.let { listOf(it) })
+    val collections = collectionRepository.findAll(SearchContext(user), Pageable.ofSize(1), libraryId?.let { listOf(it) }, includePrivate = user.isAdmin)
     val readLists = readListRepository.findAll(SearchContext(user), Pageable.ofSize(1), user.getAuthorizedLibraryIds(libraryId?.let { listOf(it) }))
 
     return listOfNotNull(
@@ -562,7 +562,7 @@ class Opds2Controller(
     @PathVariable id: String,
     @Parameter(hidden = true) page: Pageable,
   ): FeedDto =
-    collectionRepository.findByIdOrNull(id, SearchContext(principal.user))?.let { collection ->
+    collectionRepository.findByIdOrNull(id, SearchContext(principal.user), includePrivate = principal.user.isAdmin)?.let { collection ->
       val sort =
         if (collection.ordered)
           Sort.by(Sort.Order.asc("collection.number"))

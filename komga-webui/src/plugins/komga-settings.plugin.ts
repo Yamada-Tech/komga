@@ -1,6 +1,8 @@
 import {AxiosInstance} from 'axios'
 import _Vue from 'vue'
 import KomgaSettingsService from '@/services/komga-settings.service'
+import {BrandingDto} from '@/types/komga-settings'
+import {applyFavicon, DEFAULT_SITE_NAME, setSiteName} from '@/functions/branding'
 import {Module} from 'vuex'
 import {
   CLIENT_SETTING,
@@ -16,8 +18,22 @@ const vuexModule: Module<any, any> = {
   state: {
     clientSettingsGlobal: {} as Record<string, ClientSettingDto>,
     clientSettingsUser: {} as Record<string, ClientSettingDto>,
+    branding: {} as BrandingDto,
+    brandingLoadedAt: 0,
   },
   getters: {
+    getBranding(state): BrandingDto {
+      return state.branding
+    },
+    siteName(state): string {
+      return state.branding.siteName || DEFAULT_SITE_NAME
+    },
+    logoAvailable(state): boolean {
+      return !!state.branding.logoAvailable
+    },
+    logoVersion(state): number {
+      return state.brandingLoadedAt
+    },
     getClientSettings(state): Record<string, ClientSettingDto> {
       return {...state.clientSettingsGlobal, ...state.clientSettingsUser}
     },
@@ -31,6 +47,10 @@ const vuexModule: Module<any, any> = {
     },
   },
   mutations: {
+    setBranding(state, branding: BrandingDto) {
+      state.branding = branding
+      state.brandingLoadedAt = Date.now()
+    },
     setClientSettingsGlobal(state, settings) {
       state.clientSettingsGlobal = settings
     },
@@ -39,6 +59,12 @@ const vuexModule: Module<any, any> = {
     },
   },
   actions: {
+    async getBranding({commit}) {
+      const branding = await service.getBranding()
+      commit('setBranding', branding)
+      setSiteName(branding.siteName)
+      applyFavicon(branding.logoAvailable)
+    },
     async getClientSettingsGlobal({commit}) {
       commit('setClientSettingsGlobal', await service.getClientSettingsGlobal())
     },
