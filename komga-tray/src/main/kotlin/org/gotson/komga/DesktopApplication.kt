@@ -2,6 +2,7 @@ package org.gotson.komga
 
 import org.gotson.komga.application.gui.showErrorDialog
 import org.gotson.komga.infrastructure.util.checkTempDirectory
+import org.gotson.komga.infrastructure.util.waitForRestartParent
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.web.server.PortInUseException
 import org.springframework.scheduling.annotation.EnableAsync

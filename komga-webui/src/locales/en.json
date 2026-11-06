@@ -615,6 +615,11 @@
       "no_results": "No Series found",
       "title": "Select Series"
     },
+    "server_optimize_restart": {
+      "button_confirm": "Optimize and restart",
+      "confirmation_message": "The databases will be optimized (VACUUM), then the server will be stopped and restarted automatically. Depending on the database size, this may take a while. Are you sure?",
+      "dialog_title": "Optimize databases and restart server"
+    },
     "server_stop": {
       "button_confirm": "Stop",
       "confirmation_message": "Are you sure you want to stop Komga?",
@@ -974,10 +979,14 @@
     "server_management": {
       "button_cancel_all_tasks": "Cancel all tasks",
       "button_empty_trash": "Empty trash for all libraries",
+      "button_optimize_and_restart": "Optimize databases and restart",
       "button_scan_libraries": "Scan all libraries",
       "button_scan_libraries_deep": "Scan all libraries (deep)",
       "button_shutdown": "Shut down",
       "download_log": "Download log file",
+      "notification_optimize_restart_done": "Databases optimized and server restarted. Reloading...",
+      "notification_optimize_restart_started": "Optimizing databases and restarting the server... The server will be unavailable for a while.",
+      "notification_optimize_restart_timeout": "The server did not come back up in time. Please check the server process and start it manually if needed.",
       "notification_tasks_cancelled": "No tasks to cancel | One task cancelled | {count} tasks cancelled",
       "section_title": "Server Management"
     },

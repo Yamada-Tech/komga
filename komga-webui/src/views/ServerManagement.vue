@@ -20,6 +20,16 @@
     </v-row>
     <v-row>
       <v-col cols="auto">
+        <v-btn @click="modalOptimizeAndRestart = true"
+               color="primary"
+               :disabled="restarting"
+               :loading="restarting"
+        >{{ $t('server.server_management.button_optimize_and_restart') }}
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="auto">
         <v-btn @click="modalStopServer = true"
                color="error"
         >{{ $t('server.server_management.button_shutdown') }}
@@ -34,6 +44,15 @@
       :button-confirm="$t('dialog.server_stop.button_confirm')"
       button-confirm-color="error"
       @confirm="stopServer"
+    />
+
+    <confirmation-dialog
+      v-model="modalOptimizeAndRestart"
+      :title="$t('dialog.server_optimize_restart.dialog_title')"
+      :body="$t('dialog.server_optimize_restart.confirmation_message')"
+      :button-confirm="$t('dialog.server_optimize_restart.button_confirm')"
+      button-confirm-color="primary"
+      @confirm="optimizeAndRestart"
     />
 
   </v-container>
@@ -51,6 +70,8 @@ export default Vue.extend({
   components: {ConfirmationDialog},
   data: () => ({
     modalStopServer: false,
+    modalOptimizeAndRestart: false,
+    restarting: false,
   }),
   methods: {
     async cancelAllTasks() {
@@ -64,6 +85,52 @@ export default Vue.extend({
         await this.$actuator.shutdown()
       } catch (e) {
         this.$eventHub.$emit(ERROR, {message: e.message} as ErrorEvent)
+      }
+    },
+    async optimizeAndRestart() {
+      if (this.restarting) return
+      this.restarting = true
+      try {
+        await this.$komgaServer.optimizeAndRestart()
+      } catch (e) {
+        this.restarting = false
+        this.$eventHub.$emit(ERROR, {message: e.message} as ErrorEvent)
+        return
+      }
+      this.$eventHub.$emit(NOTIFICATION, {
+        message: this.$t('server.server_management.notification_optimize_restart_started'),
+      } as NotificationEvent)
+      // wait for the server to go down (vacuum may take a long time), then poll until it's back up
+      const shutdownDeadline = Date.now() + 30 * 60 * 1000
+      let wentDown = false
+      while (Date.now() < shutdownDeadline) {
+        await new Promise(resolve => setTimeout(resolve, 3000))
+        if (!await this.$komgaServer.isUp()) {
+          wentDown = true
+          break
+        }
+      }
+      let restarted = false
+      if (wentDown) {
+        const startupDeadline = Date.now() + 5 * 60 * 1000
+        while (Date.now() < startupDeadline) {
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          if (await this.$komgaServer.isUp()) {
+            restarted = true
+            break
+          }
+        }
+      }
+      this.restarting = false
+      if (restarted) {
+        this.$eventHub.$emit(NOTIFICATION, {
+          message: this.$t('server.server_management.notification_optimize_restart_done'),
+        } as NotificationEvent)
+        setTimeout(() => location.reload(), 3000)
+      } else {
+        this.$eventHub.$emit(ERROR, {
+          message: this.$t('server.server_management.notification_optimize_restart_timeout'),
+        } as ErrorEvent)
       }
     },
     downloadLogFile() {

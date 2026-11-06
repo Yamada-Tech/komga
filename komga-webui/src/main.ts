@@ -10,6 +10,7 @@ import Chart from 'chart.js'
 import {sync} from 'vuex-router-sync'
 import App from './App.vue'
 import actuator from './plugins/actuator.plugin'
+import komgaServer from './plugins/komga-server.plugin'
 import httpPlugin from './plugins/http.plugin'
 import komgaBooks from './plugins/komga-books.plugin'
 import komgaClaim from './plugins/komga-claim.plugin'
@@ -68,6 +69,7 @@ Vue.use(komgaUsers, {store: store, http: Vue.prototype.$http})
 Vue.use(komgaLibraries, {store: store, http: Vue.prototype.$http})
 Vue.use(komgaSse, {eventHub: Vue.prototype.$eventHub, store: store})
 Vue.use(actuator, {http: Vue.prototype.$http})
+Vue.use(komgaServer, {http: Vue.prototype.$http})
 Vue.use(komgaTasks, {http: Vue.prototype.$http})
 Vue.use(komgaSyncPoints, {http: Vue.prototype.$http})
 Vue.use(komgaOauth2, {http: Vue.prototype.$http})
