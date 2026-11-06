@@ -23,7 +23,6 @@ import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.ANN
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.API_KEYS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOKS
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOK_FONTS
-import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOK_IMPORT
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOK_PAGES
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOK_POSTER
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.BOOK_WEBPUB
@@ -35,9 +34,7 @@ import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.COL
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.COMICRACK
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.CURRENT_USER
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.DEPRECATED
-import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.DUPLICATE_PAGES
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.FILE_SYSTEM
-import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.HISTORY
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.LIBRARIES
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.MANAGEMENT
 import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames.MIHON
@@ -305,8 +302,6 @@ class OpenApiConfiguration(
           BOOKS,
           BOOK_PAGES,
           BOOK_POSTER,
-          BOOK_IMPORT,
-          DUPLICATE_PAGES,
           BOOK_WEBPUB,
           BOOK_FONTS,
         ),
@@ -350,7 +345,6 @@ class OpenApiConfiguration(
           CLAIM,
           SERVER_SETTINGS,
           TASKS,
-          HISTORY,
           FILE_SYSTEM,
           RELEASES,
           ANNOUNCEMENTS,
@@ -383,10 +377,8 @@ class OpenApiConfiguration(
     const val BOOK_POSTER = "Book Poster"
     const val BOOK_PAGES = "Book Pages"
     const val BOOK_WEBPUB = "WebPub Manifest"
-    const val BOOK_IMPORT = "Import"
     const val BOOK_FONTS = "Fonts"
 
-    const val DUPLICATE_PAGES = "Duplicate Pages"
     const val COLLECTIONS = "Collections"
     const val COLLECTION_SERIES = "Collection Series"
 
@@ -406,7 +398,6 @@ class OpenApiConfiguration(
     const val SYNCPOINTS = "Sync points"
     const val CLAIM = "Claim"
     const val TASKS = "Tasks"
-    const val HISTORY = "History"
     const val FILE_SYSTEM = "File system"
     const val SERVER_SETTINGS = "Server settings"
     const val RELEASES = "Releases"
@@ -429,9 +420,7 @@ class OpenApiConfiguration(
       Tag().name(BOOK_POSTER).description("Manage posters for books."),
       Tag().name(BOOK_PAGES),
       Tag().name(BOOK_WEBPUB),
-      Tag().name(BOOK_IMPORT),
       Tag().name(BOOK_FONTS).description("Provide font files and CSS for the Epub Reader."),
-      Tag().name(DUPLICATE_PAGES).description("Manage duplicate pages. Duplicate pages are identified by a page hash."),
       Tag().name(COLLECTIONS).description("Manage collections."),
       Tag().name(COLLECTION_POSTER).description("Manage posters for collections."),
       Tag().name(COLLECTION_SERIES),
@@ -447,7 +436,6 @@ class OpenApiConfiguration(
       Tag().name(SYNCPOINTS).description("Sync points are automatically created during a Kobo sync."),
       Tag().name(CLAIM).description("Claim a freshly installed Komga server."),
       Tag().name(TASKS).description("Manage server tasks"),
-      Tag().name(HISTORY).description("Server events history"),
       Tag().name(FILE_SYSTEM).description("List files from the host server's file system"),
       Tag().name(SERVER_SETTINGS).description("Store and retrieve server settings"),
       Tag().name(RELEASES).description("Retrieve releases information"),

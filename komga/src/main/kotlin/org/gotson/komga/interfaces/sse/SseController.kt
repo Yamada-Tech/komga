@@ -6,8 +6,6 @@ import org.gotson.komga.domain.model.DomainEvent
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.persistence.BookRepository
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
-import org.gotson.komga.infrastructure.web.toFilePath
-import org.gotson.komga.interfaces.sse.dto.BookImportSseDto
 import org.gotson.komga.interfaces.sse.dto.BookSseDto
 import org.gotson.komga.interfaces.sse.dto.CollectionSseDto
 import org.gotson.komga.interfaces.sse.dto.LibrarySseDto
@@ -91,7 +89,6 @@ class SseController(
       is DomainEvent.BookAdded -> emitSse("BookAdded", BookSseDto(event.book.id, event.book.seriesId, event.book.libraryId))
       is DomainEvent.BookUpdated -> emitSse("BookChanged", BookSseDto(event.book.id, event.book.seriesId, event.book.libraryId))
       is DomainEvent.BookDeleted -> emitSse("BookDeleted", BookSseDto(event.book.id, event.book.seriesId, event.book.libraryId))
-      is DomainEvent.BookImported -> emitSse("BookImported", BookImportSseDto(event.book?.id, event.sourceFile.toFilePath(), event.success, event.message), adminOnly = true)
 
       is DomainEvent.ReadListAdded -> emitSse("ReadListAdded", ReadListSseDto(event.readList.id, event.readList.bookIds.map { it.value }))
       is DomainEvent.ReadListUpdated -> emitSse("ReadListChanged", ReadListSseDto(event.readList.id, event.readList.bookIds.map { it.value }))

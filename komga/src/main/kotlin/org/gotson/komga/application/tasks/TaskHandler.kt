@@ -7,20 +7,16 @@ import org.gotson.komga.domain.persistence.BookRepository
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.persistence.SeriesRepository
 import org.gotson.komga.domain.service.BookConverter
-import org.gotson.komga.domain.service.BookImporter
 import org.gotson.komga.domain.service.BookLifecycle
 import org.gotson.komga.domain.service.BookMetadataLifecycle
-import org.gotson.komga.domain.service.BookPageEditor
 import org.gotson.komga.domain.service.LibraryContentLifecycle
 import org.gotson.komga.domain.service.LocalArtworkLifecycle
-import org.gotson.komga.domain.service.PageHashLifecycle
 import org.gotson.komga.domain.service.SeriesLifecycle
 import org.gotson.komga.domain.service.SeriesMetadataLifecycle
 import org.gotson.komga.infrastructure.search.SearchIndexLifecycle
 import org.gotson.komga.interfaces.scheduler.METER_TASKS_EXECUTION
 import org.gotson.komga.interfaces.scheduler.METER_TASKS_FAILURE
 import org.springframework.stereotype.Service
-import java.nio.file.Paths
 import kotlin.time.measureTime
 import kotlin.time.toJavaDuration
 
@@ -38,11 +34,8 @@ class TaskHandler(
   private val seriesLifecycle: SeriesLifecycle,
   private val seriesMetadataLifecycle: SeriesMetadataLifecycle,
   private val localArtworkLifecycle: LocalArtworkLifecycle,
-  private val bookImporter: BookImporter,
   private val bookConverter: BookConverter,
-  private val bookPageEditor: BookPageEditor,
   private val searchIndexLifecycle: SearchIndexLifecycle,
-  private val pageHashLifecycle: PageHashLifecycle,
   private val meterRegistry: MeterRegistry,
 ) {
   fun handleTask(task: Task) {
@@ -56,8 +49,6 @@ class TaskHandler(
               taskEmitter.analyzeUnknownAndOutdatedBooks(library)
               taskEmitter.repairExtensions(library, LOW_PRIORITY)
               taskEmitter.findBooksToConvert(library, LOWEST_PRIORITY)
-              taskEmitter.findBooksWithMissingPageHash(library, LOWEST_PRIORITY)
-              taskEmitter.findDuplicatePagesToDelete(library, LOWEST_PRIORITY)
               taskEmitter.hashBooksWithoutHash(library)
               taskEmitter.hashBooksWithoutHashKoreader(library)
             } ?: logger.warn { "Cannot execute task $task: Library does not exist" }
@@ -65,16 +56,6 @@ class TaskHandler(
           is Task.FindBooksToConvert ->
             libraryRepository.findByIdOrNull(task.libraryId)?.let { library ->
               taskEmitter.convertBookToCbz(bookConverter.getConvertibleBooks(library), task.priority + 1)
-            } ?: logger.warn { "Cannot execute task $task: Library does not exist" }
-
-          is Task.FindBooksWithMissingPageHash ->
-            libraryRepository.findByIdOrNull(task.libraryId)?.let { library ->
-              taskEmitter.hashBookPages(pageHashLifecycle.getBookIdsWithMissingPageHash(library), task.priority + 1)
-            } ?: logger.warn { "Cannot execute task $task: Library does not exist" }
-
-          is Task.FindDuplicatePagesToDelete ->
-            libraryRepository.findByIdOrNull(task.libraryId)?.let { library ->
-              taskEmitter.removeDuplicatePages(pageHashLifecycle.getBookPagesToDeleteAutomatically(library), task.priority + 1)
             } ?: logger.warn { "Cannot execute task $task: Library does not exist" }
 
           is Task.EmptyTrash ->
@@ -121,12 +102,6 @@ class TaskHandler(
               localArtworkLifecycle.refreshLocalArtwork(series)
             } ?: logger.warn { "Cannot execute task $task: Series does not exist" }
 
-          is Task.ImportBook ->
-            seriesRepository.findByIdOrNull(task.seriesId)?.let { series ->
-              val importedBook = bookImporter.importBook(Paths.get(task.sourceFile), series, task.copyMode, task.destinationName, task.upgradeBookId)
-              taskEmitter.analyzeBook(importedBook, priority = task.priority + 1)
-            } ?: logger.warn { "Cannot execute task $task: Series does not exist" }
-
           is Task.ConvertBook ->
             bookRepository.findByIdOrNull(task.bookId)?.let { book ->
               bookConverter.convertToCbz(book)
@@ -137,13 +112,6 @@ class TaskHandler(
               bookConverter.repairExtension(book)
             } ?: logger.warn { "Cannot execute task $task: Book does not exist" }
 
-          is Task.RemoveHashedPages ->
-            bookRepository.findByIdOrNull(task.bookId)?.let { book ->
-              if (bookPageEditor.removeHashedPages(book, task.pages) == BookAction.GENERATE_THUMBNAIL) {
-                taskEmitter.generateBookThumbnail(book.id, priority = task.priority + 1)
-              }
-            } ?: logger.warn { "Cannot execute task $task: Book does not exist" }
-
           is Task.HashBook ->
             bookRepository.findByIdOrNull(task.bookId)?.let { book ->
               bookLifecycle.hashAndPersist(book)
@@ -152,11 +120,6 @@ class TaskHandler(
           is Task.HashBookKoreader ->
             bookRepository.findByIdOrNull(task.bookId)?.let { book ->
               bookLifecycle.hashKoreaderAndPersist(book)
-            } ?: logger.warn { "Cannot execute task $task: Book does not exist" }
-
-          is Task.HashBookPages ->
-            bookRepository.findByIdOrNull(task.bookId)?.let { book ->
-              bookLifecycle.hashPagesAndPersist(book)
             } ?: logger.warn { "Cannot execute task $task: Book does not exist" }
 
           is Task.RebuildIndex -> searchIndexLifecycle.rebuildIndex(task.entities)

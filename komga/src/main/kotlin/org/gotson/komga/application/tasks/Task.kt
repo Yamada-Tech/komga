@@ -1,8 +1,6 @@
 package org.gotson.komga.application.tasks
 
 import org.gotson.komga.domain.model.BookMetadataPatchCapability
-import org.gotson.komga.domain.model.BookPageNumbered
-import org.gotson.komga.domain.model.CopyMode
 import org.gotson.komga.infrastructure.search.LuceneEntity
 
 const val HIGHEST_PRIORITY = 8
@@ -34,24 +32,6 @@ sealed class Task(
     override val uniqueId = "FIND_BOOKS_TO_CONVERT_$libraryId"
 
     override fun toString(): String = "FindBooksToConvert(libraryId='$libraryId', priority='$priority')"
-  }
-
-  class FindBooksWithMissingPageHash(
-    val libraryId: String,
-    priority: Int = DEFAULT_PRIORITY,
-  ) : Task(priority) {
-    override val uniqueId = "FIND_BOOKS_WITH_MISSING_PAGE_HASH_$libraryId"
-
-    override fun toString(): String = "FindBooksWithMissingPageHash(libraryId='$libraryId', priority='$priority')"
-  }
-
-  class FindDuplicatePagesToDelete(
-    val libraryId: String,
-    priority: Int = DEFAULT_PRIORITY,
-  ) : Task(priority) {
-    override val uniqueId = "FIND_DUPLICATE_PAGES_TO_DELETE_$libraryId"
-
-    override fun toString(): String = "FindDuplicatePagesToDelete(libraryId='$libraryId', priority='$priority')"
   }
 
   class EmptyTrash(
@@ -102,15 +82,6 @@ sealed class Task(
     override fun toString(): String = "HashBook(bookId='$bookId', priority='$priority')"
   }
 
-  class HashBookPages(
-    val bookId: String,
-    priority: Int = DEFAULT_PRIORITY,
-  ) : Task(priority) {
-    override val uniqueId = "HASH_BOOK_PAGES_$bookId"
-
-    override fun toString(): String = "HashBookPages(bookId='$bookId', priority='$priority')"
-  }
-
   class HashBookKoreader(
     val bookId: String,
     priority: Int = DEFAULT_PRIORITY,
@@ -156,19 +127,6 @@ sealed class Task(
     override fun toString(): String = "RefreshSeriesLocalArtwork(seriesId=$seriesId, priority='$priority')"
   }
 
-  class ImportBook(
-    val sourceFile: String,
-    val seriesId: String,
-    val copyMode: CopyMode,
-    val destinationName: String?,
-    val upgradeBookId: String?,
-    priority: Int = DEFAULT_PRIORITY,
-  ) : Task(priority, seriesId) {
-    override val uniqueId: String = "IMPORT_BOOK_${seriesId}_$sourceFile"
-
-    override fun toString(): String = "ImportBook(sourceFile='$sourceFile', seriesId='$seriesId', copyMode=$copyMode, destinationName=$destinationName, upgradeBookId=$upgradeBookId, priority='$priority')"
-  }
-
   class ConvertBook(
     val bookId: String,
     priority: Int = DEFAULT_PRIORITY,
@@ -187,16 +145,6 @@ sealed class Task(
     override val uniqueId: String = "REPAIR_EXTENSION_$bookId"
 
     override fun toString(): String = "RepairExtension(bookId='$bookId', priority='$priority')"
-  }
-
-  class RemoveHashedPages(
-    val bookId: String,
-    val pages: Collection<BookPageNumbered>,
-    priority: Int = DEFAULT_PRIORITY,
-  ) : Task(priority) {
-    override val uniqueId: String = "REMOVE_HASHED_PAGES_$bookId"
-
-    override fun toString(): String = "RemoveHashedPages(bookId='$bookId', priority='$priority')"
   }
 
   class RebuildIndex(

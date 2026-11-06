@@ -196,7 +196,7 @@ class TasksDaoTest(
     // given
     tasksDao.save(
       buildList {
-        (1..100).forEach { add(Task.HashBookPages("book$it", 5)) }
+        (1..100).forEach { add(Task.HashBook("book$it", 5)) }
       },
     )
 
@@ -218,7 +218,7 @@ class TasksDaoTest(
     // given
     tasksDao.save(
       buildList {
-        (1..20).forEach { add(Task.HashBookPages("book$it", 5)) }
+        (1..20).forEach { add(Task.HashBook("book$it", 5)) }
       },
     )
 
@@ -246,7 +246,7 @@ class TasksDaoTest(
     // given
     tasksDao.save(
       buildList {
-        (1..20).forEach { add(Task.HashBookPages("book$it", 5)) }
+        (1..20).forEach { add(Task.HashBook("book$it", 5)) }
       },
     )
 
@@ -276,7 +276,7 @@ class TasksDaoTest(
   @Test
   fun `given a single task with owner when counting tasks then the count is 1`() {
     // given
-    tasksDao.save(Task.HashBookPages("book1", 5))
+    tasksDao.save(Task.HashBook("book1", 5))
     tasksDao.takeFirst()
 
     // when

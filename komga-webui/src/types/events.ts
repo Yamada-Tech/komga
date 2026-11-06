@@ -7,7 +7,6 @@ export const LIBRARY_DELETED = 'library-deleted'
 export const BOOK_ADDED = 'book-added'
 export const BOOK_CHANGED = 'book-changed'
 export const BOOK_DELETED = 'book-deleted'
-export const BOOK_IMPORTED = 'book-imported'
 
 export const SERIES_ADDED = 'series-added'
 export const SERIES_CHANGED = 'series-changed'

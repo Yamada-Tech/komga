@@ -8,12 +8,6 @@ interface MediaRepository {
 
   fun findByIdOrNull(bookId: String): Media?
 
-  fun findAllBookIdsByLibraryIdAndMediaTypeAndWithMissingPageHash(
-    libraryId: String,
-    mediaTypes: Collection<String>,
-    pageHashing: Int,
-  ): Collection<String>
-
   fun getPagesSizes(bookIds: Collection<String>): Collection<Pair<String, Int>>
 
   fun findExtensionByIdOrNull(bookId: String): MediaExtension?

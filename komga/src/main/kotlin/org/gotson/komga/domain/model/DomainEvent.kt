@@ -1,7 +1,5 @@
 package org.gotson.komga.domain.model
 
-import java.net.URL
-
 sealed class DomainEvent {
   data class LibraryAdded(
     val library: Library,
@@ -41,13 +39,6 @@ sealed class DomainEvent {
 
   data class BookDeleted(
     val book: Book,
-  ) : DomainEvent()
-
-  data class BookImported(
-    val book: Book?,
-    val sourceFile: URL,
-    val success: Boolean,
-    val message: String? = null,
   ) : DomainEvent()
 
   data class CollectionAdded(

@@ -71,8 +71,6 @@ class LibraryLifecycle(
       taskEmitter.hashBooksWithoutHash(toUpdate)
     if (toUpdate.hashKoreader && !current.hashKoreader)
       taskEmitter.hashBooksWithoutHashKoreader(toUpdate)
-    if (toUpdate.hashPages && !current.hashPages)
-      taskEmitter.findBooksWithMissingPageHash(toUpdate, LOWEST_PRIORITY)
     if (toUpdate.repairExtensions && !current.repairExtensions)
       taskEmitter.repairExtensions(toUpdate, LOWEST_PRIORITY)
     if (toUpdate.convertToCbz && !current.convertToCbz)

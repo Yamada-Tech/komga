@@ -27,9 +27,6 @@ class KomgaProperties {
   }
 
   @Positive
-  var pageHashing: Int = 3
-
-  @Positive
   var epubDivinaLetterCountThreshold: Int = 15
 
   var oauth2AccountCreation: Boolean = false

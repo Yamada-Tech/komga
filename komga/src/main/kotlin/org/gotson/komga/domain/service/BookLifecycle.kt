@@ -5,7 +5,6 @@ import org.gotson.komga.domain.model.Book
 import org.gotson.komga.domain.model.BookAction
 import org.gotson.komga.domain.model.BookWithMedia
 import org.gotson.komga.domain.model.DomainEvent
-import org.gotson.komga.domain.model.HistoricalEvent
 import org.gotson.komga.domain.model.ImageConversionException
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.model.MarkSelectedPreference
@@ -24,7 +23,6 @@ import org.gotson.komga.domain.model.TypedBytes
 import org.gotson.komga.domain.persistence.BookMetadataRepository
 import org.gotson.komga.domain.persistence.BookProjectionRepository
 import org.gotson.komga.domain.persistence.BookRepository
-import org.gotson.komga.domain.persistence.HistoricalEventRepository
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.persistence.MediaRepository
 import org.gotson.komga.domain.persistence.ReadListRepository
@@ -70,7 +68,6 @@ class BookLifecycle(
   private val transactionTemplate: TransactionTemplate,
   private val hasher: Hasher,
   private val hasherKoreader: KoreaderHasher,
-  private val historicalEventRepository: HistoricalEventRepository,
   private val komgaSettingsProvider: KomgaSettingsProvider,
   @Qualifier("pdfImageType")
   private val pdfImageType: ImageType,
@@ -128,15 +125,6 @@ class BookLifecycle(
     } else {
       logger.info { "Book already has a Koreader hash, skipping" }
     }
-  }
-
-  fun hashPagesAndPersist(book: Book) {
-    if (!libraryRepository.findById(book.libraryId).hashPages)
-      return logger.info { "Page hashing is disabled for the library, it may have changed since the task was submitted, skipping" }
-
-    logger.info { "Hash and persist pages for book: $book" }
-
-    mediaRepository.update(bookAnalyzer.hashPages(BookWithMedia(book, mediaRepository.findById(book.id))))
   }
 
   fun generateThumbnailAndPersist(book: Book) {
@@ -553,9 +541,8 @@ class BookLifecycle(
         .mapNotNull { it.url?.toURI()?.toPath() }
         .filter { it.exists() && it.isWritable() }
 
-    if (book.path.deleteIfExists()) {
-      logger.info { "Deleted file: ${book.path}" }
-      historicalEventRepository.insert(HistoricalEvent.BookFileDeleted(book, "File was deleted by user request"))
+    book.path.deleteIfExists().also {
+      if (it) logger.info { "Deleted file: ${book.path}" }
     }
     thumbnails.forEach {
       if (it.deleteIfExists()) logger.info { "Deleted file: $it" }
@@ -565,10 +552,8 @@ class BookLifecycle(
         .listDirectoryEntries()
         .isEmpty()
     )
-      if (book.path.parent.deleteIfExists()) {
+      if (book.path.parent.deleteIfExists())
         logger.info { "Deleted directory: ${book.path.parent}" }
-        historicalEventRepository.insert(HistoricalEvent.SeriesFolderDeleted(book.seriesId, book.path.parent, "Folder was deleted because it was empty"))
-      }
 
     softDeleteMany(listOf(book))
   }

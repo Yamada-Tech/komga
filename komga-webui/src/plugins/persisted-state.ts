@@ -42,8 +42,6 @@ export const persistedModule: Module<any, any> = {
       sortBooks: {},
       route: {},
     },
-    importPath: '',
-    duplicatesNewPageSize: 10,
     rememberMe: false,
   },
   getters: {
@@ -165,12 +163,6 @@ export const persistedModule: Module<any, any> = {
     },
     setLibraryRoute(state, {id, route}) {
       state.library.route[id] = route
-    },
-    setImportPath(state, val) {
-      state.importPath = val ?? ''
-    },
-    setDuplicatesNewPageSize(state, val) {
-      state.duplicatesNewPageSize = val
     },
     setRememberMe(state, val) {
       state.rememberMe = val

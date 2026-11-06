@@ -55,8 +55,6 @@ export default new Vuex.Store({
     deleteSeries: {} as SeriesDto | SeriesDto[],
     deleteSeriesDialog: false,
 
-    booksToCheck: 0,
-
     announcements: {} as JsonFeedDto,
 
     actuatorInfo: {} as ActuatorInfo,
@@ -161,9 +159,6 @@ export default new Vuex.Store({
     },
     setUpdateSeriesDialog(state, dialog) {
       state.updateSeriesDialog = dialog
-    },
-    setBooksToCheck(state, count) {
-      state.booksToCheck = count
     },
     setDeleteSeries(state, series) {
       state.deleteSeries = series

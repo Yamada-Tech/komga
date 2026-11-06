@@ -41,7 +41,6 @@ class LibraryUpdateDto {
   val emptyTrashAfterScan: Boolean? = null
   val seriesCover: SeriesCoverDto? = null
   val hashFiles: Boolean? = null
-  val hashPages: Boolean? = null
   val hashKoreader: Boolean? = null
   val analyzeDimensions: Boolean? = null
   var oneshotsDirectory: String?

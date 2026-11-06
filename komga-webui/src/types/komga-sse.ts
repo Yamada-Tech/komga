@@ -62,10 +62,3 @@ export interface TaskQueueSseDto {
   count: number,
   countByType: { [key: string]: number }
 }
-
-export interface BookImportSseDto {
-  bookId?: string,
-  sourceFile: string,
-  success: boolean,
-  message?: string,
-}

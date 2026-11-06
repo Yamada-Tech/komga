@@ -52,7 +52,6 @@ import org.gotson.komga.interfaces.api.dto.WPPublicationDto
 import org.gotson.komga.interfaces.api.getBookLastModified
 import org.gotson.komga.interfaces.api.persistence.BookDtoRepository
 import org.gotson.komga.interfaces.api.rest.dto.BookDto
-import org.gotson.komga.interfaces.api.rest.dto.BookImportBatchDto
 import org.gotson.komga.interfaces.api.rest.dto.BookMetadataUpdateDto
 import org.gotson.komga.interfaces.api.rest.dto.PageDto
 import org.gotson.komga.interfaces.api.rest.dto.R2Positions
@@ -242,34 +241,6 @@ class BookController(
         page,
         principal.user.restrictions,
       ).map { it.restrictUrl(!principal.user.isAdmin) }
-
-  @Operation(summary = "List duplicate books", description = "Return books that have the same file hash.", tags = [OpenApiConfiguration.TagNames.BOOKS])
-  @PageableAsQueryParam
-  @GetMapping("api/v1/books/duplicates")
-  @PreAuthorize("hasRole('ADMIN')")
-  fun getBooksDuplicates(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
-    @Parameter(hidden = true) page: Pageable,
-  ): Page<BookDto> {
-    val sort =
-      when {
-        page.sort.isSorted -> page.sort
-        else -> Sort.by(Sort.Order.asc("fileHash"))
-      }
-
-    val pageRequest =
-      if (unpaged)
-        Pageable.unpaged()
-      else
-        PageRequest.of(
-          page.pageNumber,
-          page.pageSize,
-          sort,
-        )
-
-    return bookDtoRepository.findAllDuplicates(principal.user.id, pageRequest)
-  }
 
   @Operation(summary = "Get book details", tags = [OpenApiConfiguration.TagNames.BOOKS])
   @GetMapping("api/v1/books/{bookId}")
@@ -727,29 +698,6 @@ class BookController(
 
       bookLifecycle.deleteReadProgress(book, principal.user)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-  }
-
-  @Operation(summary = "Import books", tags = [OpenApiConfiguration.TagNames.BOOK_IMPORT])
-  @PostMapping("api/v1/books/import")
-  @PreAuthorize("hasRole('ADMIN')")
-  @ResponseStatus(HttpStatus.ACCEPTED)
-  fun importBooks(
-    @RequestBody bookImportBatch: BookImportBatchDto,
-  ) {
-    bookImportBatch.books.forEach {
-      try {
-        taskEmitter.importBook(
-          sourceFile = it.sourceFile,
-          seriesId = it.seriesId,
-          copyMode = bookImportBatch.copyMode,
-          destinationName = it.destinationName,
-          upgradeBookId = it.upgradeBookId,
-          priority = HIGHEST_PRIORITY,
-        )
-      } catch (e: Exception) {
-        logger.error(e) { "Error while creating import task for: $it" }
-      }
-    }
   }
 
   @Operation(summary = "Delete book file", tags = [OpenApiConfiguration.TagNames.BOOKS])

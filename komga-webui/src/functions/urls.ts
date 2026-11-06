@@ -1,5 +1,3 @@
-import {PageHashKnownDto, PageHashUnknownDto} from '@/types/komga-pagehashes'
-
 const fullUrl = process.env.VUE_APP_KOMGA_API_URL
   ? process.env.VUE_APP_KOMGA_API_URL
   : window.location.origin + window.resourceBaseUrl
@@ -77,18 +75,3 @@ export function readListThumbnailUrlByThumbnailId(readListId: string, thumbnailI
   return `${urls.originNoSlash}/api/v1/readlists/${readListId}/thumbnails/${thumbnailId}`
 }
 
-export function transientBookPageUrl(transientBookId: string, page: number): string {
-  return `${urls.originNoSlash}/api/v1/transient-books/${transientBookId}/pages/${page}`
-}
-
-export function pageHashUnknownThumbnailUrl(pageHash: PageHashUnknownDto, resize?: number): string {
-  let url = `${urls.originNoSlash}/api/v1/page-hashes/unknown/${pageHash.hash}/thumbnail`
-  if(resize) {
-    url += `?resize=${resize}`
-  }
-  return url
-}
-
-export function pageHashKnownThumbnailUrl(pageHash: PageHashKnownDto): string {
-  return `${urls.originNoSlash}/api/v1/page-hashes/${pageHash.hash}/thumbnail`
-}

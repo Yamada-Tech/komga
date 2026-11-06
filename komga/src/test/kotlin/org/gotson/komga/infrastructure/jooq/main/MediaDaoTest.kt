@@ -8,7 +8,6 @@ import org.gotson.komga.domain.model.EpubTocEntry
 import org.gotson.komga.domain.model.Media
 import org.gotson.komga.domain.model.MediaExtensionEpub
 import org.gotson.komga.domain.model.MediaFile
-import org.gotson.komga.domain.model.MediaType
 import org.gotson.komga.domain.model.ProxyExtension
 import org.gotson.komga.domain.model.makeBook
 import org.gotson.komga.domain.model.makeLibrary
@@ -16,7 +15,6 @@ import org.gotson.komga.domain.model.makeSeries
 import org.gotson.komga.domain.persistence.BookRepository
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.persistence.SeriesRepository
-import org.gotson.komga.infrastructure.configuration.KomgaProperties
 import org.gotson.komga.infrastructure.jooq.offset
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -33,7 +31,6 @@ class MediaDaoTest(
   @Autowired private val bookRepository: BookRepository,
   @Autowired private val seriesRepository: SeriesRepository,
   @Autowired private val libraryRepository: LibraryRepository,
-  @Autowired private val komgaProperties: KomgaProperties,
 ) {
   private val library = makeLibrary()
   private val series = makeSeries("Series", libraryId = library.id)
@@ -75,7 +72,6 @@ class MediaDaoTest(
               fileName = "1.jpg",
               mediaType = "image/jpeg",
               dimension = Dimension(10, 10),
-              fileHash = "hashed",
               fileSize = 10,
             ),
           ),
@@ -98,7 +94,6 @@ class MediaDaoTest(
       assertThat(fileName).isEqualTo(media.pages.first().fileName)
       assertThat(mediaType).isEqualTo(media.pages.first().mediaType)
       assertThat(dimension).isEqualTo(media.pages.first().dimension)
-      assertThat(fileHash).isEqualTo(media.pages.first().fileHash)
       assertThat(fileSize).isEqualTo(media.pages.first().fileSize)
     }
     assertThat(created.files).hasSize(1)
@@ -158,7 +153,6 @@ class MediaDaoTest(
                 fileName = "2.png",
                 mediaType = "image/png",
                 dimension = Dimension(10, 10),
-                fileHash = "hashed",
                 fileSize = 10,
               ),
             ),
@@ -181,7 +175,6 @@ class MediaDaoTest(
     assertThat(modified.pages.first().fileName).isEqualTo(updated.pages.first().fileName)
     assertThat(modified.pages.first().mediaType).isEqualTo(updated.pages.first().mediaType)
     assertThat(modified.pages.first().dimension).isEqualTo(updated.pages.first().dimension)
-    assertThat(modified.pages.first().fileHash).isEqualTo(updated.pages.first().fileHash)
     assertThat(modified.pages.first().fileSize).isEqualTo(updated.pages.first().fileSize)
     assertThat(modified.files.first().fileName).isEqualTo(updated.files.first().fileName)
     assertThat(modified.files.first().mediaType).isEqualTo(updated.files.first().mediaType)
@@ -317,144 +310,6 @@ class MediaDaoTest(
       assertThat(extension).isNotNull
       assertThat(extension).isInstanceOf(MediaExtensionEpub::class.java)
       assertThat(extension).isEqualTo(media.extension)
-    }
-  }
-
-  @Nested
-  inner class MissingPageHash {
-    @Test
-    fun `given media with single page not hashed when finding for missing page hash then it is returned`() {
-      val media =
-        Media(
-          status = Media.Status.READY,
-          pages =
-            listOf(
-              BookPage(
-                fileName = "1.jpg",
-                mediaType = "image/jpeg",
-              ),
-            ),
-          mediaType = MediaType.ZIP.type,
-          bookId = book.id,
-        )
-      mediaDao.insert(media)
-
-      val found = mediaDao.findAllBookIdsByLibraryIdAndMediaTypeAndWithMissingPageHash(book.libraryId, listOf(MediaType.ZIP.type), komgaProperties.pageHashing)
-
-      assertThat(found).containsExactly(book.id)
-    }
-
-    @Test
-    fun `given non-convertible media not hashed when finding for missing page hash then it is returned`() {
-      val media =
-        Media(
-          status = Media.Status.READY,
-          pages =
-            listOf(
-              BookPage(
-                fileName = "1.jpg",
-                mediaType = "image/jpeg",
-              ),
-            ),
-          mediaType = MediaType.RAR_4.type,
-          bookId = book.id,
-        )
-      mediaDao.insert(media)
-
-      val found = mediaDao.findAllBookIdsByLibraryIdAndMediaTypeAndWithMissingPageHash(book.libraryId, listOf(MediaType.ZIP.type), komgaProperties.pageHashing)
-
-      assertThat(found).isEmpty()
-    }
-
-    @Test
-    fun `given media with no pages hashed when finding for missing page hash then it is not returned`() {
-      val media =
-        Media(
-          status = Media.Status.READY,
-          pages =
-            (1..12).map {
-              BookPage(
-                fileName = "$it.jpg",
-                mediaType = "image/jpeg",
-              )
-            },
-          mediaType = MediaType.ZIP.type,
-          bookId = book.id,
-        )
-      mediaDao.insert(media)
-
-      val found = mediaDao.findAllBookIdsByLibraryIdAndMediaTypeAndWithMissingPageHash(book.libraryId, listOf(MediaType.ZIP.type), komgaProperties.pageHashing)
-
-      assertThat(found).containsOnly(book.id)
-    }
-
-    @Test
-    fun `given media with single page hashed when finding for missing page hash then it is not returned`() {
-      val media =
-        Media(
-          status = Media.Status.READY,
-          pages =
-            listOf(
-              BookPage(
-                fileName = "1.jpg",
-                mediaType = "image/jpeg",
-                fileHash = "hashed",
-              ),
-            ),
-          mediaType = MediaType.ZIP.type,
-          bookId = book.id,
-        )
-      mediaDao.insert(media)
-
-      val found = mediaDao.findAllBookIdsByLibraryIdAndMediaTypeAndWithMissingPageHash(book.libraryId, listOf(MediaType.ZIP.type), komgaProperties.pageHashing)
-
-      assertThat(found).isEmpty()
-    }
-
-    @Test
-    fun `given media with required pages hashed when finding for missing page hash then it is not returned`() {
-      val media =
-        Media(
-          status = Media.Status.READY,
-          pages =
-            (1..12).map {
-              BookPage(
-                fileName = "$it.jpg",
-                mediaType = "image/jpeg",
-                fileHash = if (it <= 3 || it >= 9) "hashed" else "",
-              )
-            },
-          mediaType = MediaType.ZIP.type,
-          bookId = book.id,
-        )
-      mediaDao.insert(media)
-
-      val found = mediaDao.findAllBookIdsByLibraryIdAndMediaTypeAndWithMissingPageHash(book.libraryId, listOf(MediaType.ZIP.type), komgaProperties.pageHashing)
-
-      assertThat(found).isEmpty()
-    }
-
-    @Test
-    fun `given media with more pages hashed than required when finding for missing page hash then it is not returned`() {
-      val media =
-        Media(
-          status = Media.Status.READY,
-          pages =
-            (1..12).map {
-              BookPage(
-                fileName = "$it.jpg",
-                mediaType = "image/jpeg",
-                fileHash = "hashed",
-              )
-            },
-          mediaType = MediaType.ZIP.type,
-          bookId = book.id,
-        )
-      mediaDao.insert(media)
-
-      val found = mediaDao.findAllBookIdsByLibraryIdAndMediaTypeAndWithMissingPageHash(book.libraryId, listOf(MediaType.ZIP.type), komgaProperties.pageHashing)
-
-      assertThat(found).isEmpty()
     }
   }
 }

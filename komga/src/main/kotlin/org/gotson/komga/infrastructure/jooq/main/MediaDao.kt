@@ -19,7 +19,6 @@ import org.gotson.komga.jooq.main.tables.records.MediaPageRecord
 import org.gotson.komga.jooq.main.tables.records.MediaRecord
 import org.gotson.komga.language.toCurrentTimeZone
 import org.jooq.DSLContext
-import org.jooq.impl.DSL
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -40,7 +39,6 @@ class MediaDao(
   private val m = Tables.MEDIA
   private val p = Tables.MEDIA_PAGE
   private val f = Tables.MEDIA_FILE
-  private val b = Tables.BOOK
 
   private val groupFields =
     arrayOf(
@@ -68,32 +66,6 @@ class MediaDao(
       .where(m.BOOK_ID.eq(bookId))
       .fetchOne()
       ?.map { mapper.deserializeMediaExtension(it.get(m.EXTENSION_CLASS), it.get(m.EXTENSION_VALUE_BLOB)) }
-
-  override fun findAllBookIdsByLibraryIdAndMediaTypeAndWithMissingPageHash(
-    libraryId: String,
-    mediaTypes: Collection<String>,
-    pageHashing: Int,
-  ): Collection<String> {
-    val pagesCount = DSL.count(p.BOOK_ID)
-    val hashedCount = DSL.sum(DSL.`when`(p.FILE_HASH.eq(""), 0).otherwise(1)).cast(Int::class.java)
-    val neededHash = pageHashing * 2
-    val neededHashForBook = DSL.`when`(pagesCount.lt(neededHash), pagesCount).otherwise(neededHash)
-
-    return dslRO
-      .select(b.ID)
-      .from(b)
-      .leftJoin(p)
-      .on(b.ID.eq(p.BOOK_ID))
-      .leftJoin(m)
-      .on(b.ID.eq(m.BOOK_ID))
-      .where(b.LIBRARY_ID.eq(libraryId))
-      .and(m.STATUS.eq(Media.Status.READY.name))
-      .and(m.MEDIA_TYPE.`in`(mediaTypes))
-      .groupBy(b.ID)
-      .having(hashedCount.lt(neededHashForBook))
-      .fetch()
-      .map { it.value1() }
-  }
 
   override fun getPagesSizes(bookIds: Collection<String>): Collection<Pair<String, Int>> =
     dslRO
@@ -194,9 +166,8 @@ class MediaDao(
                 p.NUMBER,
                 p.WIDTH,
                 p.HEIGHT,
-                p.FILE_HASH,
                 p.FILE_SIZE,
-              ).values(null as String?, null, null, null, null, null, null, null),
+              ).values(null as String?, null, null, null, null, null, null),
           ).also { step ->
             chunk.forEach { media ->
               media.pages.forEachIndexed { index, page ->
@@ -207,7 +178,6 @@ class MediaDao(
                   index,
                   page.dimension?.width,
                   page.dimension?.height,
-                  page.fileHash,
                   page.fileSize,
                 )
               }
@@ -338,7 +308,6 @@ class MediaDao(
       fileName = fileName,
       mediaType = mediaType,
       dimension = if (width != null && height != null) Dimension(width, height) else null,
-      fileHash = fileHash,
       fileSize = fileSize,
     )
 

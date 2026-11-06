@@ -4,8 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.gotson.komga.application.query.UnpagedSorted
 import org.gotson.komga.domain.model.Book
 import org.gotson.komga.domain.model.BookMetadataPatchCapability
-import org.gotson.komga.domain.model.BookPageNumbered
-import org.gotson.komga.domain.model.CopyMode
 import org.gotson.komga.domain.model.Library
 import org.gotson.komga.domain.model.Media
 import org.gotson.komga.domain.model.SearchCondition
@@ -75,22 +73,6 @@ class TaskEmitter(
         .let { submitTasks(it) }
   }
 
-  fun findBooksWithMissingPageHash(
-    library: Library,
-    priority: Int = DEFAULT_PRIORITY,
-  ) {
-    submitTask(Task.FindBooksWithMissingPageHash(library.id, priority))
-  }
-
-  fun hashBookPages(
-    bookIdToSeriesId: Collection<String>,
-    priority: Int = DEFAULT_PRIORITY,
-  ) {
-    bookIdToSeriesId
-      .map { Task.HashBookPages(it, priority) }
-      .let { submitTasks(it) }
-  }
-
   fun findBooksToConvert(
     library: Library,
     priority: Int = DEFAULT_PRIORITY,
@@ -116,30 +98,6 @@ class TaskEmitter(
         .getMismatchedExtensionBooks(library)
         .map { Task.RepairExtension(it.id, priority, it.seriesId) }
         .let { submitTasks(it) }
-  }
-
-  fun findDuplicatePagesToDelete(
-    library: Library,
-    priority: Int = DEFAULT_PRIORITY,
-  ) {
-    submitTask(Task.FindDuplicatePagesToDelete(library.id, priority))
-  }
-
-  fun removeDuplicatePages(
-    bookId: String,
-    pages: Collection<BookPageNumbered>,
-    priority: Int = DEFAULT_PRIORITY,
-  ) {
-    submitTask(Task.RemoveHashedPages(bookId, pages, priority))
-  }
-
-  fun removeDuplicatePages(
-    bookIdToPages: Map<String, Collection<BookPageNumbered>>,
-    priority: Int = DEFAULT_PRIORITY,
-  ) {
-    bookIdToPages
-      .map { Task.RemoveHashedPages(it.key, it.value, priority) }
-      .let { submitTasks(it) }
   }
 
   fun analyzeBook(
@@ -236,17 +194,6 @@ class TaskEmitter(
     seriesIds
       .map { Task.RefreshSeriesLocalArtwork(it, priority) }
       .let { submitTasks(it) }
-  }
-
-  fun importBook(
-    sourceFile: String,
-    seriesId: String,
-    copyMode: CopyMode,
-    destinationName: String?,
-    upgradeBookId: String?,
-    priority: Int = DEFAULT_PRIORITY,
-  ) {
-    submitTask(Task.ImportBook(sourceFile, seriesId, copyMode, destinationName, upgradeBookId, priority))
   }
 
   fun rebuildIndex(

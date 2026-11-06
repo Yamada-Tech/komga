@@ -20,15 +20,12 @@ import komgaLibraries from './plugins/komga-libraries.plugin'
 import komgaReferential from './plugins/komga-referential.plugin'
 import komgaSeries from './plugins/komga-series.plugin'
 import komgaUsers from './plugins/komga-users.plugin'
-import komgaTransientBooks from './plugins/komga-transientbooks.plugin'
 import komgaSse from './plugins/komga-sse.plugin'
 import komgaTasks from './plugins/komga-tasks.plugin'
 import komgaSyncPoints from './plugins/komga-syncpoints.plugin'
 import komgaOauth2 from './plugins/komga-oauth2.plugin'
 import komgaLogin from './plugins/komga-login.plugin'
-import komgaPageHashes from './plugins/komga-pagehashes.plugin'
 import komgaMetrics from './plugins/komga-metrics.plugin'
-import komgaHistory from './plugins/komga-history.plugin'
 import komgaAnnouncements from './plugins/komga-announcements.plugin'
 import komgaReleases from './plugins/komga-releases.plugin'
 import komgaSettings from './plugins/komga-settings.plugin'
@@ -67,7 +64,6 @@ Vue.use(komgaReadLists, {http: Vue.prototype.$http})
 Vue.use(komgaBooks, {http: Vue.prototype.$http})
 Vue.use(komgaReferential, {http: Vue.prototype.$http})
 Vue.use(komgaClaim, {http: Vue.prototype.$http})
-Vue.use(komgaTransientBooks, {http: Vue.prototype.$http})
 Vue.use(komgaUsers, {store: store, http: Vue.prototype.$http})
 Vue.use(komgaLibraries, {store: store, http: Vue.prototype.$http})
 Vue.use(komgaSse, {eventHub: Vue.prototype.$eventHub, store: store})
@@ -76,9 +72,7 @@ Vue.use(komgaTasks, {http: Vue.prototype.$http})
 Vue.use(komgaSyncPoints, {http: Vue.prototype.$http})
 Vue.use(komgaOauth2, {http: Vue.prototype.$http})
 Vue.use(komgaLogin, {http: Vue.prototype.$http})
-Vue.use(komgaPageHashes, {http: Vue.prototype.$http})
 Vue.use(komgaMetrics, {http: Vue.prototype.$http})
-Vue.use(komgaHistory, {http: Vue.prototype.$http})
 Vue.use(komgaAnnouncements, {http: Vue.prototype.$http})
 Vue.use(komgaReleases, {http: Vue.prototype.$http})
 Vue.use(komgaFonts, {http: Vue.prototype.$http})

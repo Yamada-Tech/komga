@@ -3,7 +3,6 @@ import {
   BOOK_ADDED,
   BOOK_CHANGED,
   BOOK_DELETED,
-  BOOK_IMPORTED,
   COLLECTION_ADDED,
   COLLECTION_CHANGED,
   COLLECTION_DELETED,
@@ -68,8 +67,6 @@ export default class KomgaSseService {
     this.eventSource.addEventListener('BookAdded', (event: any) => this.emit(BOOK_ADDED, event))
     this.eventSource.addEventListener('BookChanged', (event: any) => this.emit(BOOK_CHANGED, event))
     this.eventSource.addEventListener('BookDeleted', (event: any) => this.emit(BOOK_DELETED, event))
-
-    this.eventSource.addEventListener('BookImported', (event: any) => this.emit(BOOK_IMPORTED, event))
 
     // Collections
     this.eventSource.addEventListener('CollectionAdded', (event: any) => this.emit(COLLECTION_ADDED, event))

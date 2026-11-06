@@ -7,8 +7,8 @@
         dot
         offset-x="15"
         offset-y="20"
-        :value="drawerVisible ? 0 : $store.state.booksToCheck + $store.getters.getUnreadAnnouncementsCount()"
-        :color="$store.state.booksToCheck ? 'accent' : 'info'"
+        :value="drawerVisible ? 0 : $store.getters.getUnreadAnnouncementsCount()"
+        color="info"
         class="ms-n3"
       >
         <v-app-bar-nav-icon @click.stop="toggleDrawer"/>
@@ -142,90 +142,6 @@
               </v-list-item-action>
             </v-list-item>
           </v-list-group>
-
-          <!--   IMPORT     -->
-          <v-list-group v-if="isAdmin"
-                        prepend-icon="mdi-import"
-                        no-action
-                        v-model="expandImport"
-          >
-            <template v-slot:activator>
-              <v-list-item-title>{{ $t('book_import.title') }}</v-list-item-title>
-            </template>
-
-            <v-list-item :to="{name: 'import-books'}">
-              <v-list-item-title>{{ $t('common.books') }}</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item :to="{name: 'import-readlist'}">
-              <v-list-item-title>{{ $t('common.readlist') }}</v-list-item-title>
-            </v-list-item>
-          </v-list-group>
-
-          <!--   MEDIA MANAGEMENT     -->
-          <v-list-group v-if="isAdmin"
-                        no-action
-                        v-model="expandMediaManagement"
-          >
-            <template v-slot:prependIcon>
-              <v-badge
-                dot
-                inline
-                :value="$store.state.booksToCheck"
-                color="accent"
-              >
-                <v-icon>mdi-book-cog</v-icon>
-              </v-badge>
-            </template>
-            <template v-slot:activator>
-              <v-list-item-title>{{ $t('common.media') }}</v-list-item-title>
-            </template>
-
-            <v-list-item :to="{name: 'media-analysis'}">
-              <v-badge
-                dot
-                inline
-                :value="$store.state.booksToCheck"
-                color="accent"
-              >
-                <v-list-item-title>{{ $t('media_analysis.media_analysis') }}</v-list-item-title>
-              </v-badge>
-            </v-list-item>
-
-            <v-list-item :to="{name: 'missing-posters'}">
-              <v-list-item-title>{{ $t('missing_posters.title') }}</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item :to="{name: 'duplicate-files'}">
-              <v-list-item-title>{{ $t('duplicates.title') }}</v-list-item-title>
-            </v-list-item>
-
-            <v-list-group no-action
-                          sub-group
-                          v-model="expandDuplicatePages"
-            >
-              <template v-slot:activator>
-                <v-list-item-title>{{ $t('duplicate_pages.title') }}</v-list-item-title>
-              </template>
-
-              <v-list-item :to="{name: 'settings-duplicate-pages-known'}">
-                <v-list-item-title>{{ $t('duplicate_pages.known') }}</v-list-item-title>
-              </v-list-item>
-
-              <v-list-item :to="{name: 'settings-duplicate-pages-unknown'}">
-                <v-list-item-title>{{ $t('duplicate_pages.new') }}</v-list-item-title>
-              </v-list-item>
-            </v-list-group>
-          </v-list-group>
-
-          <v-list-item :to="{name: 'history'}" v-if="isAdmin">
-            <v-list-item-icon>
-              <v-icon>mdi-clock-time-four-outline</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title>{{ $t('history.title') }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
 
           <!--   SETTINGS     -->
           <v-list-group v-if="isAdmin"
@@ -385,9 +301,7 @@ import {Theme} from '@/types/themes'
 import Vue from 'vue'
 import {LIBRARIES_ALL} from '@/types/library'
 import ToasterNotification from '@/components/ToasterNotification.vue'
-import {MediaStatus} from '@/types/enum-books'
 import {LibraryDto} from '@/types/komga-libraries'
-import {BookSearch, SearchConditionAnyOfBook, SearchConditionMediaStatus, SearchOperatorIs} from '@/types/komga-search'
 import LibrariesActionsMenu from '@/components/menus/LibrariesActionsMenu.vue'
 import ReorderLibraries from '@/components/ReorderLibraries.vue'
 
@@ -408,9 +322,6 @@ export default Vue.extend({
       drawerVisible: this.$vuetify.breakpoint.lgAndUp,
       locales: this.$i18n.availableLocales.map((x: any) => ({text: this.$i18n.t('common.locale_name', x), value: x})),
       expandSettings: false,
-      expandDuplicatePages: false,
-      expandMediaManagement: false,
-      expandImport: false,
       expandAccount: false,
       expandUnpinned: false,
       showReorder: false,
@@ -420,13 +331,6 @@ export default Vue.extend({
     if (this.isAdmin) {
       this.$actuator.getInfo()
         .then(x => this.$store.commit('setActuatorInfo', x))
-      this.$komgaBooks.getBooksList({
-        condition: new SearchConditionAnyOfBook([
-          new SearchConditionMediaStatus(new SearchOperatorIs(MediaStatus.ERROR)),
-          new SearchConditionMediaStatus(new SearchOperatorIs(MediaStatus.UNSUPPORTED)),
-        ]),
-      } as BookSearch, {size: 0} as PageRequest)
-        .then(x => this.$store.commit('setBooksToCheck', x.totalElements))
       this.$komgaAnnouncements.getAnnouncements()
         .then(x => this.$store.commit('setAnnouncements', x))
       this.$komgaReleases.getReleases()
@@ -504,9 +408,6 @@ export default Vue.extend({
   methods: {
     checkRoute(to) {
       this.expandSettings = to.path.includes('/settings/')
-      this.expandMediaManagement = to.path.includes('/media-management/')
-      this.expandImport = to.path.includes('/import/')
-      this.expandDuplicatePages = to.path.includes('/duplicate-pages/')
       this.expandAccount = to.path.includes('/account/')
       if (this.librariesUnpinned.some(it => it.id === to.params.libraryId)) this.expandUnpinned = true
       else if (this.librariesPinned.some(it => it.id === to.params.libraryId)) this.expandUnpinned = false

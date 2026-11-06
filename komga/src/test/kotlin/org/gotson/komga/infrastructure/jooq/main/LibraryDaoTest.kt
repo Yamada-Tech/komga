@@ -69,7 +69,6 @@ class LibraryDaoTest(
           emptyTrashAfterScan = true,
           seriesCover = Library.SeriesCover.LAST,
           hashFiles = false,
-          hashPages = true,
           analyzeDimensions = false,
           scanForceModifiedTime = true,
           scanCbx = false,
@@ -107,7 +106,6 @@ class LibraryDaoTest(
     assertThat(modified.emptyTrashAfterScan).isEqualTo(updated.emptyTrashAfterScan)
     assertThat(modified.seriesCover).isEqualTo(updated.seriesCover)
     assertThat(modified.hashFiles).isEqualTo(updated.hashFiles)
-    assertThat(modified.hashPages).isEqualTo(updated.hashPages)
     assertThat(modified.analyzeDimensions).isEqualTo(updated.analyzeDimensions)
     assertThat(modified.scanForceModifiedTime).isEqualTo(updated.scanForceModifiedTime)
     assertThat(modified.scanCbx).isEqualTo(updated.scanCbx)
