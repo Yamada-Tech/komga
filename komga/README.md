@@ -2,7 +2,7 @@
 
 ### Requirements
 
-- Java JDK version 21+
+- Java JDK version 25+
 
 ### Spring profiles
 
@@ -43,3 +43,5 @@ To build the Docker image, you need to:
 - have the webui built and copied to `/resources/public`
 - prepare the docker image via JReleaser. To do so, run `./gradlew jreleaserPackage`.
 - the `Dockerfile` will be available in `komga/build/jreleaser/package/docker/`
+
+Images are built for `linux/amd64` and `linux/arm64/v8` only. The `linux/arm/v7` (ARM32) image has been dropped: Java support for ARM32 ended with Java 21, and the server now requires Java 25. ARM32 users should stay on the last release that provided the image.

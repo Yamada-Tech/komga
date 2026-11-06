@@ -180,10 +180,10 @@ jreleaser {
       buildx {
         enabled = true
         createBuilder = false
+        // ARM32 (linux/arm/v7) is dropped: Java support for ARM32 ended with Java 21 (see komga.org/blog/prepare-v2)
         platforms =
           listOf(
             "linux/amd64",
-            "linux/arm/v7",
             "linux/arm64/v8",
           )
       }

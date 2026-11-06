@@ -21,14 +21,16 @@ repositories {
 
 kotlin {
   compilerOptions {
-    jvmTarget = JvmTarget.JVM_21
+    // must stay >= :komga's target, otherwise Gradle fails dependency resolution with
+    // "looking for a library compatible with JVM runtime version N, but project ':komga' is only compatible with N+1 or newer"
+    jvmTarget = JvmTarget.JVM_25
   }
 }
 
 tasks {
   withType<JavaCompile> {
-    sourceCompatibility = "21"
-    targetCompatibility = "21"
+    sourceCompatibility = "25"
+    targetCompatibility = "25"
   }
 }
 
