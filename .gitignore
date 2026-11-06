@@ -29,9 +29,7 @@ node_modules
 .springBeans
 
 ### IntelliJ IDEA
-.idea/*
-!/.idea/codeStyles/
-!/.idea/runConfigurations/
+.idea/
 *.iws
 *.iml
 *.ipr
