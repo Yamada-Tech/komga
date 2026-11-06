@@ -175,6 +175,10 @@ tasks {
   withType<Test> {
     useJUnitPlatform()
     systemProperty("spring.profiles.active", "test")
+    // pin the JVM locale: ICU collation tests (CollatorsTest) are locale sensitive and
+    // would fail on machines with a Japanese locale (katakana/hiragana equal at tertiary strength)
+    systemProperty("user.language", "en")
+    systemProperty("user.country", "US")
     maxHeapSize = "1G"
   }
 
