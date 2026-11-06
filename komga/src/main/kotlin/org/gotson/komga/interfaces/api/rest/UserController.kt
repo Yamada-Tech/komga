@@ -209,7 +209,7 @@ class UserController(
   @PreAuthorize("hasRole('ADMIN')")
   @Operation(summary = "Retrieve the most recently read books across all users", tags = [TagNames.USERS])
   fun getRecentReads(
-    @RequestParam(name = "limit", required = false) limit: Int = 10,
+    @RequestParam(name = "limit", required = false) limit: Int = 100,
   ): List<RecentReadDto> = recentReadsDtoRepository.findRecentReads(limit.coerceIn(1, 100))
 
   @GetMapping("me/api-keys")

@@ -75,7 +75,7 @@ export default Vue.extend({
     async loadData() {
       this.loading = true
       try {
-        this.items = await this.$komgaUsers.getRecentReads(10)
+        this.items = await this.$komgaUsers.getRecentReads(100)
       } catch (e) {
         this.$eventHub.$emit(ERROR, {message: e.message} as ErrorEvent)
       }

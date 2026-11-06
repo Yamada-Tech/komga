@@ -132,7 +132,7 @@ export default class KomgaUsersService {
     }
   }
 
-  async getRecentReads(limit = 10): Promise<RecentReadDto[]> {
+  async getRecentReads(limit = 100): Promise<RecentReadDto[]> {
     try {
       return (await this.http.get(`${API_USERS}/recent-reads`, {params: {limit}})).data
     } catch (e) {
