@@ -36,6 +36,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
+import org.springframework.security.web.firewall.HttpFirewall
+import org.springframework.security.web.firewall.StrictHttpFirewall
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 
 @Configuration
@@ -70,6 +72,7 @@ class SecurityConfiguration(
           "/api/**",
           "/opds/**",
           "/sse/**",
+          "/webdav/**",
           "/oauth2/authorization/**",
           "/login/oauth2/code/**",
         )
@@ -108,6 +111,7 @@ class SecurityConfiguration(
             "/api/**",
             "/opds/**",
             "/sse/**",
+            "/webdav/**",
           ).authenticated()
       }.headers { headersConfigurer ->
         headersConfigurer.cacheControl { it.disable() } // headers are set in WebMvcConfiguration
@@ -244,5 +248,15 @@ class SecurityConfiguration(
   fun apiKeyAuthenticationProvider(): AuthenticationManager =
     ProviderManager(apiKeyAuthenticationProvider).apply {
       setAuthenticationEventPublisher(authenticationEventPublisher)
+    }
+
+  /**
+   * Same as the default StrictHttpFirewall, but additionally allows the WebDAV PROPFIND method,
+   * which would otherwise be rejected before reaching the [org.gotson.komga.interfaces.api.webdav.WebDavServlet].
+   */
+  @Bean
+  fun httpFirewall(): HttpFirewall =
+    StrictHttpFirewall().apply {
+      setAllowedHttpMethods(listOf("DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "PROPFIND"))
     }
 }
