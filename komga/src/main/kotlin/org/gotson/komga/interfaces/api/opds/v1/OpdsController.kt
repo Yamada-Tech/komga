@@ -1,4 +1,4 @@
-package org.gotson.komga.interfaces.api.opds.v1
+﻿package org.gotson.komga.interfaces.api.opds.v1
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -86,7 +86,6 @@ private const val ROUTE_BOOKS_LATEST = "books/latest"
 private const val ROUTE_LIBRARIES_ALL = "libraries"
 private const val ROUTE_COLLECTIONS_ALL = "collections"
 private const val ROUTE_READLISTS_ALL = "readlists"
-private const val ROUTE_PUBLISHERS_ALL = "publishers"
 private const val ROUTE_SEARCH = "search"
 
 private const val ID_ON_DECK = "ondeck"
@@ -97,7 +96,6 @@ private const val ID_BOOKS_LATEST = "latestBooks"
 private const val ID_LIBRARIES_ALL = "allLibraries"
 private const val ID_COLLECTIONS_ALL = "allCollections"
 private const val ID_READLISTS_ALL = "allReadLists"
-private const val ID_PUBLISHERS_ALL = "allPublishers"
 
 @RestController
 @RequestMapping(value = [ROUTE_BASE], produces = [MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE])
@@ -219,13 +217,6 @@ class OpdsController(
             content = "Browse by read lists",
             link = OpdsLinkFeedNavigation(OpdsLinkRel.SUBSECTION, uriBuilder(ROUTE_READLISTS_ALL).toUriString()),
           ),
-          OpdsEntryNavigation(
-            title = "All publishers",
-            updated = ZonedDateTime.now(),
-            id = ID_PUBLISHERS_ALL,
-            content = "Browse by publishers",
-            link = OpdsLinkFeedNavigation(OpdsLinkRel.SUBSECTION, uriBuilder(ROUTE_PUBLISHERS_ALL).toUriString()),
-          ),
         ),
     )
 
@@ -311,7 +302,6 @@ class OpdsController(
   fun getAllSeries(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @RequestParam(name = "search", required = false) searchTerm: String?,
-    @RequestParam(name = "publisher", required = false) publishers: List<String>?,
     @Parameter(hidden = true) page: Pageable,
   ): OpdsFeed {
     val sort =
@@ -326,7 +316,6 @@ class OpdsController(
         SearchCondition.AllOfSeries(
           buildList {
             searchTerm?.let { add(SearchCondition.Title(SearchOperator.Contains(it))) }
-            publishers?.let { add(SearchCondition.AnyOfSeries(it.map { publisher -> SearchCondition.Publisher(SearchOperator.Is(publisher)) })) }
             add(SearchCondition.Deleted(SearchOperator.IsFalse))
           },
         ),
@@ -337,7 +326,6 @@ class OpdsController(
     val builder =
       uriBuilder(ROUTE_SERIES_ALL)
         .queryParamIfPresent("search", Optional.ofNullable(searchTerm))
-        .queryParamIfPresent("publisher", Optional.ofNullable(publishers))
 
     return OpdsFeedNavigation(
       id = ID_SERIES_ALL,
@@ -486,39 +474,6 @@ class OpdsController(
           *linkPage(uriBuilder, readLists).toTypedArray(),
         ),
       entries = readLists.content.map { it.toOpdsEntry() },
-    )
-  }
-
-  @GetMapping(ROUTE_PUBLISHERS_ALL)
-  fun getPublishers(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @Parameter(hidden = true) page: Pageable,
-  ): OpdsFeed {
-    val publishers = referentialRepository.findPublishers(SearchContext(principal.user), null, null, page)
-
-    val uriBuilder = uriBuilder(ROUTE_PUBLISHERS_ALL)
-
-    return OpdsFeedNavigation(
-      id = ID_PUBLISHERS_ALL,
-      title = "All publishers",
-      updated = ZonedDateTime.now(),
-      author = komgaAuthor,
-      links =
-        listOf(
-          OpdsLinkFeedNavigation(OpdsLinkRel.SELF, uriBuilder.toUriString()),
-          linkStart(),
-          *linkPage(uriBuilder, publishers).toTypedArray(),
-        ),
-      entries =
-        publishers.content.map { publisher ->
-          OpdsEntryNavigation(
-            title = publisher,
-            updated = ZonedDateTime.now(),
-            id = "publisher:${UriUtils.encodeQueryParam(publisher, StandardCharsets.UTF_8)}",
-            content = "",
-            link = OpdsLinkFeedNavigation(OpdsLinkRel.SUBSECTION, uriBuilder(ROUTE_SERIES_ALL).queryParam("publisher", publisher).toUriString()),
-          )
-        },
     )
   }
 

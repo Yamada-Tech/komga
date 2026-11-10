@@ -48,11 +48,7 @@ class MetadataApplier {
         titleSort = getIfNotLocked(titleSort, patch.titleSort, titleSortLock),
         summary = getIfNotLocked(summary, patch.summary, summaryLock),
         readingDirection = getIfNotLocked(readingDirection, patch.readingDirection, readingDirectionLock),
-        ageRating = getIfNotLocked(ageRating, patch.ageRating, ageRatingLock),
-        publisher = getIfNotLocked(publisher, patch.publisher, publisherLock),
-        language = getIfNotLocked(language, patch.language, languageLock),
         genres = getIfNotLocked(genres, patch.genres, genresLock),
-        totalBookCount = getIfNotLocked(totalBookCount, patch.totalBookCount, totalBookCountLock),
       )
     }
 }

@@ -114,12 +114,8 @@ class SeriesMetadataLifecycle(
             .flatten()
             .toSet()
             .ifEmpty { null },
-        language = patches.mostFrequent { it.language },
         summary = null,
         readingDirection = patches.mostFrequent { it.readingDirection },
-        ageRating = patches.mapNotNull { it.ageRating }.maxOrNull(),
-        publisher = patches.mostFrequent { it.publisher },
-        totalBookCount = patches.mapNotNull { it.totalBookCount }.maxOrNull(),
         collections = emptySet(),
       )
 

@@ -3,7 +3,6 @@ package org.gotson.komga.interfaces.api
 import org.gotson.komga.domain.model.Book
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.persistence.BookRepository
-import org.gotson.komga.domain.persistence.SeriesMetadataRepository
 import org.gotson.komga.domain.persistence.SeriesRepository
 import org.gotson.komga.domain.persistence.ThumbnailBookRepository
 import org.gotson.komga.domain.persistence.ThumbnailSeriesRepository
@@ -13,9 +12,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
 
+/**
+ * Fork note: content restrictions (age rating, sharing labels) are effectively disabled
+ * because the corresponding series metadata fields have been removed. Only library
+ * access checks are enforced.
+ */
 @Component
 class ContentRestrictionChecker(
-  private val seriesMetadataRepository: SeriesMetadataRepository,
   private val bookRepository: BookRepository,
   private val thumbnailBookRepository: ThumbnailBookRepository,
   private val seriesRepository: SeriesRepository,
@@ -32,10 +35,6 @@ class ContentRestrictionChecker(
     book: BookDto,
   ) {
     if (!komgaUser.canAccessLibrary(book.libraryId)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    if (komgaUser.restrictions.isRestricted)
-      seriesMetadataRepository.findById(book.seriesId).let {
-        if (!komgaUser.isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-      }
   }
 
   /**
@@ -49,10 +48,6 @@ class ContentRestrictionChecker(
     book: Book,
   ) {
     if (!komgaUser.canAccessLibrary(book.libraryId)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    if (komgaUser.restrictions.isRestricted)
-      seriesMetadataRepository.findById(book.seriesId).let {
-        if (!komgaUser.isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-      }
   }
 
   /**
@@ -70,12 +65,6 @@ class ContentRestrictionChecker(
         if (!komgaUser.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
       } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     }
-    if (komgaUser.restrictions.isRestricted)
-      bookRepository.getSeriesIdOrNull(bookId)?.let { seriesId ->
-        seriesMetadataRepository.findById(seriesId).let {
-          if (!komgaUser.isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-        }
-      } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 
   /**
@@ -92,12 +81,6 @@ class ContentRestrictionChecker(
         if (!komgaUser.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
       } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     }
-    if (komgaUser.restrictions.isRestricted)
-      thumbnailBookRepository.getSeriesIdOrNull(thumbnailId)?.let { seriesId ->
-        seriesMetadataRepository.findById(seriesId).let {
-          if (!komgaUser.isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-        }
-      } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 
   /**
@@ -110,7 +93,6 @@ class ContentRestrictionChecker(
     series: SeriesDto,
   ) {
     if (!komgaUser.canAccessLibrary(series.libraryId)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    if (!komgaUser.isContentAllowed(series.metadata.ageRating, series.metadata.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
   }
 
   /**
@@ -127,10 +109,6 @@ class ContentRestrictionChecker(
         if (!komgaUser.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
       } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     }
-    if (komgaUser.restrictions.isRestricted)
-      seriesMetadataRepository.findById(seriesId).let {
-        if (!komgaUser.isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-      }
   }
 
   /**
@@ -147,11 +125,5 @@ class ContentRestrictionChecker(
         if (!komgaUser.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
       } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     }
-    if (komgaUser.restrictions.isRestricted)
-      thumbnailSeriesRepository.getSeriesIdOrNull(thumbnailId)?.let { seriesId ->
-        seriesMetadataRepository.findById(seriesId).let {
-          if (!komgaUser.isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-        }
-      } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 }

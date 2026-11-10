@@ -132,20 +132,6 @@
                   {{ $t(`enums.series_status.${series.metadata.status}`) }}
                 </v-chip>
               </v-col>
-              <v-col class="py-1 pe-0" cols="auto" v-if="series.metadata.ageRating">
-                <v-chip label small link
-                        :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {ageRating: [new SearchConditionAgeRating(new SearchOperatorIs(series.metadata.ageRating.toString()))]}}"
-                >
-                  {{ series.metadata.ageRating }}+
-                </v-chip>
-              </v-col>
-              <v-col class="py-1 pe-0" cols="auto" v-if="series.metadata.language">
-                <v-chip label small link
-                        :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {language: [new SearchConditionLanguage(new SearchOperatorIs(series.metadata.language))]}}"
-                >
-                  {{ languageDisplay }}
-                </v-chip>
-              </v-col>
               <v-col class="py-1 pe-0" cols="auto"
                      v-if="series.metadata.readingDirection">
                 <v-chip label small>
@@ -160,38 +146,12 @@
             </v-row>
 
             <v-row class="text-caption" align="center">
-              <v-col cols="auto" v-if="series.metadata.totalBookCount">
-                {{ $t('common.books_total', {count: series.booksCount, total: series.metadata.totalBookCount}) }}
-              </v-col>
-
-              <v-col cols="auto" v-else>
+              <v-col cols="auto">
                 {{ $tc('common.books_n', series.booksCount) }}
               </v-col>
             </v-row>
 
             <template v-if="$vuetify.breakpoint.smAndUp">
-              <!-- Alternate titles  -->
-              <read-more v-model="readMoreTitles"
-                         class="mb-4"
-                         i18n-less="titles_more.less"
-                         i18n-more="titles_more.more"
-                         v-if="series.metadata.alternateTitles.length > 0"
-              >
-                <v-row v-for="(a, i) in series.metadata.alternateTitles"
-                       :key="i"
-                       class="align-center text-caption"
-                >
-                  <v-col cols="4" sm="3" md="2" xl="1" class="py-0 text-uppercase"
-                         :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">
-                    {{ a.label }}
-                  </v-col>
-                  <v-col cols="8" sm="9" md="10" xl="11" class="py-0"
-                         :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">
-                    {{ a.title }}
-                  </v-col>
-                </v-row>
-              </read-more>
-
               <v-row class="align-center">
                 <v-col cols="auto">
                   <v-btn :title="$t('menu.download_series')"
@@ -229,30 +189,6 @@
       </v-row>
 
       <template v-if="$vuetify.breakpoint.xsOnly">
-        <!-- Alternate titles  -->
-        <read-more v-model="readMoreTitles"
-                   class="mb-4"
-                   i18n-less="titles_more.less"
-                   i18n-more="titles_more.more"
-                   v-if="series.metadata.alternateTitles.length > 0"
-        >
-          <v-row v-for="(a, i) in series.metadata.alternateTitles"
-                 :key="i"
-                 class="align-center text-caption"
-          >
-            <v-col cols="4" class="py-0 text-uppercase"
-                   :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">{{
-                a.label
-              }}
-            </v-col>
-            <v-col cols="8" class="py-0"
-                   :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">{{
-                a.title
-              }}
-            </v-col>
-          </v-row>
-        </read-more>
-
         <!--   Download button     -->
         <v-row class="align-center">
           <v-col cols="auto">
@@ -288,23 +224,6 @@
           </v-col>
         </v-row>
       </template>
-
-      <!--  Publisher    -->
-      <v-row v-if="series.metadata.publisher" class="align-center text-caption">
-        <v-col cols="4" sm="3" md="2" xl="1" class="py-1 text-uppercase">{{ $t('common.publisher') }}</v-col>
-        <v-col cols="8" sm="9" md="10" xl="11" class="py-1">
-          <v-chip
-            class="me-2"
-            :title="series.metadata.publisher"
-            :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {publisher: [new SearchConditionPublisher(new SearchOperatorIs(series.metadata.publisher))]}}"
-            label
-            small
-            outlined
-            link
-          >{{ series.metadata.publisher }}
-          </v-chip>
-        </v-col>
-      </v-row>
 
       <!--  Genres    -->
       <v-row v-if="series.metadata.genres.length > 0" class="align-center text-caption">
@@ -378,33 +297,6 @@
             >{{ t }}
             </v-chip>
           </vue-horizontal>
-        </v-col>
-      </v-row>
-
-      <v-row v-if="series.metadata.links.length > 0" class="align-center text-caption">
-        <v-col class="py-1 text-uppercase" cols="4" sm="3" md="2" xl="1">{{ $t('browse_book.links') }}</v-col>
-        <v-col class="py-1" cols="8" sm="9" md="10" xl="11">
-          <v-chip
-            v-for="(link, i) in series.metadata.links"
-            :href="link.url"
-            rel="noreferrer"
-            target="_blank"
-            class="me-2"
-            label
-            small
-            outlined
-            link
-            :key="i"
-          >
-            {{ link.label }}
-            <v-icon
-              x-small
-              color="grey"
-              class="ps-1"
-            >
-              mdi-open-in-new
-            </v-icon>
-          </v-chip>
         </v-col>
       </v-row>
 
@@ -551,16 +443,13 @@ import {ItemContext} from '@/types/items'
 import {Context, ContextOrigin} from '@/types/context'
 import {RawLocation} from 'vue-router/types/router'
 import {
-  SearchConditionAgeRating,
   SearchConditionAllOfBook,
   SearchConditionAnyOfBook,
   SearchConditionAuthor,
   SearchConditionBook,
   SearchConditionDeleted,
   SearchConditionGenre,
-  SearchConditionLanguage,
   SearchConditionMediaProfile,
-  SearchConditionPublisher,
   SearchConditionReadStatus,
   SearchConditionSeriesId,
   SearchConditionSeriesStatus,
@@ -584,8 +473,6 @@ import {
   NameValue,
 } from '@/types/filter'
 
-const tags = require('language-tags')
-
 export default Vue.extend({
   name: 'BrowseSeries',
   components: {
@@ -608,11 +495,8 @@ export default Vue.extend({
   data: function () {
     return {
       SearchConditionSeriesStatus,
-      SearchConditionPublisher,
       SearchConditionGenre,
       SearchConditionTag,
-      SearchConditionLanguage,
-      SearchConditionAgeRating,
       SearchOperatorIs,
       series: {} as SeriesDto,
       context: {} as Context,
@@ -638,7 +522,6 @@ export default Vue.extend({
         mediaProfile: [] as NameValue[],
       },
       readMore: false,
-      readMoreTitles: false,
     }
   },
   computed: {
@@ -762,9 +645,6 @@ export default Vue.extend({
           return 15
       }
     },
-    languageDisplay(): string {
-      return tags(this.series.metadata.language)?.language()?.descriptions()[0] || this.series.metadata.language
-    },
     statusChip(): object {
       switch (this.series.metadata.status) {
         case SeriesStatus.ABANDONED:
@@ -853,7 +733,6 @@ export default Vue.extend({
       // reset
       await this.resetParams(to, to.params.seriesId)
       this.readMore = false
-      this.readMoreTitles = false
       this.page = 1
       this.totalPages = 1
       this.totalElements = null

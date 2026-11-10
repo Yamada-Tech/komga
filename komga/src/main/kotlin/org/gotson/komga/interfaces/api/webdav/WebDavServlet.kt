@@ -11,7 +11,6 @@ import org.gotson.komga.domain.model.UserRoles
 import org.gotson.komga.domain.persistence.BookRepository
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.persistence.MediaRepository
-import org.gotson.komga.domain.persistence.SeriesMetadataRepository
 import org.gotson.komga.domain.persistence.SeriesRepository
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
 import org.gotson.komga.infrastructure.web.getMediaTypeOrDefault
@@ -68,7 +67,6 @@ class WebDavServlet(
   private val libraryRepository: LibraryRepository,
   private val seriesRepository: SeriesRepository,
   private val bookRepository: BookRepository,
-  private val seriesMetadataRepository: SeriesMetadataRepository,
   private val mediaRepository: MediaRepository,
   private val contentRestrictionChecker: ContentRestrictionChecker,
 ) : HttpServlet() {
@@ -349,17 +347,7 @@ class WebDavServlet(
     seriesRepository
       .findAllByLibraryId(libraryId)
       .filter { it.deletedDate == null }
-      .filter { !user.restrictions.isRestricted || isSeriesAllowed(user, it.id) }
       .sortedBy { it.id }
-
-  private fun isSeriesAllowed(
-    user: KomgaUser,
-    seriesId: String,
-  ): Boolean =
-    seriesMetadataRepository
-      .findByIdOrNull(seriesId)
-      ?.let { user.isContentAllowed(it.ageRating, it.sharingLabels) }
-      ?: true
 
   private fun entryFor(
     href: String,

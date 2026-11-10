@@ -406,12 +406,8 @@ class ComicInfoProviderTest {
         assertThat(titleSort).isEqualTo("séries")
         assertThat(status).isNull()
         assertThat(collections).containsExactlyInAnyOrder("collections", "multiple")
-        assertThat(publisher).isEqualTo("publisher")
-        assertThat(ageRating).isEqualTo(15)
         assertThat(readingDirection).isEqualTo(SeriesMetadata.ReadingDirection.RIGHT_TO_LEFT)
-        assertThat(language).isEqualTo("en")
         assertThat(summary).isBlank
-        assertThat(totalBookCount).isEqualTo(10)
         assertThat(genres).containsExactlyInAnyOrder("Action", "Adventure")
       }
     }
@@ -463,50 +459,6 @@ class ComicInfoProviderTest {
     }
 
     @Test
-    fun `given comicInfo with incorrect values when getting series metadata then metadata patch is valid`() {
-      val comicInfo =
-        ComicInfo().apply {
-          languageISO = "japanese"
-        }
-
-      every { mockMapper.readValue(any<ByteArray>(), ComicInfo::class.java) } returns comicInfo
-
-      val patch = comicInfoProvider.getSeriesMetadataFromBook(BookWithMedia(book, media), true)!!
-
-      with(patch) {
-        assertThat(language).isNull()
-      }
-    }
-
-    @ParameterizedTest
-    @MethodSource("languagesSource")
-    fun `given comicInfo with malformed BCP-47 language when getting series metadata then patch language is normalized`(
-      source: String,
-      expected: String,
-    ) {
-      val comicInfo =
-        ComicInfo().apply {
-          languageISO = source
-        }
-
-      every { mockMapper.readValue(any<ByteArray>(), ComicInfo::class.java) } returns comicInfo
-
-      val patch = comicInfoProvider.getSeriesMetadataFromBook(BookWithMedia(book, media), true)!!
-
-      with(patch) {
-        assertThat(language).isEqualTo(expected)
-      }
-    }
-
-    private fun languagesSource(): Stream<Arguments> =
-      Stream.of(
-        Arguments.of("fra", "fr"),
-        Arguments.of("fra-be", "fr-BE"),
-        Arguments.of("JA", "ja"),
-        Arguments.of("en-us", "en-US"),
-      )
-
-    @Test
     fun `given comicInfo with blank values when getting series metadata then blank values are omitted`() {
       val comicInfo =
         ComicInfo().apply {
@@ -526,8 +478,6 @@ class ComicInfoProviderTest {
         assertThat(title).isNull()
         assertThat(titleSort).isNull()
         assertThat(genres).isNull()
-        assertThat(language).isNull()
-        assertThat(publisher).isNull()
         assertThat(collections).isEmpty()
       }
     }

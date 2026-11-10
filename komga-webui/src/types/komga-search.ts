@@ -110,43 +110,11 @@ export class SearchConditionTag implements SearchConditionBook, SearchConditionS
   }
 }
 
-export class SearchConditionLanguage implements SearchConditionSeries {
-  language: SearchOperatorEquality
-
-  constructor(op: SearchOperatorEquality) {
-    this.language = op
-  }
-}
-
-export class SearchConditionPublisher implements SearchConditionSeries {
-  publisher: SearchOperatorEquality
-
-  constructor(op: SearchOperatorEquality) {
-    this.publisher = op
-  }
-}
-
-export class SearchConditionAgeRating implements SearchConditionSeries {
-  ageRating: SearchOperatorNumericNullable
-
-  constructor(op: SearchOperatorNumericNullable) {
-    this.ageRating = op
-  }
-}
-
 export class SearchConditionReleaseDate implements SearchConditionBook, SearchConditionSeries {
   releaseDate: SearchOperatorDate
 
   constructor(op: SearchOperatorDate) {
     this.releaseDate = op
-  }
-}
-
-export class SearchConditionSharingLabel implements SearchConditionBook, SearchConditionSeries {
-  sharingLabel: SearchOperatorEquality
-
-  constructor(op: SearchOperatorEquality) {
-    this.sharingLabel = op
   }
 }
 

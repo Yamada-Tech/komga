@@ -1,4 +1,4 @@
-import {AuthorDto, BookDto, WebLinkDto} from '@/types/komga-books'
+import {AuthorDto, BookDto} from '@/types/komga-books'
 import {Context} from '@/types/context'
 
 export interface SeriesDto {
@@ -34,24 +34,10 @@ export interface SeriesMetadataDto {
   summaryLock: boolean,
   readingDirection: string,
   readingDirectionLock: boolean,
-  publisher: string,
-  publisherLock: boolean,
-  ageRating?: number,
-  ageRatingLock: boolean,
-  language: string,
-  languageLock: boolean,
   genres: string[],
   genresLock: boolean,
   tags: string[],
   tagsLock: boolean,
-  totalBookCount?: number,
-  totalBookCountLock: boolean,
-  sharingLabels: string[],
-  sharingLabelsLock: boolean,
-  links: WebLinkDto[],
-  linksLock: boolean,
-  alternateTitles: AlternateTitleDto[],
-  alternateTitlesLock: boolean,
 }
 
 export interface SeriesBooksMetadataDto {
@@ -75,24 +61,10 @@ export interface SeriesMetadataUpdateDto {
   summaryLock?: boolean,
   readingDirection?: string,
   readingDirectionLock?: boolean,
-  publisher?: string,
-  publisherLock?: boolean,
-  ageRating?: number,
-  ageRatingLock?: boolean,
-  language?: string,
-  languageLock?: boolean,
   genres?: string[],
   genresLock?: boolean,
   tags?: string[],
   tagsLock?: boolean,
-  totalBookCount?: number,
-  totalBookCountLock: boolean,
-  sharingLabels?: string[],
-  sharingLabelsLock: boolean,
-  links?: WebLinkDto[],
-  linksLock?: boolean,
-  alternateTitles?: AlternateTitleDto[],
-  alternateTitlesLock?: boolean,
 }
 
 export interface GroupCountDto {
@@ -111,10 +83,6 @@ export interface SeriesThumbnailDto {
   height: number,
 }
 
-export interface AlternateTitleDto {
-  label: string,
-  title: string
-}
 
 export interface Oneshot {
   series: SeriesDto,

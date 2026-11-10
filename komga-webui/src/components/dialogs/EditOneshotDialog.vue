@@ -35,18 +35,6 @@
             <v-icon left class="hidden-xs-only">mdi-tag-multiple</v-icon>
             {{ $t('dialog.edit_books.tab_tags') }}
           </v-tab>
-          <v-tab class="justify-start" v-if="single">
-            <v-icon left class="hidden-xs-only">mdi-link</v-icon>
-            {{ $t('dialog.edit_books.tab_links') }}
-          </v-tab>
-          <v-tab class="justify-start" v-if="single">
-            <v-icon left class="hidden-xs-only">mdi-image</v-icon>
-            {{ $t('dialog.edit_books.tab_poster') }}
-          </v-tab>
-          <v-tab class="justify-start">
-            <v-icon left class="hidden-xs-only">mdi-account-multiple</v-icon>
-            {{ $t('dialog.edit_series.tab_sharing') }}
-          </v-tab>
 
           <!--  Tab: General  -->
           <v-tab-item>
@@ -60,6 +48,8 @@
                                   :label="$t('dialog.edit_books.field_title')"
                                   filled
                                   dense
+                                  :hint="$t('dialog.edit_series.field_title_hint')"
+                                  persistent-hint
                                   :error-messages="requiredBookErrors('title')"
                                   @input="$v.form.book.title.$touch()"
                                   @blur="$v.form.book.title.$touch()"
@@ -79,14 +69,14 @@
                 <!--  Sort Title  -->
                 <v-row v-if="single">
                   <v-col cols="12">
-                    <v-text-field v-model="form.series.titleSort"
-                                  :label="$t('dialog.edit_series.field_sort_title')"
-                                  filled
-                                  dense
-                                  :error-messages="requiredSeriesErrors('titleSort')"
-                                  @input="$v.form.series.titleSort.$touch()"
-                                  @blur="$v.form.series.titleSort.$touch()"
-                                  @change="form.series.titleSortLock = true"
+                    <v-select :items="sortTitleOptions"
+                              v-model="form.series.titleSort"
+                              :label="$t('dialog.edit_series.field_sort_title')"
+                              filled
+                              dense
+                              clearable
+                              @input="$v.form.series.titleSort.$touch()"
+                              @change="form.series.titleSortLock = true"
                     >
                       <template v-slot:prepend>
                         <v-icon :color="form.series.titleSortLock ? 'secondary' : ''"
@@ -95,7 +85,7 @@
                           {{ form.series.titleSortLock ? 'mdi-lock' : 'mdi-lock-open' }}
                         </v-icon>
                       </template>
-                    </v-text-field>
+                    </v-select>
                   </v-col>
                 </v-row>
 
@@ -120,8 +110,8 @@
                   </v-col>
                 </v-row>
 
+                <!--  Reading Direction  -->
                 <v-row>
-                  <!--  Reading Direction  -->
                   <v-col cols="6">
                     <v-select v-model="form.series.readingDirection"
                               :items="readingDirections"
@@ -140,74 +130,6 @@
                         </v-icon>
                       </template>
                     </v-select>
-                  </v-col>
-
-                  <!--  Language  -->
-                  <v-col cols="6">
-                    <v-text-field v-model="form.series.language"
-                                  :label="$t('dialog.edit_series.field_language')"
-                                  filled
-                                  dense
-                                  :placeholder="!single && mixed.language ? $t('dialog.edit_series.mixed') : ''"
-                                  :error-messages="languageErrors"
-                                  :hint="$t('dialog.edit_series.field_language_hint')"
-                                  @input="$v.form.series.language.$touch()"
-                                  @change="form.series.languageLock = true"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon :color="form.series.languageLock ? 'secondary' : ''"
-                                @click="form.series.languageLock = !form.series.languageLock"
-                        >
-                          {{ form.series.languageLock ? 'mdi-lock' : 'mdi-lock-open' }}
-                        </v-icon>
-                      </template>
-                    </v-text-field>
-                  </v-col>
-                </v-row>
-
-                <v-row>
-                  <!--  Publisher  -->
-                  <v-col cols="6">
-                    <v-text-field v-model="form.series.publisher"
-                                  :label="$t('dialog.edit_series.field_publisher')"
-                                  filled
-                                  dense
-                                  :placeholder="!single && mixed.publisher ? $t('dialog.edit_series.mixed') : ''"
-                                  @input="$v.form.series.publisher.$touch()"
-                                  @change="form.series.publisherLock = true"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon :color="form.series.publisherLock ? 'secondary' : ''"
-                                @click="form.series.publisherLock = !form.series.publisherLock"
-                        >
-                          {{ form.series.publisherLock ? 'mdi-lock' : 'mdi-lock-open' }}
-                        </v-icon>
-                      </template>
-                    </v-text-field>
-                  </v-col>
-
-                  <!--  Age Rating  -->
-                  <v-col cols="6">
-                    <v-text-field v-model="form.series.ageRating"
-                                  :label="$t('dialog.edit_series.field_age_rating')"
-                                  clearable
-                                  filled
-                                  dense
-                                  type="number"
-                                  :placeholder="!single && mixed.ageRating ? $t('dialog.edit_series.mixed') : ''"
-                                  :error-messages="ageRatingErrors"
-                                  @input="$v.form.series.ageRating.$touch()"
-                                  @blur="$v.form.series.ageRating.$touch()"
-                                  @change="form.series.ageRatingLock = true"
-                    >
-                      <template v-slot:prepend>
-                        <v-icon :color="form.series.ageRatingLock ? 'secondary' : ''"
-                                @click="form.series.ageRatingLock = !form.series.ageRatingLock"
-                        >
-                          {{ form.series.ageRatingLock ? 'mdi-lock' : 'mdi-lock-open' }}
-                        </v-icon>
-                      </template>
-                    </v-text-field>
                   </v-col>
                 </v-row>
 
@@ -405,149 +327,6 @@
               </v-container>
             </v-card>
           </v-tab-item>
-
-          <!--  Tab: Links  -->
-          <v-tab-item v-if="single">
-            <v-card flat min-height="100">
-              <v-container fluid>
-                <!-- Links -->
-                <v-form
-                  v-model="linksValid"
-                  ref="linksForm"
-                >
-                  <v-row
-                    v-for="(link, i) in form.book.links"
-                    :key="i"
-                  >
-                    <v-col cols="4" class="py-0">
-                      <v-text-field v-model="form.book.links[i].label"
-                                    :label="$t('dialog.edit_books.field_link_label')"
-                                    filled
-                                    dense
-                                    :rules="[linksLabelRules]"
-                                    @input="$v.form.book.links.$touch()"
-                                    @blur="$v.form.book.links.$touch()"
-                                    @change="form.book.linksLock = true"
-                      >
-                        <template v-slot:prepend>
-                          <v-icon :color="form.book.linksLock ? 'secondary' : ''"
-                                  @click="form.book.linksLock = !form.book.linksLock"
-                          >
-                            {{ form.book.linksLock ? 'mdi-lock' : 'mdi-lock-open' }}
-                          </v-icon>
-                        </template>
-                      </v-text-field>
-                    </v-col>
-
-                    <v-col cols="8" class="py-0">
-                      <v-text-field v-model="form.book.links[i].url"
-                                    :label="$t('dialog.edit_books.field_link_url')"
-                                    filled
-                                    dense
-                                    :rules="[linksUrlRules]"
-                                    @input="$v.form.book.links.$touch()"
-                                    @blur="$v.form.book.links.$touch()"
-                                    @change="form.book.linksLock = true"
-                      >
-                        <template v-slot:append-outer>
-                          <v-icon @click="form.book.links.splice(i, 1)">mdi-delete</v-icon>
-                        </template>
-                      </v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-form>
-
-                <v-row>
-                  <v-spacer/>
-                  <v-col cols="auto">
-                    <v-btn
-                      elevation="2"
-                      fab
-                      small
-                      bottom
-                      right
-                      color="primary"
-                      @click="form.book.links.push({label:'', url:''})"
-                    >
-                      <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card>
-          </v-tab-item>
-
-          <!--  Tab: Thumbnails  -->
-          <v-tab-item v-if="single">
-            <v-card flat>
-              <v-container fluid>
-                <!-- Upload -->
-                <v-row>
-                  <v-col class="pa-1">
-                    <drop-zone ref="thumbnailsUpload" @on-input-change="addThumbnail" class="pa-8"/>
-                  </v-col>
-                </v-row>
-
-                <!-- Gallery -->
-                <v-row>
-                  <v-col
-                    cols="6" sm="4" lg="3" class="pa-1"
-                    v-for="(item, index) in [...poster.uploadQueue, ...poster.bookThumbnails]"
-                    :key="index"
-                  >
-                    <thumbnail-card
-                      :item="item"
-                      :selected="isThumbnailSelected(item)"
-                      :toBeDeleted="isThumbnailToBeDeleted(item)"
-                      @on-select-thumbnail="selectThumbnail"
-                      @on-delete-thumbnail="deleteThumbnail"
-                    />
-                  </v-col>
-                </v-row>
-
-              </v-container>
-            </v-card>
-          </v-tab-item>
-
-          <!--  Tab: Sharing  -->
-          <v-tab-item>
-            <v-card flat>
-              <v-container fluid>
-                <v-alert v-if="!single"
-                         type="warning"
-                         outlined
-                         dense
-                >{{ $t('dialog.edit_books.tags_notice_multiple_edit') }}
-                </v-alert>
-
-                <!-- Sharing Labels -->
-                <v-row>
-                  <v-col cols="12">
-                    <span class="text-body-2">{{ $t('dialog.edit_series.field_labels') }}</span>
-                    <v-combobox v-model="form.series.sharingLabels"
-                                :items="sharingLabelsAvailable"
-                                @input="$v.form.series.sharingLabels.$touch()"
-                                @change="form.series.sharingLabelsLock = true"
-                                hide-selected
-                                chips
-                                deletable-chips
-                                multiple
-                                filled
-                                dense
-                    >
-                      <template v-slot:prepend>
-                        <v-icon :color="form.series.sharingLabelsLock ? 'secondary' : ''"
-                                @click="form.series.sharingLabelsLock = !form.series.sharingLabelsLock"
-                        >
-                          {{ form.series.sharingLabelsLock ? 'mdi-lock' : 'mdi-lock-open' }}
-                        </v-icon>
-                      </template>
-                    </v-combobox>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card>
-          </v-tab-item>
         </v-tabs>
 
         <v-card-actions class="hidden-xs-only">
@@ -562,28 +341,22 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {helpers, minValue, requiredIf} from 'vuelidate/lib/validators'
+import {helpers, requiredIf} from 'vuelidate/lib/validators'
 import {ReadingDirection} from '@/types/enum-books'
 import {Oneshot, SeriesDto} from '@/types/komga-series'
 import {ERROR, ErrorEvent} from '@/types/events'
-import DropZone from '@/components/DropZone.vue'
-import ThumbnailCard from '@/components/ThumbnailCard.vue'
-import {BookDto, BookThumbnailDto} from '@/types/komga-books'
+import {BookDto} from '@/types/komga-books'
 import {isMatch} from 'date-fns'
 import IsbnVerify from '@w0s/isbn-verify'
 import {debounce} from 'lodash'
 import {authorRoles} from '@/types/author-roles'
 import {groupAuthorsByRole} from '@/functions/authors'
 
-const tags = require('language-tags')
-
-const validLanguage = (value: string) => !helpers.req(value) || tags.check(value)
 const validDate = (value: string) => !helpers.req(value) || isMatch(value, 'yyyy-MM-dd')
 const validIsbn = (value: string) => !helpers.req(value) || new IsbnVerify(value).isIsbn13({check_digit: true})
 
 export default Vue.extend({
   name: 'EditOneshotDialog',
-  components: {ThumbnailCard, DropZone},
   data: () => {
     return {
       modal: false,
@@ -592,23 +365,14 @@ export default Vue.extend({
       customRole: '',
       customRoles: [] as string[],
       customRoleValid: false,
-      linksValid: false,
       form: {
         series: {
           titleSort: '',
           titleSortLock: false,
           readingDirection: '',
           readingDirectionLock: false,
-          publisher: '',
-          publisherLock: false,
-          ageRating: undefined as number | undefined,
-          ageRatingLock: false,
-          language: '',
-          languageLock: false,
           genres: [],
           genresLock: false,
-          sharingLabels: [],
-          sharingLabelsLock: false,
         },
         book: {
           title: '',
@@ -623,27 +387,15 @@ export default Vue.extend({
           tagsLock: false,
           isbn: '',
           isbnLock: false,
-          links: [],
-          linksLock: false,
         },
       },
       mixed: {
         readingDirection: false,
-        publisher: false,
-        ageRating: false,
-        language: false,
-      },
-      poster: {
-        selectedThumbnail: '',
-        uploadQueue: [] as File[],
-        deleteQueue: [] as BookThumbnailDto[],
-        bookThumbnails: [] as BookThumbnailDto[],
       },
       authorSearch: [],
       authorSearchResults: [] as string[],
       genresAvailable: [] as string[],
       tagsAvailable: [] as string[],
-      sharingLabelsAvailable: [] as string[],
     }
   },
   props: {
@@ -659,10 +411,8 @@ export default Vue.extend({
     },
     modal(val) {
       if (val) {
-        this.getThumbnails(this.books)
         this.loadAvailableTags()
         this.loadAvailableGenres()
-        this.loadAvailableSharingLabels()
       } else {
         this.dialogCancel()
       }
@@ -684,19 +434,9 @@ export default Vue.extend({
   validations: {
     form: {
       series: {
-        titleSort: {
-          required: requiredIf(function (this: any, model: any) {
-            return this.single
-          }),
-        },
-        language: {
-          validLanguage: validLanguage,
-        },
+        titleSort: {},
         genres: {},
-        sharingLabels: {},
-        ageRating: {minValue: minValue(0)},
         readingDirection: {},
-        publisher: {},
       },
       book: {
         title: {
@@ -707,7 +447,6 @@ export default Vue.extend({
         summary: {},
         tags: {},
         releaseDate: {validDate},
-        links: {},
         authors: {},
         isbn: {validIsbn},
       },
@@ -749,16 +488,10 @@ export default Vue.extend({
         }),
       )
     },
-    ageRatingErrors(): string[] {
-      const errors = [] as string[]
-      if (!this.$v.form?.series?.ageRating?.$dirty) return errors
-      !this.$v?.form?.series?.ageRating?.minValue && errors.push(this.$t('dialog.edit_series.field_age_rating_error').toString())
-      return errors
-    },
-    languageErrors(): string[] {
-      if (!this.$v.form?.series?.language?.$dirty) return []
-      if (!this.$v?.form?.series?.language?.validLanguage) return tags(this.form.series.language).errors().map((x: any) => x.message)
-      return []
+    sortTitleOptions(): { text: string, value: string }[] {
+      const latin = Array.from({length: 26}, (_, i) => String.fromCharCode(65 + i))
+      const kana = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん'.split('')
+      return [...latin, ...kana].map(x => ({text: x, value: x}))
     },
     dialogTitle(): string {
       return this.single
@@ -784,20 +517,6 @@ export default Vue.extend({
     },
   },
   methods: {
-    linksLabelRules(label: string): boolean | string {
-      if (!!this.$_.trim(label)) return true
-      return this.$t('common.required').toString()
-    },
-    linksUrlRules(value: string): boolean | string {
-      let url
-      try {
-        url = new URL(value)
-      } catch (_) {
-        return this.$t('dialog.edit_books.field_link_url_error_url').toString()
-      }
-      if (url.protocol === 'http:' || url.protocol === 'https:') return true
-      return this.$t('dialog.edit_books.field_link_url_error_protocol').toString()
-    },
     addRole() {
       if ((this.$refs.customRoleForm as any).validate()) {
         this.customRoles.push(this.customRole.toLowerCase());
@@ -810,9 +529,6 @@ export default Vue.extend({
     async loadAvailableGenres() {
       this.genresAvailable = await this.$komgaReferential.getGenres()
     },
-    async loadAvailableSharingLabels() {
-      this.sharingLabelsAvailable = await this.$komgaReferential.getSharingLabels()
-    },
     requiredBookErrors(fieldName: string): string[] {
       const errors = [] as string[]
       const formField = this.$v.form.book!![fieldName] as any
@@ -820,17 +536,13 @@ export default Vue.extend({
       !formField.required && errors.push(this.$t('common.required').toString())
       return errors
     },
-    requiredSeriesErrors(fieldName: string): string[] {
-      const errors = [] as string[]
-      const formField = this.$v.form.series!![fieldName] as any
-      if (!formField.$dirty) return errors
-      !formField.required && errors.push(this.$t('common.required').toString())
-      return errors
+    stripAuthorPrefix(title: string): string {
+      // 先頭の [作者名] を除去（例: "[作者名] タイトル" -> "タイトル"）
+      return title.replace(/^\s*\[[^\]]*\]\s*/, '')
     },
     dialogReset(oneshots: Oneshot | Oneshot[]) {
       this.tab = 0;
-      (this.$refs.customRoleForm as any)?.reset();
-      (this.$refs.linksForm as any)?.resetValidation()
+      (this.$refs.customRoleForm as any)?.reset()
       this.customRoles = []
       this.$v.$reset()
       if (Array.isArray(oneshots) && oneshots.length === 0) return
@@ -843,27 +555,6 @@ export default Vue.extend({
         const readingDirectionLock = this.$_.uniq(oneshots.map(x => x.series.metadata.readingDirectionLock))
         this.form.series.readingDirectionLock = readingDirectionLock.length > 1 ? false : readingDirectionLock[0]
 
-        const ageRating = this.$_.uniq(oneshots.map(x => x.series.metadata.ageRating))
-        this.form.series.ageRating = ageRating.length > 1 ? undefined : ageRating[0]
-        this.mixed.ageRating = ageRating.length > 1
-
-        const ageRatingLock = this.$_.uniq(oneshots.map(x => x.series.metadata.ageRatingLock))
-        this.form.series.ageRatingLock = ageRatingLock.length > 1 ? false : ageRatingLock[0]
-
-        const publisher = this.$_.uniq(oneshots.map(x => x.series.metadata.publisher))
-        this.form.series.publisher = publisher.length > 1 ? '' : publisher[0]
-        this.mixed.publisher = publisher.length > 1
-
-        const publisherLock = this.$_.uniq(oneshots.map(x => x.series.metadata.publisherLock))
-        this.form.series.publisherLock = publisherLock.length > 1 ? false : publisherLock[0]
-
-        const language = this.$_.uniq(oneshots.map(x => x.series.metadata.language))
-        this.form.series.language = language.length > 1 ? '' : language[0]
-        this.mixed.language = language.length > 1
-
-        const languageLock = this.$_.uniq(oneshots.map(x => x.series.metadata.languageLock))
-        this.form.series.languageLock = languageLock.length > 1 ? false : languageLock[0]
-
         this.form.series.genres = []
 
         const genresLock = this.$_.uniq(oneshots.map(x => x.series.metadata.genresLock))
@@ -874,29 +565,17 @@ export default Vue.extend({
         const tagsLock = this.$_.uniq(oneshots.map(x => x.book.metadata.tagsLock))
         this.form.book.tagsLock = tagsLock.length > 1 ? false : tagsLock[0]
 
-        this.form.series.sharingLabels = []
-
-        const sharingLabelsLock = this.$_.uniq(oneshots.map(x => x.series.metadata.sharingLabelsLock))
-        this.form.series.sharingLabelsLock = sharingLabelsLock.length > 1 ? false : sharingLabelsLock[0]
-
-        this.form.book.links = []
         this.form.book.authors = {}
 
         const authorsLock = this.$_.uniq(oneshots.map(x => x.book.metadata.authorsLock))
         this.form.book.authorsLock = authorsLock.length > 1 ? false : authorsLock[0]
       } else {
         this.form.series.genres = []
-        this.form.series.sharingLabels = []
         this.form.book.tags = []
-        this.form.book.links = []
         const oneshot = oneshots as Oneshot
         this.$_.merge(this.form.series, oneshot.series.metadata)
         this.$_.merge(this.form.book, oneshot.book.metadata)
         this.form.book.authors = groupAuthorsByRole(oneshot.book.metadata.authors)
-        this.poster.selectedThumbnail = ''
-        this.poster.deleteQueue = []
-        this.poster.uploadQueue = []
-        this.poster.bookThumbnails = []
       }
     },
     dialogCancel() {
@@ -909,16 +588,10 @@ export default Vue.extend({
       }
     },
     validateForm(): any {
-      if (!this.$v.$invalid
-        && (!this.single || !this.$refs.linksForm || (this.$refs.linksForm as any).validate())
-      ) {
+      if (!this.$v.$invalid) {
         const metadataSeries = {
           readingDirectionLock: this.form.series.readingDirectionLock,
-          ageRatingLock: this.form.series.ageRatingLock,
-          publisherLock: this.form.series.publisherLock,
-          languageLock: this.form.series.languageLock,
           genresLock: this.form.series.genresLock,
-          sharingLabelsLock: this.form.series.sharingLabelsLock,
         }
         const metadataBook = {
           authorsLock: this.form.book.authorsLock,
@@ -941,24 +614,8 @@ export default Vue.extend({
           this.$_.merge(metadataSeries, {readingDirection: this.form.series.readingDirection ? this.form.series.readingDirection : null})
         }
 
-        if (this.$v.form?.series?.ageRating?.$dirty) {
-          this.$_.merge(metadataSeries, {ageRating: this.form.series.ageRating})
-        }
-
-        if (this.$v.form?.series?.publisher?.$dirty) {
-          this.$_.merge(metadataSeries, {publisher: this.form.series.publisher})
-        }
-
         if (this.$v.form?.series?.genres?.$dirty) {
           this.$_.merge(metadataSeries, {genres: this.form.series.genres})
-        }
-
-        if (this.$v.form?.series?.language?.$dirty) {
-          this.$_.merge(metadataSeries, {language: this.form.series.language})
-        }
-
-        if (this.$v.form?.series?.sharingLabels?.$dirty) {
-          this.$_.merge(metadataSeries, {sharingLabels: this.form.series.sharingLabels})
         }
 
         if (this.single) {
@@ -973,16 +630,15 @@ export default Vue.extend({
             summaryLock: this.form.book.summaryLock,
             releaseDateLock: this.form.book.releaseDateLock,
             isbnLock: this.form.book.isbnLock,
-            linksLock: this.form.book.linksLock,
           })
 
           if (this.$v.form?.series?.titleSort?.$dirty) {
-            this.$_.merge(metadataSeries, {titleSort: this.form.series.titleSort})
+            this.$_.merge(metadataSeries, {titleSort: this.form.series.titleSort ? this.form.series.titleSort : null})
           }
 
           if (this.$v.form?.book?.title?.$dirty) {
-            this.$_.merge(metadataBook, {title: this.form.book.title})
-            this.$_.merge(metadataSeries, {title: this.form.book.title})
+            this.$_.merge(metadataBook, {title: this.stripAuthorPrefix(this.form.book.title)})
+            this.$_.merge(metadataSeries, {title: this.stripAuthorPrefix(this.form.book.title)})
           }
 
           if (this.$v.form?.book?.summary?.$dirty) {
@@ -997,10 +653,6 @@ export default Vue.extend({
           if (this.$v.form?.book?.isbn?.$dirty) {
             this.$_.merge(metadataBook, {isbn: this.form.book.isbn})
           }
-
-          if (this.$v.form?.book?.links?.$dirty || this.form.book.links.length != (this.books as BookDto).metadata.links?.length) {
-            this.$_.merge(metadataBook, {links: this.form.book.links})
-          }
         }
 
         return {series: metadataSeries, book: metadataBook}
@@ -1008,36 +660,6 @@ export default Vue.extend({
       return null
     },
     async editOneShots(): Promise<boolean> {
-      if (this.single && this.poster.uploadQueue.length > 0) {
-        const book = this.books as BookDto
-        let hadErrors = false
-        for (const file of this.poster.uploadQueue.slice()) {
-          try {
-            await this.$komgaBooks.uploadThumbnail(book.id, file, file.name === this.poster.selectedThumbnail)
-            this.deleteThumbnail(file)
-          } catch (e) {
-            this.$eventHub.$emit(ERROR, {message: e.message} as ErrorEvent)
-            hadErrors = true
-          }
-        }
-        if (hadErrors) {
-          await this.getThumbnails(book)
-          return false
-        }
-      }
-
-      if (this.single && this.poster.selectedThumbnail !== '') {
-        const id = this.poster.selectedThumbnail
-        const book = this.books as BookDto
-        if (this.poster.bookThumbnails.find(value => value.id === id)) {
-          await this.$komgaBooks.markThumbnailAsSelected(book.id, id)
-        }
-      }
-
-      if (this.single && this.poster.deleteQueue.length > 0) {
-        this.poster.deleteQueue.forEach(toDelete => this.$komgaBooks.deleteThumbnail(toDelete.bookId, toDelete.id))
-      }
-
       const metadata = this.validateForm()
       if (metadata) {
         const toUpdate = (this.single ? [this.oneshots] : this.oneshots) as Oneshot[]
@@ -1051,73 +673,6 @@ export default Vue.extend({
         }
         return true
       } else return false
-    },
-    addThumbnail(files: File[]) {
-      let hasSelected = false
-      for (const file of files) {
-        if (!this.poster.uploadQueue.find(value => value.name === file.name)) {
-          this.poster.uploadQueue.push(file)
-          if (!hasSelected) {
-            this.selectThumbnail(file)
-            hasSelected = true
-          }
-        }
-      }
-
-      (this.$refs.thumbnailsUpload as any).reset()
-    },
-    async getThumbnails(book: BookDto | BookDto[]) {
-      if (Array.isArray(book)) return
-
-      const thumbnails = await this.$komgaBooks.getThumbnails(book.id)
-
-      this.selectThumbnail(thumbnails.find(x => x.selected))
-
-      this.poster.bookThumbnails = thumbnails
-    },
-    isThumbnailSelected(item: File | BookThumbnailDto): boolean {
-      return item instanceof File ? item.name === this.poster.selectedThumbnail : item.id === this.poster.selectedThumbnail
-    },
-    selectThumbnail(item: File | BookThumbnailDto | undefined) {
-      if (!item) {
-        return
-      } else if (item instanceof File) {
-        this.poster.selectedThumbnail = item.name
-      } else {
-        const index = this.poster.deleteQueue.indexOf(item, 0)
-        if (index > -1) this.poster.deleteQueue.splice(index, 1)
-
-        this.poster.selectedThumbnail = item.id
-      }
-    },
-    isThumbnailToBeDeleted(item: File | BookThumbnailDto) {
-      if (item instanceof File) {
-        return false
-      } else {
-        return this.poster.deleteQueue.includes(item)
-      }
-    },
-    deleteThumbnail(item: File | BookThumbnailDto) {
-      if (item instanceof File) {
-        const index = this.poster.uploadQueue.indexOf(item, 0)
-        if (index > -1) {
-          this.poster.uploadQueue.splice(index, 1)
-        }
-        if (item.name === this.poster.selectedThumbnail) {
-          this.poster.selectedThumbnail = ''
-        }
-      } else {
-        // if thumbnail was marked for deletion, unmark it
-        if (this.isThumbnailToBeDeleted(item)) {
-          const index = this.poster.deleteQueue.indexOf(item, 0)
-          if (index > -1) {
-            this.poster.deleteQueue.splice(index, 1)
-          }
-        } else {
-          this.poster.deleteQueue.push(item)
-          if (item.id === this.poster.selectedThumbnail) this.poster.selectedThumbnail = ''
-        }
-      }
     },
   },
 })

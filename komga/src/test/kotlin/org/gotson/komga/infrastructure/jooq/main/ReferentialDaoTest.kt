@@ -5,10 +5,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import org.assertj.core.api.Assertions.assertThat
-import org.gotson.komga.domain.model.AgeRestriction
-import org.gotson.komga.domain.model.AllowExclude
 import org.gotson.komga.domain.model.Author
-import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.FilterBy
 import org.gotson.komga.domain.model.FilterByEntity
 import org.gotson.komga.domain.model.FilterTags
@@ -58,8 +55,6 @@ class ReferentialDaoTest(
   private val seriesAge10 = makeSeries("Series Age 10").copy(libraryId = library1.id)
   private val userAll = KomgaUser("user1@example.org", "p")
   private val userLib1 = KomgaUser("user2@example.org", "p", sharedLibrariesIds = setOf(library1.id), sharedAllLibraries = false)
-  private val userLabelAllow = KomgaUser("user3@example.org", "p", restrictions = ContentRestrictions(labelsAllow = setOf("item_shared")))
-  private val userAge10 = KomgaUser("user4@example.org", "p", restrictions = ContentRestrictions(ageRestriction = AgeRestriction(10, AllowExclude.ALLOW_ONLY)))
 
   @MockkBean
   private lateinit var mockEventPublisher: ApplicationEventPublisher
@@ -76,17 +71,6 @@ class ReferentialDaoTest(
     seriesLifecycle.createSeries(seriesAge10)
     userRepository.insert(userAll)
     userRepository.insert(userLib1)
-    userRepository.insert(userLabelAllow)
-    userRepository.insert(userAge10)
-
-    // setup restrictions context
-    seriesMetadataRepository.findById(seriesShared.id).let {
-      seriesMetadataRepository.update(it.copy(sharingLabels = setOf("item_shared")))
-    }
-
-    seriesMetadataRepository.findById(seriesAge10.id).let {
-      seriesMetadataRepository.update(it.copy(ageRating = 10))
-    }
 
     // prepare metadata
     makeBook("1", libraryId = library1.id, seriesId = series1.id).let { book ->
@@ -95,7 +79,7 @@ class ReferentialDaoTest(
         bookMetadataRepository.update(it.copy(authors = listOf(Author("item1", "writer")), notableEntities = listOf(NotableEntity("power", "item1")), releaseDate = LocalDate.of(2002, 1, 1), tags = setOf("bt1")))
       }
       seriesMetadataRepository.findById(series1.id).let {
-        seriesMetadataRepository.update(it.copy(genres = setOf("item1"), sharingLabels = setOf("item1"), language = "fr", publisher = "item1", ageRating = 18, tags = setOf("st1")))
+        seriesMetadataRepository.update(it.copy(genres = setOf("item1"), tags = setOf("st1")))
       }
     }
     seriesMetadataLifecycle.aggregateMetadata(series1)
@@ -106,7 +90,7 @@ class ReferentialDaoTest(
         bookMetadataRepository.update(it.copy(authors = listOf(Author("item2", "inker"), Author("item2", "translator")), notableEntities = listOf(NotableEntity("location", "item2"), NotableEntity("team", "item2")), releaseDate = LocalDate.of(2002, 2, 1), tags = setOf("bt2")))
       }
       seriesMetadataRepository.findById(series2.id).let {
-        seriesMetadataRepository.update(it.copy(genres = setOf("item2"), sharingLabels = setOf("item2"), language = "en", publisher = "item2", ageRating = 19, tags = setOf("st2")))
+        seriesMetadataRepository.update(it.copy(genres = setOf("item2"), tags = setOf("st2")))
       }
     }
     seriesMetadataLifecycle.aggregateMetadata(series2)
@@ -122,7 +106,7 @@ class ReferentialDaoTest(
         bookMetadataRepository.update(it.copy(authors = listOf(Author("item_shared", "penciller")), notableEntities = listOf(NotableEntity("object", "item_shared")), releaseDate = LocalDate.of(2003, 1, 1), tags = setOf("bt_shared")))
       }
       seriesMetadataRepository.findById(seriesShared.id).let {
-        seriesMetadataRepository.update(it.copy(genres = setOf("item_shared"), language = "ja", publisher = "item_shared", tags = setOf("st_shared")))
+        seriesMetadataRepository.update(it.copy(genres = setOf("item_shared"), tags = setOf("st_shared")))
       }
     }
     seriesMetadataLifecycle.aggregateMetadata(seriesShared)
@@ -133,7 +117,7 @@ class ReferentialDaoTest(
         bookMetadataRepository.update(it.copy(authors = listOf(Author("item_10", "cover")), notableEntities = listOf(NotableEntity("energy", "item_10")), releaseDate = LocalDate.of(2004, 1, 1), tags = setOf("bt_10")))
       }
       seriesMetadataRepository.findById(seriesAge10.id).let {
-        seriesMetadataRepository.update(it.copy(genres = setOf("item_10"), sharingLabels = setOf("item_10"), language = "sp", publisher = "item_10", tags = setOf("st_10")))
+        seriesMetadataRepository.update(it.copy(genres = setOf("item_10"), tags = setOf("st_10")))
       }
     }
     seriesMetadataLifecycle.aggregateMetadata(seriesAge10)
@@ -196,22 +180,6 @@ class ReferentialDaoTest(
 
       assertThat(items.map { it.name }).containsExactlyInAnyOrder("item1", "item_shared", "item_10")
     }
-
-    @Test
-    fun `given user with restricted label access when getting authors then only allowed authors are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findAuthors(context, null, null, null, Pageable.unpaged()).content
-
-      assertThat(items.map { it.name }).containsExactlyInAnyOrder("item_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting authors then only allowed authors are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findAuthors(context, null, null, null, Pageable.unpaged()).content
-
-      assertThat(items.map { it.name }).containsExactlyInAnyOrder("item_10")
-    }
   }
 
   @Nested
@@ -255,22 +223,6 @@ class ReferentialDaoTest(
 
       assertThat(items).containsExactlyInAnyOrder("item1", "item_shared", "item_10")
     }
-
-    @Test
-    fun `given user with restricted label access when getting authors then only allowed authors are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findAuthorsNames(context, null, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting authors then only allowed authors are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findAuthorsNames(context, null, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_10")
-    }
   }
 
   @Nested
@@ -297,22 +249,6 @@ class ReferentialDaoTest(
       val items = referentialDao.findAuthorsRoles(context, null, Pageable.unpaged()).content
 
       assertThat(items).containsExactlyInAnyOrder("writer", "penciller", "cover")
-    }
-
-    @Test
-    fun `given user with restricted label access when getting authors then only allowed authors are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findAuthorsRoles(context, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("penciller")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting authors then only allowed authors are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findAuthorsRoles(context, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("cover")
     }
   }
 
@@ -349,22 +285,6 @@ class ReferentialDaoTest(
 
       assertThat(items).containsExactlyInAnyOrder("item1", "item_shared", "item_10")
     }
-
-    @Test
-    fun `given user with restricted label access when getting genres then only allowed genres are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findGenres(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting genres then only allowed genres are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findGenres(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_10")
-    }
   }
 
   @Nested
@@ -399,22 +319,6 @@ class ReferentialDaoTest(
       val items = referentialDao.findTags(context, null, null, FilterTags.BOOK, Pageable.unpaged()).content
 
       assertThat(items).containsExactlyInAnyOrder("bt1", "bt_shared", "bt_10")
-    }
-
-    @Test
-    fun `given user with restricted label access when getting tags then only allowed tags are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findTags(context, null, null, FilterTags.BOOK, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("bt_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting tags then only allowed tags are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findTags(context, null, null, FilterTags.BOOK, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("bt_10")
     }
   }
 
@@ -451,22 +355,6 @@ class ReferentialDaoTest(
 
       assertThat(items).containsExactlyInAnyOrder("st1", "st_shared", "st_10")
     }
-
-    @Test
-    fun `given user with restricted label access when getting tags then only allowed tags are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findTags(context, null, null, FilterTags.SERIES, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("st_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting tags then only allowed tags are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findTags(context, null, null, FilterTags.SERIES, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("st_10")
-    }
   }
 
   @Nested
@@ -502,218 +390,6 @@ class ReferentialDaoTest(
 
       assertThat(items).containsExactlyInAnyOrder("st1", "st_shared", "st_10", "bt1", "bt_shared", "bt_10")
     }
-
-    @Test
-    fun `given user with restricted label access when getting tags then only allowed tags are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findTags(context, null, null, FilterTags.BOTH, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("st_shared", "bt_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting tags then only allowed tags are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findTags(context, null, null, FilterTags.BOTH, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("st_10", "bt_10")
-    }
-  }
-
-  @Nested
-  inner class SharingLabel {
-    @Test
-    fun `given search when getting sharing labels then all sharing labels are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findSharingLabels(context, "shared", null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_shared")
-    }
-
-    @Test
-    fun `given filter by library when getting sharing labels then only matching sharing labels are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findSharingLabels(context, null, FilterBy(FilterByEntity.LIBRARY, setOf(library2.id)), Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item2")
-    }
-
-    @Test
-    fun `given user without restrictions when getting sharing labels then all sharing labels are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findSharingLabels(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item1", "item2", "item_shared", "item_10")
-    }
-
-    @Test
-    fun `given user with restricted library access when getting sharing labels then only allowed sharing labels are returned`() {
-      val context = SearchContext(userLib1)
-      val items = referentialDao.findSharingLabels(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item1", "item_shared", "item_10")
-    }
-
-    @Test
-    fun `given user with restricted label access when getting sharing labels then only allowed sharing labels are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findSharingLabels(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting sharing labels then only allowed sharing labels are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findSharingLabels(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_10")
-    }
-  }
-
-  @Nested
-  inner class Publisher {
-    @Test
-    fun `given search when getting publishers then all publishers are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findPublishers(context, "shared", null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_shared")
-    }
-
-    @Test
-    fun `given filter by library when getting publishers then only matching publishers are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findPublishers(context, null, FilterBy(FilterByEntity.LIBRARY, setOf(library2.id)), Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item2")
-    }
-
-    @Test
-    fun `given user without restrictions when getting publishers then all publishers are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findPublishers(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item1", "item2", "item_shared", "item_10")
-    }
-
-    @Test
-    fun `given user with restricted library access when getting publishers then only allowed publishers are returned`() {
-      val context = SearchContext(userLib1)
-      val items = referentialDao.findPublishers(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item1", "item_shared", "item_10")
-    }
-
-    @Test
-    fun `given user with restricted label access when getting publishers then only allowed publishers are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findPublishers(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting publishers then only allowed publishers are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findPublishers(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("item_10")
-    }
-  }
-
-  @Nested
-  inner class Language {
-    @Test
-    fun `given search when getting languages then all languages are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findLanguages(context, "j", null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("ja")
-    }
-
-    @Test
-    fun `given filter by library when getting languages then only matching languages are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findLanguages(context, null, FilterBy(FilterByEntity.LIBRARY, setOf(library2.id)), Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("en")
-    }
-
-    @Test
-    fun `given user without restrictions when getting languages then all languages are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findLanguages(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("fr", "en", "ja", "sp")
-    }
-
-    @Test
-    fun `given user with restricted library access when getting languages then only allowed languages are returned`() {
-      val context = SearchContext(userLib1)
-      val items = referentialDao.findLanguages(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("fr", "ja", "sp")
-    }
-
-    @Test
-    fun `given user with restricted label access when getting languages then only allowed languages are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findLanguages(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("ja")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting languages then only allowed languages are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findLanguages(context, null, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactlyInAnyOrder("sp")
-    }
-  }
-
-  @Nested
-  inner class AgeRating {
-    @Test
-    fun `given filter by library when getting age ratings then only matching age ratings are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findAgeRatings(context, FilterBy(FilterByEntity.LIBRARY, setOf(library2.id)), Pageable.unpaged()).content
-
-      assertThat(items).containsExactly(19)
-    }
-
-    @Test
-    fun `given user without restrictions when getting age ratings then all age ratings are returned`() {
-      val context = SearchContext(userAll)
-      val items = referentialDao.findAgeRatings(context, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactly(10, 18, 19)
-    }
-
-    @Test
-    fun `given user with restricted library access when getting age ratings then only allowed age ratings are returned`() {
-      val context = SearchContext(userLib1)
-      val items = referentialDao.findAgeRatings(context, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactly(10, 18)
-    }
-
-    @Test
-    fun `given user with restricted label access when getting age ratings then only allowed age ratings are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findAgeRatings(context, null, Pageable.unpaged()).content
-
-      assertThat(items).isEmpty()
-    }
-
-    @Test
-    fun `given user with restricted age access when getting age ratings then only allowed age ratings are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findAgeRatings(context, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactly(10)
-    }
   }
 
   @Nested
@@ -740,22 +416,6 @@ class ReferentialDaoTest(
       val items = referentialDao.findSeriesReleaseYears(context, null, Pageable.unpaged()).content
 
       assertThat(items).containsExactly("2004", "2003", "2002")
-    }
-
-    @Test
-    fun `given user with restricted label access when getting series release dates then only allowed series release dates are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findSeriesReleaseYears(context, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactly("2003")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting series release dates then only allowed series release dates are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findSeriesReleaseYears(context, null, Pageable.unpaged()).content
-
-      assertThat(items).containsExactly("2004")
     }
   }
 
@@ -800,22 +460,6 @@ class ReferentialDaoTest(
 
       assertThat(items.map { it.name }).containsExactlyInAnyOrder("item1", "item_shared", "item_10")
     }
-
-    @Test
-    fun `given user with restricted label access when getting notable entities then only allowed notable entities are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findNotableEntities(context, null, null, null, Pageable.unpaged()).items
-
-      assertThat(items.map { it.name }).containsExactlyInAnyOrder("item_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting notable entities then only allowed notable entities are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findNotableEntities(context, null, null, null, Pageable.unpaged()).items
-
-      assertThat(items.map { it.name }).containsExactlyInAnyOrder("item_10")
-    }
   }
 
   @Nested
@@ -859,22 +503,6 @@ class ReferentialDaoTest(
 
       assertThat(items).containsExactlyInAnyOrder("item1", "item_shared", "item_10")
     }
-
-    @Test
-    fun `given user with restricted label access when getting notable entities then only allowed notable entities are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findNotableEntitiesNames(context, null, null, null, Pageable.unpaged()).items
-
-      assertThat(items).containsExactlyInAnyOrder("item_shared")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting notable entities then only allowed notable entities are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findNotableEntitiesNames(context, null, null, null, Pageable.unpaged()).items
-
-      assertThat(items).containsExactlyInAnyOrder("item_10")
-    }
   }
 
   @Nested
@@ -901,22 +529,6 @@ class ReferentialDaoTest(
       val items = referentialDao.findNotableEntitiesKinds(context, null, Pageable.unpaged()).items
 
       assertThat(items).containsExactlyInAnyOrder("energy", "object", "power")
-    }
-
-    @Test
-    fun `given user with restricted label access when getting notable entities then only allowed notable entities are returned`() {
-      val context = SearchContext(userLabelAllow)
-      val items = referentialDao.findNotableEntitiesKinds(context, null, Pageable.unpaged()).items
-
-      assertThat(items).containsExactlyInAnyOrder("object")
-    }
-
-    @Test
-    fun `given user with restricted age access when getting notable entities then only allowed notable entities are returned`() {
-      val context = SearchContext(userAge10)
-      val items = referentialDao.findNotableEntitiesKinds(context, null, Pageable.unpaged()).items
-
-      assertThat(items).containsExactlyInAnyOrder("energy")
     }
   }
 }

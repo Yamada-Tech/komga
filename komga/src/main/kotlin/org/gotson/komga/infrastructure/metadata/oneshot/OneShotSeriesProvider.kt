@@ -19,17 +19,13 @@ class OneShotSeriesProvider(
     if (!series.oneshot) return null
     val bookMetadata = bookMetadataRepository.findById(bookRepository.findAllIdsBySeriesId(series.id).first())
     return SeriesMetadataPatch(
-      bookMetadata.title,
-      bookMetadata.title,
-      SeriesMetadata.Status.ENDED,
-      bookMetadata.summary,
-      null,
-      null,
-      null,
-      null,
-      null,
-      1,
-      emptySet(),
+      title = bookMetadata.title,
+      titleSort = bookMetadata.title,
+      status = SeriesMetadata.Status.ENDED,
+      summary = bookMetadata.summary,
+      readingDirection = null,
+      genres = null,
+      collections = emptySet(),
     )
   }
 

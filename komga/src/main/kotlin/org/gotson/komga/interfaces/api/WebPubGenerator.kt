@@ -236,7 +236,6 @@ class WebPubGenerator(
 
   private fun WPMetadataDto.withSeriesMetadata(seriesMetadata: SeriesMetadata) =
     copy(
-      language = seriesMetadata.language,
       readingProgression =
         when (seriesMetadata.readingDirection) {
           SeriesMetadata.ReadingDirection.LEFT_TO_RIGHT -> WPReadingProgressionDto.LTR

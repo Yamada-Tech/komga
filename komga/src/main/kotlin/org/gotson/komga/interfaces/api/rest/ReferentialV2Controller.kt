@@ -104,57 +104,6 @@ class ReferentialV2Controller(
   }
 
   @PageableWithoutSortAsQueryParam
-  @GetMapping("sharing-labels")
-  @Operation(summary = "List sharing labels", description = "Can be filtered by various criteria")
-  fun getSharingLabels(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "search", required = false) search: String?,
-    @RequestParam(name = "library_id", required = false) libraryIds: Set<String> = emptySet(),
-    @RequestParam(name = "collection_id", required = false) collectionIds: Set<String> = emptySet(),
-    @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
-    @Parameter(hidden = true) page: Pageable,
-  ): Page<String> {
-    val pageRequest = unpackPageParams(unpaged, page)
-    val filterBy = unpackFilters(libraryIds, collectionIds)
-
-    return referentialRepository.findSharingLabels(SearchContext(principal.user), search, filterBy, pageRequest)
-  }
-
-  @PageableWithoutSortAsQueryParam
-  @GetMapping("languages")
-  @Operation(summary = "List languages", description = "Can be filtered by various criteria")
-  fun getLanguages(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "search", required = false) search: String?,
-    @RequestParam(name = "library_id", required = false) libraryIds: Set<String> = emptySet(),
-    @RequestParam(name = "collection_id", required = false) collectionIds: Set<String> = emptySet(),
-    @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
-    @Parameter(hidden = true) page: Pageable,
-  ): Page<String> {
-    val pageRequest = unpackPageParams(unpaged, page)
-    val filterBy = unpackFilters(libraryIds, collectionIds)
-
-    return referentialRepository.findLanguages(SearchContext(principal.user), search, filterBy, pageRequest)
-  }
-
-  @PageableWithoutSortAsQueryParam
-  @GetMapping("publishers")
-  @Operation(summary = "List publishers", description = "Can be filtered by various criteria")
-  fun getPublishers(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "search", required = false) search: String?,
-    @RequestParam(name = "library_id", required = false) libraryIds: Set<String> = emptySet(),
-    @RequestParam(name = "collection_id", required = false) collectionIds: Set<String> = emptySet(),
-    @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
-    @Parameter(hidden = true) page: Pageable,
-  ): Page<String> {
-    val pageRequest = unpackPageParams(unpaged, page)
-    val filterBy = unpackFilters(libraryIds, collectionIds)
-
-    return referentialRepository.findPublishers(SearchContext(principal.user), search, filterBy, pageRequest)
-  }
-
-  @PageableWithoutSortAsQueryParam
   @GetMapping("tags")
   @Operation(summary = "List tags", description = "Can be filtered by various criteria")
   fun getTags(
@@ -188,21 +137,5 @@ class ReferentialV2Controller(
     val filterBy = unpackFilters(libraryIds, collectionIds)
 
     return referentialRepository.findSeriesReleaseYears(SearchContext(principal.user), filterBy, pageRequest)
-  }
-
-  @PageableWithoutSortAsQueryParam
-  @GetMapping("age-ratings")
-  @Operation(summary = "List age ratings", description = "Can be filtered by various criteria")
-  fun getAgeRatings(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "library_id", required = false) libraryIds: Set<String> = emptySet(),
-    @RequestParam(name = "collection_id", required = false) collectionIds: Set<String> = emptySet(),
-    @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
-    @Parameter(hidden = true) page: Pageable,
-  ): Page<Int> {
-    val pageRequest = unpackPageParams(unpaged, page)
-    val filterBy = unpackFilters(libraryIds, collectionIds)
-
-    return referentialRepository.findAgeRatings(SearchContext(principal.user), filterBy, pageRequest)
   }
 }

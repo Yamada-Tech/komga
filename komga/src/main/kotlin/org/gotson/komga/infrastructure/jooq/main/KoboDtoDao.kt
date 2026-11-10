@@ -7,7 +7,6 @@ import org.gotson.komga.infrastructure.jooq.deserializeMediaExtension
 import org.gotson.komga.interfaces.api.kobo.dto.ContributorDto
 import org.gotson.komga.interfaces.api.kobo.dto.KoboBookMetadataDto
 import org.gotson.komga.interfaces.api.kobo.dto.KoboSeriesDto
-import org.gotson.komga.interfaces.api.kobo.dto.PublisherDto
 import org.gotson.komga.interfaces.api.kobo.persistence.KoboDtoRepository
 import org.gotson.komga.jooq.main.Tables
 import org.jooq.DSLContext
@@ -46,8 +45,6 @@ class KoboDtoDao(
           d.CREATED_DATE,
           sd.SERIES_ID,
           sd.TITLE,
-          sd.PUBLISHER,
-          sd.LANGUAGE,
           b.FILE_SIZE,
           b.ONESHOT,
           m.EPUB_IS_KEPUB,
@@ -97,9 +94,7 @@ class KoboDtoDao(
         description = dr.summary.ifEmpty { " " },
         entitlementId = dr.bookId,
         isbn = dr.isbn.ifBlank { null },
-        language = sr.language.take(2).ifBlank { "en" },
         publicationDate = dr.releaseDate?.atStartOfDay(ZoneId.of("Z")) ?: dr.createdDate.atZone(ZoneId.of("Z")),
-        publisher = PublisherDto(name = sr.publisher),
         revisionId = dr.bookId,
         series =
           if (!br.oneshot)

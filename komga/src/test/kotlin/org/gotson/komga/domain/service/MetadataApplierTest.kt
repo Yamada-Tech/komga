@@ -130,12 +130,8 @@ class MetadataApplierTest {
           titleSortLock = true,
           summaryLock = true,
           readingDirectionLock = true,
-          publisherLock = true,
-          ageRatingLock = true,
-          languageLock = true,
           genresLock = true,
           tagsLock = true,
-          totalBookCountLock = true,
         )
 
       val patch =
@@ -145,11 +141,7 @@ class MetadataApplierTest {
           status = SeriesMetadata.Status.ENDED,
           summary = "new summary",
           readingDirection = SeriesMetadata.ReadingDirection.VERTICAL,
-          publisher = "new publisher",
-          ageRating = 12,
-          language = "en",
           genres = setOf("shonen"),
-          totalBookCount = 12,
           collections = emptySet(),
         )
 
@@ -160,11 +152,7 @@ class MetadataApplierTest {
       assertThat(patched.status).isEqualTo(metadata.status)
       assertThat(patched.summary).isEqualTo(metadata.summary)
       assertThat(patched.readingDirection).isEqualTo(metadata.readingDirection)
-      assertThat(patched.publisher).isEqualTo(metadata.publisher)
-      assertThat(patched.ageRating).isEqualTo(metadata.ageRating)
-      assertThat(patched.language).isEqualTo(metadata.language)
       assertThat(patched.genres).isEmpty()
-      assertThat(patched.totalBookCount).isNull()
       assertThat(patched.tags).isEmpty()
     }
 
@@ -182,11 +170,7 @@ class MetadataApplierTest {
           status = SeriesMetadata.Status.ENDED,
           summary = "new summary",
           readingDirection = SeriesMetadata.ReadingDirection.VERTICAL,
-          publisher = "new publisher",
-          ageRating = 12,
-          language = "en",
           genres = setOf("shonen"),
-          totalBookCount = 12,
           collections = emptySet(),
         )
 
@@ -197,10 +181,6 @@ class MetadataApplierTest {
       assertThat(patched.status).isEqualTo(patch.status)
       assertThat(patched.summary).isEqualTo(patch.summary)
       assertThat(patched.readingDirection).isEqualTo(patch.readingDirection)
-      assertThat(patched.publisher).isEqualTo(patch.publisher)
-      assertThat(patched.ageRating).isEqualTo(patch.ageRating)
-      assertThat(patched.language).isEqualTo(patch.language)
-      assertThat(patched.totalBookCount).isEqualTo(patch.totalBookCount)
       assertThat(patched.genres as Iterable<String>)
         .hasSize(1)
         .containsExactlyInAnyOrder("shonen")

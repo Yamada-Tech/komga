@@ -206,8 +206,6 @@ class SeriesSearchHelper(
 
       is SearchCondition.OneShot -> searchCondition.operator.toCondition(Tables.SERIES.ONESHOT) to emptySet()
 
-      is SearchCondition.AgeRating -> searchCondition.operator.toCondition(Tables.SERIES_METADATA.AGE_RATING) to setOf(RequiredJoin.SeriesMetadata)
-
       is SearchCondition.CollectionId ->
         when (searchCondition.operator) {
           // for IS condition we have to do a join, so as to order the series by collection number
@@ -227,14 +225,6 @@ class SeriesSearchHelper(
           }
         }
 
-      is SearchCondition.Complete ->
-        Tables.SERIES_METADATA.TOTAL_BOOK_COUNT.let { field ->
-          when (searchCondition.operator) {
-            SearchOperator.IsTrue -> field.isNotNull.and(field.eq(Tables.SERIES.BOOK_COUNT))
-            SearchOperator.IsFalse -> field.isNotNull.and(field.ne(Tables.SERIES.BOOK_COUNT))
-          } to setOf(RequiredJoin.SeriesMetadata)
-        }
-
       is SearchCondition.Genre ->
         Tables.SERIES.ID.let { field ->
           val innerEquals = { genre: String ->
@@ -252,37 +242,6 @@ class SeriesSearchHelper(
               .select(Tables.SERIES_METADATA_GENRE.SERIES_ID)
               .from(Tables.SERIES_METADATA_GENRE)
               .where(Tables.SERIES_METADATA_GENRE.GENRE.isNotNull)
-          }
-
-          when (searchCondition.operator) {
-            is SearchOperator.Is -> field.`in`(innerEquals(searchCondition.operator.value))
-            is SearchOperator.IsNot -> field.notIn(innerEquals(searchCondition.operator.value))
-            is SearchOperator.IsNullT<*> -> field.notIn(innerAny())
-            is SearchOperator.IsNotNullT<*> -> field.`in`(innerAny())
-          }
-        } to emptySet()
-
-      is SearchCondition.Language -> searchCondition.operator.toCondition(Tables.SERIES_METADATA.LANGUAGE, true) to setOf(RequiredJoin.SeriesMetadata)
-
-      is SearchCondition.Publisher -> searchCondition.operator.toCondition(Tables.SERIES_METADATA.PUBLISHER, true) to setOf(RequiredJoin.SeriesMetadata)
-
-      is SearchCondition.SharingLabel ->
-        Tables.SERIES.ID.let { field ->
-          val innerEquals = { label: String ->
-            DSL
-              .select(Tables.SERIES_METADATA_SHARING.SERIES_ID)
-              .from(Tables.SERIES_METADATA_SHARING)
-              .where(
-                Tables.SERIES_METADATA_SHARING.LABEL
-                  .unicode1()
-                  .equal(label),
-              )
-          }
-          val innerAny = {
-            DSL
-              .select(Tables.SERIES_METADATA_SHARING.SERIES_ID)
-              .from(Tables.SERIES_METADATA_SHARING)
-              .where(Tables.SERIES_METADATA_SHARING.LABEL.isNotNull)
           }
 
           when (searchCondition.operator) {

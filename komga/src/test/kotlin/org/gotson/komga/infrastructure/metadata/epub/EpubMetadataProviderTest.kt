@@ -154,8 +154,6 @@ class EpubMetadataProviderTest {
         assertThat(title).isEqualTo("Die drei ??? Kids")
         assertThat(titleSort).isEqualTo("Die drei ??? Kids")
         assertThat(readingDirection).isEqualTo(SeriesMetadata.ReadingDirection.RIGHT_TO_LEFT)
-        assertThat(publisher).isEqualTo("Kosmos")
-        assertThat(language).isEqualTo("de")
         assertThat(genres).containsExactlyInAnyOrder("Kinder- und Jugendbücher")
       }
     }
@@ -172,8 +170,6 @@ class EpubMetadataProviderTest {
         assertThat(title).isEqualTo("Die drei ??? Kids")
         assertThat(titleSort).isEqualTo("Die drei ??? Kids")
         assertThat(readingDirection).isNull()
-        assertThat(publisher).isEqualTo("Franckh-Kosmos Verlag")
-        assertThat(language).isEqualTo("de")
         assertThat(genres).containsExactlyInAnyOrder("Kinder- und Jugendbücher", "Juvenile Fiction", "Mysteries & Detective Stories")
       }
     }
@@ -190,8 +186,6 @@ class EpubMetadataProviderTest {
         assertThat(title).isNull()
         assertThat(titleSort).isNull()
         assertThat(readingDirection).isNull()
-        assertThat(publisher).isNull()
-        assertThat(language).isEqualTo("de")
         assertThat(genres).isNull()
       }
     }

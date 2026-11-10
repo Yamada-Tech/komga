@@ -362,32 +362,6 @@ class SeriesDtoDaoTest(
     }
 
     @Test
-    fun `given series when searching by publisher then results are matched`() {
-      // given
-      val series = seriesLifecycle.createSeries(makeSeries("Batman", library.id))
-      seriesLifecycle.createSeries(makeSeries("Batman and Robin", library.id))
-
-      seriesMetadataRepository.findById(series.id).let {
-        seriesMetadataRepository.update(it.copy(publisher = "Vertigo"))
-      }
-
-      searchIndexLifecycle.rebuildIndex()
-
-      // when
-      val found =
-        seriesDtoDao
-          .findAll(
-            SeriesSearch(fullTextSearch = "publisher:vertigo"),
-            SearchContext(user),
-            UnpagedSorted(Sort.by("relevance")),
-          ).content
-
-      // then
-      assertThat(found).hasSize(1)
-      assertThat(found.map { it.metadata.title }).containsExactly("Batman")
-    }
-
-    @Test
     fun `given series when searching by status then results are matched`() {
       // given
       val series = seriesLifecycle.createSeries(makeSeries("Batman", library.id))
@@ -430,58 +404,6 @@ class SeriesDtoDaoTest(
         seriesDtoDao
           .findAll(
             SeriesSearch(fullTextSearch = "reading_direction:left_to_right"),
-            SearchContext(user),
-            UnpagedSorted(Sort.by("relevance")),
-          ).content
-
-      // then
-      assertThat(found).hasSize(1)
-      assertThat(found.map { it.metadata.title }).containsExactly("Batman")
-    }
-
-    @Test
-    fun `given series when searching by age rating then results are matched`() {
-      // given
-      val series = seriesLifecycle.createSeries(makeSeries("Batman", library.id))
-      seriesLifecycle.createSeries(makeSeries("Batman and Robin", library.id))
-
-      seriesMetadataRepository.findById(series.id).let {
-        seriesMetadataRepository.update(it.copy(ageRating = 12))
-      }
-
-      searchIndexLifecycle.rebuildIndex()
-
-      // when
-      val found =
-        seriesDtoDao
-          .findAll(
-            SeriesSearch(fullTextSearch = "age_rating:12"),
-            SearchContext(user),
-            UnpagedSorted(Sort.by("relevance")),
-          ).content
-
-      // then
-      assertThat(found).hasSize(1)
-      assertThat(found.map { it.metadata.title }).containsExactly("Batman")
-    }
-
-    @Test
-    fun `given series when searching by language then results are matched`() {
-      // given
-      val series = seriesLifecycle.createSeries(makeSeries("Batman", library.id))
-      seriesLifecycle.createSeries(makeSeries("Batman and Robin", library.id))
-
-      seriesMetadataRepository.findById(series.id).let {
-        seriesMetadataRepository.update(it.copy(language = "en-us"))
-      }
-
-      searchIndexLifecycle.rebuildIndex()
-
-      // when
-      val found =
-        seriesDtoDao
-          .findAll(
-            SeriesSearch(fullTextSearch = "language:en-us"),
             SearchContext(user),
             UnpagedSorted(Sort.by("relevance")),
           ).content
@@ -593,32 +515,6 @@ class SeriesDtoDaoTest(
         seriesDtoDao
           .findAll(
             SeriesSearch(fullTextSearch = "genre:action"),
-            SearchContext(user),
-            UnpagedSorted(Sort.by("relevance")),
-          ).content
-
-      // then
-      assertThat(found).hasSize(1)
-      assertThat(found.map { it.metadata.title }).containsExactly("Batman")
-    }
-
-    @Test
-    fun `given series when searching by total book count then results are matched`() {
-      // given
-      val series = seriesLifecycle.createSeries(makeSeries("Batman", library.id))
-      seriesLifecycle.createSeries(makeSeries("Batman and Robin", library.id))
-
-      seriesMetadataRepository.findById(series.id).let {
-        seriesMetadataRepository.update(it.copy(totalBookCount = 5))
-      }
-
-      searchIndexLifecycle.rebuildIndex()
-
-      // when
-      val found =
-        seriesDtoDao
-          .findAll(
-            SeriesSearch(fullTextSearch = "total_book_count:5"),
             SearchContext(user),
             UnpagedSorted(Sort.by("relevance")),
           ).content

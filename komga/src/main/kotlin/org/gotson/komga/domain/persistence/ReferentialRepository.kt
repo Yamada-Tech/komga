@@ -144,77 +144,6 @@ interface ReferentialRepository {
     pageable: Pageable,
   ): Page<String>
 
-  @Deprecated("Use findLanguages instead")
-  fun findAllLanguages(filterOnLibraryIds: Collection<String>?): Set<String>
-
-  @Deprecated("Use findLanguages instead")
-  fun findAllLanguagesByLibraries(
-    libraryIds: Set<String>,
-    filterOnLibraryIds: Collection<String>?,
-  ): Set<String>
-
-  @Deprecated("Use findLanguages instead")
-  fun findAllLanguagesByCollection(
-    collectionId: String,
-    filterOnLibraryIds: Collection<String>?,
-  ): Set<String>
-
-  fun findLanguages(
-    context: SearchContext,
-    search: String?,
-    filterBy: FilterBy?,
-    pageable: Pageable,
-  ): Page<String>
-
-  @Deprecated("Use findPublishers instead")
-  fun findAllPublishers(filterOnLibraryIds: Collection<String>?): Set<String>
-
-  @Deprecated("Use findPublishers instead")
-  fun findAllPublishers(
-    filterOnLibraryIds: Collection<String>?,
-    pageable: Pageable,
-  ): Page<String>
-
-  @Deprecated("Use findPublishers instead")
-  fun findAllPublishersByLibraries(
-    libraryIds: Set<String>,
-    filterOnLibraryIds: Collection<String>?,
-  ): Set<String>
-
-  @Deprecated("Use findPublishers instead")
-  fun findAllPublishersByCollection(
-    collectionId: String,
-    filterOnLibraryIds: Collection<String>?,
-  ): Set<String>
-
-  fun findPublishers(
-    context: SearchContext,
-    search: String?,
-    filterBy: FilterBy?,
-    pageable: Pageable,
-  ): Page<String>
-
-  @Deprecated("Use findAgeRatings instead")
-  fun findAllAgeRatings(filterOnLibraryIds: Collection<String>?): Set<Int?>
-
-  @Deprecated("Use findAgeRatings instead")
-  fun findAllAgeRatingsByLibraries(
-    libraryIds: Set<String>,
-    filterOnLibraryIds: Collection<String>?,
-  ): Set<Int?>
-
-  @Deprecated("Use findAgeRatings instead")
-  fun findAllAgeRatingsByCollection(
-    collectionId: String,
-    filterOnLibraryIds: Collection<String>?,
-  ): Set<Int?>
-
-  fun findAgeRatings(
-    context: SearchContext,
-    filterBy: FilterBy?,
-    pageable: Pageable,
-  ): Page<Int>
-
   @Deprecated("Use findSeriesReleaseDates instead")
   fun findAllSeriesReleaseDates(filterOnLibraryIds: Collection<String>?): Set<LocalDate>
 
@@ -232,28 +161,6 @@ interface ReferentialRepository {
 
   fun findSeriesReleaseYears(
     context: SearchContext,
-    filterBy: FilterBy?,
-    pageable: Pageable,
-  ): Page<String>
-
-  @Deprecated("Use findSharingLabels instead")
-  fun findAllSharingLabels(filterOnLibraryIds: Collection<String>?): Set<String>
-
-  @Deprecated("Use findSharingLabels instead")
-  fun findAllSharingLabelsByLibraries(
-    libraryIds: Set<String>,
-    filterOnLibraryIds: Collection<String>?,
-  ): Set<String>
-
-  @Deprecated("Use findSharingLabels instead")
-  fun findAllSharingLabelsByCollection(
-    collectionId: String,
-    filterOnLibraryIds: Collection<String>?,
-  ): Set<String>
-
-  fun findSharingLabels(
-    context: SearchContext,
-    search: String?,
     filterBy: FilterBy?,
     pageable: Pageable,
   ): Page<String>

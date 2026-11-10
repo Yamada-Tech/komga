@@ -258,328 +258,6 @@ class SeriesControllerTest(
   }
 
   @Nested
-  inner class ContentRestrictedUser {
-    @Test
-    @WithMockCustomUser(allowAgeUnder = 10)
-    fun `given user only allowed content with specific age rating when getting series then only gets series that satisfies this criteria`() {
-      val series10 =
-        makeSeries(name = "series_10", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(ageRating = 10))
-          }
-        }
-
-      val series5 =
-        makeSeries(name = "series_5", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(ageRating = 5))
-          }
-        }
-
-      val series15 =
-        makeSeries(name = "series_15", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(ageRating = 15))
-          }
-        }
-
-      val series =
-        makeSeries(name = "series_no", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-        }
-
-      mockMvc.get("/api/v1/series/${series5.id}").andExpect { status { isOk() } }
-      mockMvc.get("/api/v1/series/${series10.id}").andExpect { status { isOk() } }
-      mockMvc.get("/api/v1/series/${series15.id}").andExpect { status { isForbidden() } }
-      mockMvc.get("/api/v1/series/${series.id}").andExpect { status { isForbidden() } }
-
-      mockMvc
-        .get("/api/v1/series?sort=metadata.titleSort")
-        .andExpect {
-          status { isOk() }
-          jsonPath("$.content.length()") { value(2) }
-          jsonPath("$.content[0].name") { value("series_10") }
-          jsonPath("$.content[1].name") { value("series_5") }
-        }
-    }
-
-    @Test
-    @WithMockCustomUser(excludeAgeOver = 16)
-    fun `given user disallowed content with specific age rating when getting series then only gets series that satisfies this criteria`() {
-      val series10 =
-        makeSeries(name = "series_10", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(ageRating = 10))
-          }
-        }
-
-      val series18 =
-        makeSeries(name = "series_18", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(ageRating = 18))
-          }
-        }
-
-      val series16 =
-        makeSeries(name = "series_16", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(ageRating = 16))
-          }
-        }
-
-      val series =
-        makeSeries(name = "series_no", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-        }
-
-      mockMvc.get("/api/v1/series/${series.id}").andExpect { status { isOk() } }
-      mockMvc.get("/api/v1/series/${series10.id}").andExpect { status { isOk() } }
-      mockMvc.get("/api/v1/series/${series16.id}").andExpect { status { isForbidden() } }
-      mockMvc.get("/api/v1/series/${series18.id}").andExpect { status { isForbidden() } }
-
-      mockMvc
-        .get("/api/v1/series?sort=metadata.titleSort")
-        .andExpect {
-          status { isOk() }
-          jsonPath("$.content.length()") { value(2) }
-          jsonPath("$.content[0].name") { value("series_10") }
-          jsonPath("$.content[1].name") { value("series_no") }
-        }
-    }
-
-    @Test
-    @WithMockCustomUser(allowLabels = ["kids", "cute"])
-    fun `given user allowed only content with specific labels when getting series then only gets series that satisfies this criteria`() {
-      val seriesKids =
-        makeSeries(name = "series_kids", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(sharingLabels = setOf("kids")))
-          }
-        }
-
-      val seriesCute =
-        makeSeries(name = "series_cute", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(sharingLabels = setOf("cute", "other")))
-          }
-        }
-
-      val seriesAdult =
-        makeSeries(name = "series_adult", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(sharingLabels = setOf("adult")))
-          }
-        }
-
-      val series =
-        makeSeries(name = "series_no", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-        }
-
-      mockMvc.get("/api/v1/series/${seriesKids.id}").andExpect { status { isOk() } }
-      mockMvc.get("/api/v1/series/${seriesCute.id}").andExpect { status { isOk() } }
-      mockMvc.get("/api/v1/series/${seriesAdult.id}").andExpect { status { isForbidden() } }
-      mockMvc.get("/api/v1/series/${series.id}").andExpect { status { isForbidden() } }
-
-      mockMvc
-        .get("/api/v1/series?sort=metadata.titleSort")
-        .andExpect {
-          status { isOk() }
-          jsonPath("$.content.length()") { value(2) }
-          jsonPath("$.content[0].name") { value(seriesCute.name) }
-          jsonPath("$.content[1].name") { value(seriesKids.name) }
-        }
-    }
-
-    @Test
-    @WithMockCustomUser(excludeLabels = ["kids", "cute"])
-    fun `given user disallowed content with specific labels when getting series then only gets series that satisfies this criteria`() {
-      val seriesKids =
-        makeSeries(name = "series_kids", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(sharingLabels = setOf("kids")))
-          }
-        }
-
-      val seriesCute =
-        makeSeries(name = "series_cute", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(sharingLabels = setOf("cute", "other")))
-          }
-        }
-
-      val seriesAdult =
-        makeSeries(name = "series_adult", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(sharingLabels = setOf("adult")))
-          }
-        }
-
-      val series =
-        makeSeries(name = "series_no", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-        }
-
-      mockMvc.get("/api/v1/series/${seriesKids.id}").andExpect { status { isForbidden() } }
-      mockMvc.get("/api/v1/series/${seriesCute.id}").andExpect { status { isForbidden() } }
-      mockMvc.get("/api/v1/series/${seriesAdult.id}").andExpect { status { isOk() } }
-      mockMvc.get("/api/v1/series/${series.id}").andExpect { status { isOk() } }
-
-      mockMvc
-        .get("/api/v1/series?sort=metadata.titleSort")
-        .andExpect {
-          status { isOk() }
-          jsonPath("$.content.length()") { value(2) }
-          jsonPath("$.content[0].name") { value(seriesAdult.name) }
-          jsonPath("$.content[1].name") { value(series.name) }
-        }
-    }
-
-    @Test
-    @WithMockCustomUser(allowAgeUnder = 10, allowLabels = ["kids"], excludeLabels = ["adult", "teen"])
-    fun `given user allowed and disallowed content when getting series then only gets series that satisfies this criteria`() {
-      val seriesKids =
-        makeSeries(name = "series_kids", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(sharingLabels = setOf("kids")))
-          }
-        }
-
-      val seriesCute =
-        makeSeries(name = "series_cute", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(ageRating = 5, sharingLabels = setOf("cute", "other")))
-          }
-        }
-
-      val seriesAdult =
-        makeSeries(name = "series_adult", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(sharingLabels = setOf("adult")))
-          }
-        }
-
-      val series =
-        makeSeries(name = "series_no", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-        }
-
-      mockMvc.get("/api/v1/series/${seriesKids.id}").andExpect { status { isOk() } }
-      mockMvc.get("/api/v1/series/${seriesCute.id}").andExpect { status { isOk() } }
-      mockMvc.get("/api/v1/series/${seriesAdult.id}").andExpect { status { isForbidden() } }
-      mockMvc.get("/api/v1/series/${series.id}").andExpect { status { isForbidden() } }
-
-      mockMvc
-        .get("/api/v1/series?sort=metadata.titleSort")
-        .andExpect {
-          status { isOk() }
-          jsonPath("$.content.length()") { value(2) }
-          jsonPath("$.content[0].name") { value(seriesCute.name) }
-          jsonPath("$.content[1].name") { value(seriesKids.name) }
-        }
-    }
-
-    @Test
-    @WithMockCustomUser(excludeAgeOver = 16, allowLabels = ["teen"])
-    fun `given user allowed and disallowed content when getting series then only gets series that satisfies this criteria (2)`() {
-      val seriesTeen16 =
-        makeSeries(name = "series_teen_16", libraryId = library.id).also { series ->
-          seriesLifecycle.createSeries(series).also { created ->
-            val books = listOf(makeBook("1", libraryId = library.id))
-            seriesLifecycle.addBooks(created, books)
-          }
-          seriesMetadataRepository.findById(series.id).let {
-            seriesMetadataRepository.update(it.copy(sharingLabels = setOf("teen"), ageRating = 16))
-          }
-        }
-
-      mockMvc.get("/api/v1/series/${seriesTeen16.id}").andExpect { status { isForbidden() } }
-
-      mockMvc
-        .get("/api/v1/series")
-        .andExpect {
-          status { isOk() }
-          jsonPath("$.content.length()") { value(0) }
-        }
-    }
-  }
-
-  @Nested
   inner class UserWithoutLibraryAccess {
     @Test
     @WithMockCustomUser(sharedAllLibraries = false, sharedLibraries = [])
@@ -778,9 +456,6 @@ class SeriesControllerTest(
       strings = [
         """{"title":""}""",
         """{"titleSort":""}""",
-        """{"ageRating":-1}""",
-        """{"totalBookCount":0}""",
-        """{"language":"japanese"}""",
       ],
     )
     @WithMockCustomUser(roles = ["ADMIN"])
@@ -819,18 +494,10 @@ class SeriesControllerTest(
           "summaryLock":true,
           "readingDirection":"LEFT_TO_RIGHT",
           "readingDirectionLock":true,
-          "ageRating":12,
-          "ageRatingLock":true,
-          "publisher":"newPublisher",
-          "publisherLock":true,
-          "language":"fra",
-          "languageLock":true,
           "genres":["Action"],
           "genresLock":true,
           "tags":["tag"],
-          "tagsLock":true,
-          "totalBookCount":5,
-          "totalBookCountLock":true
+          "tagsLock":true
         }
         """.trimIndent()
 
@@ -848,25 +515,17 @@ class SeriesControllerTest(
         assertThat(titleSort).isEqualTo("newTitleSort")
         assertThat(status).isEqualTo(SeriesMetadata.Status.HIATUS)
         assertThat(readingDirection).isEqualTo(SeriesMetadata.ReadingDirection.LEFT_TO_RIGHT)
-        assertThat(publisher).isEqualTo("newPublisher")
         assertThat(summary).isEqualTo("newSummary")
-        assertThat(language).isEqualTo("fr")
-        assertThat(ageRating).isEqualTo(12)
         assertThat(genres).containsExactly("action")
         assertThat(tags).containsExactly("tag")
-        assertThat(totalBookCount).isEqualTo(5)
 
         assertThat(titleLock).isEqualTo(true)
         assertThat(titleSortLock).isEqualTo(true)
         assertThat(statusLock).isEqualTo(true)
         assertThat(readingDirectionLock).isEqualTo(true)
-        assertThat(publisherLock).isEqualTo(true)
-        assertThat(ageRatingLock).isEqualTo(true)
-        assertThat(languageLock).isEqualTo(true)
         assertThat(summaryLock).isEqualTo(true)
         assertThat(genresLock).isEqualTo(true)
         assertThat(tagsLock).isEqualTo(true)
-        assertThat(totalBookCountLock).isEqualTo(true)
       }
     }
 
@@ -884,11 +543,9 @@ class SeriesControllerTest(
       seriesMetadataRepository.findById(createdSeries.id).let { metadata ->
         val updated =
           metadata.copy(
-            ageRating = 12,
             readingDirection = SeriesMetadata.ReadingDirection.LEFT_TO_RIGHT,
             genres = setOf("Action"),
             tags = setOf("tag"),
-            totalBookCount = 5,
           )
 
         seriesMetadataRepository.update(updated)
@@ -897,7 +554,6 @@ class SeriesControllerTest(
       val metadata = seriesMetadataRepository.findById(createdSeries.id)
       with(metadata) {
         assertThat(readingDirection).isEqualTo(SeriesMetadata.ReadingDirection.LEFT_TO_RIGHT)
-        assertThat(ageRating).isEqualTo(12)
         assertThat(genres).hasSize(1)
       }
 
@@ -906,10 +562,8 @@ class SeriesControllerTest(
         """
         {
           "readingDirection":null,
-          "ageRating":null,
           "genres":null,
-          "tags":null,
-          "totalBookCount":null
+          "tags":null
         }
         """.trimIndent()
 
@@ -924,10 +578,8 @@ class SeriesControllerTest(
       val updatedMetadata = seriesMetadataRepository.findById(createdSeries.id)
       with(updatedMetadata) {
         assertThat(readingDirection).isNull()
-        assertThat(ageRating).isNull()
         assertThat(genres).isEmpty()
         assertThat(tags).isEmpty()
-        assertThat(totalBookCount).isNull()
       }
     }
   }

@@ -15,7 +15,7 @@ class SearchCondition {
 
   @Schema(
     name = "SearchConditionSeries",
-    oneOf = [AnyOfSeries::class, AllOfSeries::class, LibraryId::class, CollectionId::class, Deleted::class, Complete::class, OneShot::class, Title::class, TitleSort::class, ReleaseDate::class, Tag::class, SharingLabel::class, Publisher::class, Language::class, Genre::class, AgeRating::class, ReadStatus::class, SeriesStatus::class, Author::class, NotableEntity::class],
+    oneOf = [AnyOfSeries::class, AllOfSeries::class, LibraryId::class, CollectionId::class, Deleted::class, OneShot::class, Title::class, TitleSort::class, ReleaseDate::class, Tag::class, Genre::class, ReadStatus::class, SeriesStatus::class, Author::class, NotableEntity::class],
   )
   @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
   sealed interface Series
@@ -84,12 +84,6 @@ class SearchCondition {
   ) : Book,
     Series
 
-  @Schema(name = "SearchConditionComplete")
-  data class Complete(
-    @JsonProperty("complete")
-    val operator: SearchOperator.Boolean,
-  ) : Series
-
   @Schema(name = "SearchConditionOneShot")
   data class OneShot(
     @JsonProperty("oneShot")
@@ -130,34 +124,10 @@ class SearchCondition {
   ) : Book,
     Series
 
-  @Schema(name = "SearchConditionSharingLabel")
-  data class SharingLabel(
-    @JsonProperty("sharingLabel")
-    val operator: SearchOperator.EqualityNullable<String>,
-  ) : Series
-
-  @Schema(name = "SearchConditionPublisher")
-  data class Publisher(
-    @JsonProperty("publisher")
-    val operator: SearchOperator.Equality<String>,
-  ) : Series
-
-  @Schema(name = "SearchConditionLanguage")
-  data class Language(
-    @JsonProperty("language")
-    val operator: SearchOperator.Equality<String>,
-  ) : Series
-
   @Schema(name = "SearchConditionGenre")
   data class Genre(
     @JsonProperty("genre")
     val operator: SearchOperator.EqualityNullable<String>,
-  ) : Series
-
-  @Schema(name = "SearchConditionAgeRating")
-  data class AgeRating(
-    @JsonProperty("ageRating")
-    val operator: SearchOperator.NumericNullable<Int>,
   ) : Series
 
   @Schema(name = "SearchConditionReadStatus")

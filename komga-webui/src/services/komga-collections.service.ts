@@ -83,8 +83,8 @@ export default class KomgaCollectionsService {
 
   async getSeries(collectionId: string, pageRequest?: PageRequest,
                   libraryId?: string[], status?: string[],
-                  readStatus?: string[], genre?: string[], tag?: string[], language?: string[],
-                  publisher?: string[], ageRating?: string[], releaseDate?: string[], authors?: AuthorDto[],
+                  readStatus?: string[], genre?: string[], tag?: string[],
+                  releaseDate?: string[], authors?: AuthorDto[],
                   complete?: boolean): Promise<Page<SeriesDto>> {
     try {
       const params = {...pageRequest} as any
@@ -93,9 +93,6 @@ export default class KomgaCollectionsService {
       if (readStatus) params.read_status = readStatus
       if (genre) params.genre = genre
       if (tag) params.tag = tag
-      if (language) params.language = language
-      if (publisher) params.publisher = publisher
-      if (ageRating) params.age_rating = ageRating
       if (releaseDate) params.release_year = releaseDate
       if (authors) params.author = authors.map(a => `${a.name},${a.role}`)
       if (complete !== undefined) params.complete = complete

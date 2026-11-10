@@ -67,20 +67,6 @@ class ReferentialV1Controller(
       else -> referentialRepository.findAllGenres(principal.user.getAuthorizedLibraryIds(null))
     }
 
-  @GetMapping("sharing-labels")
-  @Deprecated("Use GET /v2/sharing-labels instead")
-  @Operation(summary = "List sharing labels", description = "Use GET /v2/sharing-labels instead. Deprecated since 1.26.0", tags = [OpenApiConfiguration.TagNames.DEPRECATED])
-  fun getSharingLabels(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "library_id", required = false) libraryIds: Set<String> = emptySet(),
-    @RequestParam(name = "collection_id", required = false) collectionId: String?,
-  ): Set<String> =
-    when {
-      libraryIds.isNotEmpty() -> referentialRepository.findAllSharingLabelsByLibraries(libraryIds, principal.user.getAuthorizedLibraryIds(null))
-      collectionId != null -> referentialRepository.findAllSharingLabelsByCollection(collectionId, principal.user.getAuthorizedLibraryIds(null))
-      else -> referentialRepository.findAllSharingLabels(principal.user.getAuthorizedLibraryIds(null))
-    }
-
   @GetMapping("tags")
   @Deprecated("Use GET /v2/tags instead")
   @Operation(summary = "List tags", description = "Use GET /v2/tags instead. Deprecated since 1.26.0", tags = [OpenApiConfiguration.TagNames.DEPRECATED])
@@ -124,48 +110,6 @@ class ReferentialV1Controller(
       collectionId != null -> referentialRepository.findAllSeriesTagsByCollection(collectionId, principal.user.getAuthorizedLibraryIds(null))
       else -> referentialRepository.findAllSeriesTags(principal.user.getAuthorizedLibraryIds(null))
     }
-
-  @GetMapping("languages")
-  @Deprecated("Use GET /v2/languages instead")
-  @Operation(summary = "List languages", description = "Use GET /v2/languages instead. Deprecated since 1.26.0", tags = [OpenApiConfiguration.TagNames.DEPRECATED])
-  fun getLanguages(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "library_id", required = false) libraryIds: Set<String> = emptySet(),
-    @RequestParam(name = "collection_id", required = false) collectionId: String?,
-  ): Set<String> =
-    when {
-      libraryIds.isNotEmpty() -> referentialRepository.findAllLanguagesByLibraries(libraryIds, principal.user.getAuthorizedLibraryIds(null))
-      collectionId != null -> referentialRepository.findAllLanguagesByCollection(collectionId, principal.user.getAuthorizedLibraryIds(null))
-      else -> referentialRepository.findAllLanguages(principal.user.getAuthorizedLibraryIds(null))
-    }
-
-  @GetMapping("publishers")
-  @Deprecated("Use GET /v2/publishers instead")
-  @Operation(summary = "List publishers", description = "Use GET /v2/publishers instead. Deprecated since 1.26.0", tags = [OpenApiConfiguration.TagNames.DEPRECATED])
-  fun getPublishers(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "library_id", required = false) libraryIds: Set<String> = emptySet(),
-    @RequestParam(name = "collection_id", required = false) collectionId: String?,
-  ): Set<String> =
-    when {
-      libraryIds.isNotEmpty() -> referentialRepository.findAllPublishersByLibraries(libraryIds, principal.user.getAuthorizedLibraryIds(null))
-      collectionId != null -> referentialRepository.findAllPublishersByCollection(collectionId, principal.user.getAuthorizedLibraryIds(null))
-      else -> referentialRepository.findAllPublishers(principal.user.getAuthorizedLibraryIds(null))
-    }
-
-  @GetMapping("age-ratings")
-  @Deprecated("Use GET /v2/age-ratings instead")
-  @Operation(summary = "List age ratings", description = "Use GET /v2/age-ratings instead. Deprecated since 1.26.0", tags = [OpenApiConfiguration.TagNames.DEPRECATED])
-  fun getAgeRatings(
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "library_id", required = false) libraryIds: Set<String> = emptySet(),
-    @RequestParam(name = "collection_id", required = false) collectionId: String?,
-  ): Set<String> =
-    when {
-      libraryIds.isNotEmpty() -> referentialRepository.findAllAgeRatingsByLibraries(libraryIds, principal.user.getAuthorizedLibraryIds(null))
-      collectionId != null -> referentialRepository.findAllAgeRatingsByCollection(collectionId, principal.user.getAuthorizedLibraryIds(null))
-      else -> referentialRepository.findAllAgeRatings(principal.user.getAuthorizedLibraryIds(null))
-    }.map { it?.toString() ?: "None" }.toSet()
 
   @GetMapping("series/release-dates")
   @Deprecated("Use GET /v2/series/release-years instead")

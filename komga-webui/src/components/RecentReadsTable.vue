@@ -14,14 +14,7 @@
       </router-link>
     </template>
 
-    <template v-slot:item.seriesTitle="{ item }">
-      <router-link
-        :to="{name: 'browse-series', params: {seriesId: item.seriesId}}"
-        class="link-underline"
-      >{{ item.seriesTitle }}
-      </router-link>
-    </template>
-
+    <!--  Fork note: シリーズ列は表示しない  -->
     <template v-slot:item.progress="{ item }">
       <v-icon v-if="item.completed" color="success" small>mdi-check-circle</v-icon>
       <span v-else>{{ item.page }}/{{ item.pagesCount ?? '?' }}</span>
@@ -59,10 +52,10 @@ export default Vue.extend({
   },
   computed: {
     headers(): object[] {
+      // Fork note: シリーズ列（seriesTitle）は削除
       return [
         {text: this.$t('recent_reads.user').toString(), value: 'userEmail'},
         {text: this.$t('recent_reads.book').toString(), value: 'bookTitle'},
-        {text: this.$t('recent_reads.series').toString(), value: 'seriesTitle'},
         {text: this.$t('recent_reads.progress').toString(), value: 'progress', sortable: false},
         {text: this.$t('recent_reads.read_date').toString(), value: 'readDate'},
       ]

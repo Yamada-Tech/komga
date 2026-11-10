@@ -1,7 +1,6 @@
 package org.gotson.komga.infrastructure.jooq
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.gotson.komga.domain.model.AllowExclude
 import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.MediaExtension
 import org.gotson.komga.infrastructure.datasource.SqliteUdfDataSource
@@ -53,48 +52,11 @@ fun Field<String>.inOrNoCondition(list: Collection<String>?): Condition =
     else -> this.`in`(list)
   }
 
-fun ContentRestrictions.toCondition(): Condition {
-  val ageAllowed =
-    if (ageRestriction?.restriction == AllowExclude.ALLOW_ONLY) {
-      Tables.SERIES_METADATA.AGE_RATING.isNotNull
-        .and(Tables.SERIES_METADATA.AGE_RATING.lessOrEqual(ageRestriction.age))
-    } else {
-      DSL.noCondition()
-    }
-
-  val labelAllowed =
-    if (labelsAllow.isNotEmpty())
-      Tables.SERIES_METADATA.SERIES_ID.`in`(
-        DSL
-          .select(Tables.SERIES_METADATA_SHARING.SERIES_ID)
-          .from(Tables.SERIES_METADATA_SHARING)
-          .where(Tables.SERIES_METADATA_SHARING.LABEL.`in`(labelsAllow)),
-      )
-    else
-      DSL.noCondition()
-
-  val ageDenied =
-    if (ageRestriction?.restriction == AllowExclude.EXCLUDE)
-      Tables.SERIES_METADATA.AGE_RATING.isNull
-        .or(Tables.SERIES_METADATA.AGE_RATING.lessThan(ageRestriction.age))
-    else
-      DSL.noCondition()
-
-  val labelDenied =
-    if (labelsExclude.isNotEmpty())
-      Tables.SERIES_METADATA.SERIES_ID.notIn(
-        DSL
-          .select(Tables.SERIES_METADATA_SHARING.SERIES_ID)
-          .from(Tables.SERIES_METADATA_SHARING)
-          .where(Tables.SERIES_METADATA_SHARING.LABEL.`in`(labelsExclude)),
-      )
-    else
-      DSL.noCondition()
-
-  return ageAllowed
-    .or(labelAllowed)
-    .and(ageDenied.and(labelDenied))
-}
+/**
+ * Fork note: age rating and sharing labels have been removed from series metadata,
+ * so content restrictions always evaluate to allowed.
+ */
+fun ContentRestrictions.toCondition(): Condition = DSL.noCondition()
 
 fun ObjectMapper.serializeJsonGz(obj: Any): ByteArray? =
   try {

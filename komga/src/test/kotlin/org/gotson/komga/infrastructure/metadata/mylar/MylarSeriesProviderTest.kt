@@ -64,11 +64,7 @@ class MylarSeriesProviderTest {
       assertThat(status).isEqualTo(SeriesMetadata.Status.ENDED)
       assertThat(summary).isEqualTo("Sandman comics formatted")
       assertThat(readingDirection).isNull()
-      assertThat(publisher).isEqualTo("DC")
-      assertThat(ageRating).isEqualTo(18)
-      assertThat(language).isNull()
       assertThat(genres).isNull()
-      assertThat(totalBookCount).isEqualTo(2)
       assertThat(collections).isEmpty()
     }
   }
@@ -105,11 +101,7 @@ class MylarSeriesProviderTest {
       assertThat(status).isEqualTo(SeriesMetadata.Status.ONGOING)
       assertThat(summary).isEqualTo("Sandman comics")
       assertThat(readingDirection).isNull()
-      assertThat(publisher).isEqualTo("DC")
-      assertThat(ageRating).isNull()
-      assertThat(language).isNull()
       assertThat(genres).isNull()
-      assertThat(totalBookCount).isEqualTo(2)
       assertThat(collections).isEmpty()
     }
   }

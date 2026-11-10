@@ -86,8 +86,6 @@ class SyncPointLifecycleTest(
   fun `given user when creating syncpoint then all in-scope books are included`() {
     // given
     val bookValid = makeBook("valid", libraryId = library1.id).copy(fileHash = "hash", fileSize = 12, fileLastModified = LocalDateTime.now())
-    val bookExcludedByAge = makeBook("age restriction", libraryId = library1.id)
-    val bookExcludedByLabel = makeBook("label restriction", libraryId = library1.id)
     val bookDeleted = makeBook("deleted", libraryId = library1.id).copy(deletedDate = LocalDateTime.now())
     val bookNotReady = makeBook("media not ready", libraryId = library1.id)
     val bookNotEpub = makeBook("not epub", libraryId = library1.id)
@@ -98,18 +96,6 @@ class SyncPointLifecycleTest(
       seriesLifecycle.createSeries(series).let { created ->
         seriesLifecycle.addBooks(created, listOf(bookValid, bookDeleted, bookNotReady, bookNotEpub))
       }
-    }
-    makeSeries(name = "series age restricted", libraryId = library1.id).let { series ->
-      seriesLifecycle.createSeries(series).let { created ->
-        seriesLifecycle.addBooks(created, listOf(bookExcludedByAge))
-      }
-      seriesMetadataRepository.findById(series.id).let { seriesMetadataRepository.update(it.copy(ageRating = 20)) }
-    }
-    makeSeries(name = "series label restricted", libraryId = library1.id).let { series ->
-      seriesLifecycle.createSeries(series).let { created ->
-        seriesLifecycle.addBooks(created, listOf(bookExcludedByLabel))
-      }
-      seriesMetadataRepository.findById(series.id).let { seriesMetadataRepository.update(it.copy(sharingLabels = setOf("exclude"))) }
     }
     makeSeries(name = "series2", libraryId = library2.id).let { series ->
       seriesLifecycle.createSeries(series).let { created ->

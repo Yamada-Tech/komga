@@ -631,7 +631,7 @@ class LibraryContentLifecycleTest(
       }
 
       seriesRepository.findAll().forEach { series ->
-        seriesMetadataRepository.findById(series.id).let { seriesMetadataRepository.update(it.copy(language = "en")) }
+        seriesMetadataRepository.findById(series.id).let { seriesMetadataRepository.update(it.copy(summary = "keep")) }
         seriesLifecycle.addThumbnailForSeries(ThumbnailSeries(ByteArray(10), type = ThumbnailSeries.Type.USER_UPLOADED, mediaType = "image/jpeg", fileSize = 10L, dimension = Dimension(1, 1), seriesId = series.id), MarkSelectedPreference.YES)
       }
 
@@ -655,7 +655,7 @@ class LibraryContentLifecycleTest(
       assertThat(allSeries).hasSize(1)
 
       allSeries.forEach { series ->
-        assertThat(seriesMetadataRepository.findById(series.id).language).isEqualTo("en")
+        assertThat(seriesMetadataRepository.findById(series.id).summary).isEqualTo("keep")
         val thumbnail = seriesLifecycle.getSelectedThumbnail(series.id)
         assertThat(thumbnail).isNotNull
         assertThat(thumbnail!!.type).isEqualTo(ThumbnailSeries.Type.USER_UPLOADED)

@@ -2,7 +2,6 @@ package org.gotson.komga.infrastructure.metadata.epub
 
 import org.apache.commons.validator.routines.ISBNValidator
 import org.gotson.komga.domain.model.Author
-import org.gotson.komga.domain.model.BCP47TagValidator
 import org.gotson.komga.domain.model.BookMetadataPatch
 import org.gotson.komga.domain.model.BookMetadataPatchCapability
 import org.gotson.komga.domain.model.BookWithMedia
@@ -117,8 +116,6 @@ class EpubMetadataProvider(
       val opf = Jsoup.parse(packageFile, "", Parser.xmlParser())
 
       val series = opf.selectFirst("*|metadata > *|meta[property=belongs-to-collection]")?.text()?.ifBlank { null }
-      val publisher = opf.selectFirst("*|metadata > *|publisher")?.text()?.ifBlank { null }
-      val language = opf.selectFirst("*|metadata > *|language")?.text()?.ifBlank { null }
       val genres =
         opf
           .select("*|metadata > *|subject")
@@ -140,12 +137,8 @@ class EpubMetadataProvider(
         titleSort = series,
         status = null,
         readingDirection = direction,
-        publisher = publisher,
-        ageRating = null,
         summary = null,
-        language = if (language != null && BCP47TagValidator.isValid(language)) BCP47TagValidator.normalize(language) else null,
         genres = genres,
-        totalBookCount = null,
         collections = emptySet(),
       )
     }

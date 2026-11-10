@@ -5,20 +5,15 @@ import com.google.common.jimfs.Jimfs
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
-import org.gotson.komga.domain.model.AgeRestriction
-import org.gotson.komga.domain.model.AllowExclude
 import org.gotson.komga.domain.model.Book
-import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.model.Library
 import org.gotson.komga.domain.model.Media
 import org.gotson.komga.domain.model.Series
-import org.gotson.komga.domain.model.SeriesMetadata
 import org.gotson.komga.domain.model.UserRoles
 import org.gotson.komga.domain.persistence.BookRepository
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.persistence.MediaRepository
-import org.gotson.komga.domain.persistence.SeriesMetadataRepository
 import org.gotson.komga.domain.persistence.SeriesRepository
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
 import org.gotson.komga.interfaces.api.ContentRestrictionChecker
@@ -38,7 +33,6 @@ class WebDavServletTest {
   private val libraryRepository = mockk<LibraryRepository>(relaxed = true)
   private val seriesRepository = mockk<SeriesRepository>(relaxed = true)
   private val bookRepository = mockk<BookRepository>(relaxed = true)
-  private val seriesMetadataRepository = mockk<SeriesMetadataRepository>(relaxed = true)
   private val mediaRepository = mockk<MediaRepository>(relaxed = true)
   private val contentRestrictionChecker = mockk<ContentRestrictionChecker>(relaxed = true)
 
@@ -48,7 +42,7 @@ class WebDavServletTest {
 
   @BeforeEach
   fun setUp() {
-    servlet = WebDavServlet(libraryRepository, seriesRepository, bookRepository, seriesMetadataRepository, mediaRepository, contentRestrictionChecker)
+    servlet = WebDavServlet(libraryRepository, seriesRepository, bookRepository, mediaRepository, contentRestrictionChecker)
     authenticate(user)
   }
 
@@ -310,32 +304,6 @@ class WebDavServletTest {
 
     assertThat(response.status).isEqualTo(405)
     assertThat(response.getHeader("Allow")).isEqualTo(WebDavServlet.ALLOWED_METHODS)
-  }
-
-  @Test
-  fun `given restricted series when propfind library then restricted series is hidden`() {
-    val library = Library(name = "Library", root = URL("file:/library"), id = "lib1")
-    every { libraryRepository.findAll() } returns listOf(library)
-    val allowed = Series(name = "Allowed", url = URL("file:/library/allowed"), fileLastModified = LocalDateTime.now(), id = "s1", libraryId = "lib1")
-    val blocked = Series(name = "Blocked", url = URL("file:/library/blocked"), fileLastModified = LocalDateTime.now(), id = "s2", libraryId = "lib1")
-    every { seriesRepository.findAllByLibraryId("lib1") } returns listOf(allowed, blocked)
-    every { seriesMetadataRepository.findByIdOrNull("s1") } returns SeriesMetadata(title = "Allowed", seriesId = "s1", ageRating = 6)
-    every { seriesMetadataRepository.findByIdOrNull("s2") } returns SeriesMetadata(title = "Blocked", seriesId = "s2", ageRating = 18)
-    val restrictedUser =
-      KomgaUser(
-        email = "restricted@example.com",
-        password = "",
-        restrictions = ContentRestrictions(ageRestriction = AgeRestriction(age = 9, restriction = AllowExclude.ALLOW_ONLY)),
-      )
-    authenticate(restrictedUser)
-
-    val response = MockHttpServletResponse()
-    servlet.handle(request("PROPFIND", "/lib1"), response)
-
-    assertThat(response.status).isEqualTo(207)
-    assertThat(response.contentAsString)
-      .contains("<d:displayname>Allowed</d:displayname>")
-      .doesNotContain("Blocked")
   }
 
   private fun stubSeriesWithBook(path: Path) {

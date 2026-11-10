@@ -167,7 +167,6 @@ import {LibraryDto} from '@/types/komga-libraries'
 import {ItemContext} from '@/types/items'
 import {
   BookSearch,
-  SearchConditionAgeRating,
   SearchConditionAllOfSeries,
   SearchConditionAnyOfBook,
   SearchConditionAnyOfSeries,
@@ -175,16 +174,13 @@ import {
   SearchConditionComplete,
   SearchConditionDeleted,
   SearchConditionGenre,
-  SearchConditionLanguage,
   SearchConditionLibraryId,
   SearchConditionOneShot,
-  SearchConditionPublisher,
   SearchConditionReadStatus,
   SearchConditionReleaseDate,
   SearchConditionSeries,
   SearchConditionSeriesId,
   SearchConditionSeriesStatus,
-  SearchConditionSharingLabel,
   SearchConditionTag,
   SearchConditionTitleSort,
   SearchOperatorAfter,
@@ -251,11 +247,7 @@ export default Vue.extend({
       filterOptions: {
         genre: [] as NameValue[],
         tag: [] as NameValue[],
-        publisher: [] as NameValue[],
-        language: [] as NameValue[],
-        ageRating: [] as NameValue[],
         releaseDate: [] as NameValue[],
-        sharingLabel: [] as NameValue[],
       },
     }
   },
@@ -460,37 +452,6 @@ export default Vue.extend({
           ],
           anyAllSelector: true,
         },
-        publisher: {
-          name: this.$t('filter.publisher').toString(),
-          values: [
-            {
-              name: this.$t('filter.any').toString(),
-              value: new SearchConditionPublisher(new SearchOperatorIsNot('')),
-              nValue: new SearchConditionPublisher(new SearchOperatorIs('')),
-            },
-            ...this.filterOptions.publisher,
-          ],
-        },
-        language: {
-          name: this.$t('filter.language').toString(),
-          values: [
-            {
-              name: this.$t('filter.any').toString(),
-              value: new SearchConditionLanguage(new SearchOperatorIsNot('')),
-              nValue: new SearchConditionLanguage(new SearchOperatorIs('')),
-            },
-            ...this.filterOptions.language,
-          ],
-        },
-        ageRating: {
-          name: this.$t('filter.age_rating').toString(),
-          values: this.filterOptions.ageRating.map((x: NameValue) => ({
-              name: (x.value === 'None' ? this.$t('filter.age_rating_none').toString() : x.name),
-              value: x.value,
-              nValue: x.nValue,
-            } as NameValue),
-          ),
-        },
         releaseDate: {
           name: this.$t('filter.release_date').toString(),
           values: [
@@ -519,17 +480,6 @@ export default Vue.extend({
           anyAllSelector: true,
         }
       })
-      r['sharingLabel'] = {
-        name: this.$t('filter.sharing_label').toString(),
-        values: [
-          {
-            name: this.$t('filter.any').toString(),
-            value: new SearchConditionSharingLabel(new SearchOperatorIsNotNull()),
-            nValue: new SearchConditionSharingLabel(new SearchOperatorIsNull()),
-          },
-          ...this.filterOptions.sharingLabel,
-        ],
-      }
       return r
     },
     isAdmin(): boolean {
@@ -580,26 +530,13 @@ export default Vue.extend({
       const requestLibraryIds = libraryId !== LIBRARIES_ALL ? [libraryId] : this.$store.getters.getLibrariesPinned.map((it: LibraryDto) => it.id)
 
       // load dynamic filters
-      const [genres, tags, publishers, languages, ageRatings, releaseDates, sharingLabels] = await Promise.all([
+      const [genres, tags, releaseDates] = await Promise.all([
         this.$komgaReferential.getGenres(requestLibraryIds),
         this.$komgaReferential.getSeriesAndBookTags(requestLibraryIds),
-        this.$komgaReferential.getPublishers(requestLibraryIds),
-        this.$komgaReferential.getLanguages(requestLibraryIds),
-        this.$komgaReferential.getAgeRatings(requestLibraryIds),
         this.$komgaReferential.getSeriesReleaseDates(requestLibraryIds),
-        this.$komgaReferential.getSharingLabels(requestLibraryIds),
       ])
       this.$set(this.filterOptions, 'genre', toNameValueCondition(genres, x => new SearchConditionGenre(new SearchOperatorIs(x)), x => new SearchConditionGenre(new SearchOperatorIsNot(x))))
       this.$set(this.filterOptions, 'tag', toNameValueCondition(tags, x => new SearchConditionTag(new SearchOperatorIs(x)), x => new SearchConditionTag(new SearchOperatorIsNot(x))))
-      this.$set(this.filterOptions, 'publisher', toNameValueCondition(publishers, x => new SearchConditionPublisher(new SearchOperatorIs(x)), x => new SearchConditionPublisher(new SearchOperatorIsNot(x))))
-      this.$set(this.filterOptions, 'language', languages.map((x: NameValue) => {
-        return {
-          name: x.name,
-          value: new SearchConditionLanguage(new SearchOperatorIs(x.value)),
-          nValue: new SearchConditionLanguage(new SearchOperatorIsNot(x.value)),
-        } as NameValue
-      }))
-      this.$set(this.filterOptions, 'ageRating', toNameValueCondition(ageRatings, x => new SearchConditionAgeRating(isFinite(x) ? new SearchOperatorIs(x) : new SearchOperatorIsNull()), x => new SearchConditionAgeRating(isFinite(x) ? new SearchOperatorIsNot(x) : new SearchOperatorIsNotNull())))
       this.$set(this.filterOptions, 'releaseDate', toNameValueCondition(
         releaseDates,
         x => {
@@ -617,23 +554,17 @@ export default Vue.extend({
             ],
           ),
       ))
-      this.$set(this.filterOptions, 'sharingLabel', toNameValueCondition(sharingLabels, x => new SearchConditionSharingLabel(new SearchOperatorIs(x)), x => new SearchConditionSharingLabel(new SearchOperatorIsNot(x))))
-
       // get filter from query params or local storage and validate with available filter values
       let activeFilters: any
-      if (route.query.status || route.query.readStatus || route.query.genre || route.query.tag || route.query.language || route.query.ageRating || route.query.publisher || authorRoles.some(role => role in route.query) || route.query.complete || route.query.oneshot || route.query.sharingLabel || route.query.deleted) {
+      if (route.query.status || route.query.readStatus || route.query.genre || route.query.tag || authorRoles.some(role => role in route.query) || route.query.complete || route.query.oneshot || route.query.deleted) {
         activeFilters = {
           status: route.query.status || [],
           readStatus: route.query.readStatus || [],
           genre: route.query.genre || [],
           tag: route.query.tag || [],
-          publisher: route.query.publisher || [],
-          language: route.query.language || [],
-          ageRating: route.query.ageRating || [],
           releaseDate: route.query.releaseDate || [],
           complete: route.query.complete || [],
           oneshot: route.query.oneshot || [],
-          sharingLabel: route.query.sharingLabel || [],
           deleted: route.query.deleted || [],
         }
         authorRoles.forEach((role: string) => {
@@ -666,13 +597,9 @@ export default Vue.extend({
         readStatus: this.$_.intersectionWith(filters.readStatus, extractFilterOptionsValues(this.filterOptionsList.readStatus.values), objIsEqual) || [],
         genre: this.$_.intersectionWith(filters.genre, extractFilterOptionsValues(this.filterOptions.genre), objIsEqual) || [],
         tag: this.$_.intersectionWith(filters.tag, extractFilterOptionsValues(this.filterOptions.tag), objIsEqual) || [],
-        publisher: this.$_.intersectionWith(filters.publisher, extractFilterOptionsValues(this.filterOptions.publisher), objIsEqual) || [],
-        language: this.$_.intersectionWith(filters.language, extractFilterOptionsValues(this.filterOptions.language), objIsEqual) || [],
-        ageRating: this.$_.intersectionWith(filters.ageRating, extractFilterOptionsValues(this.filterOptions.ageRating), objIsEqual) || [],
         releaseDate: this.$_.intersectionWith(filters.releaseDate, extractFilterOptionsValues(this.filterOptions.releaseDate), objIsEqual) || [],
         complete: this.$_.intersectionWith(filters.complete, extractFilterOptionsValues(this.filterOptionsList.complete.values), objIsEqual) || [],
         oneshot: this.$_.intersectionWith(filters.oneshot, extractFilterOptionsValues(this.filterOptionsList.oneshot.values), objIsEqual) || [],
-        sharingLabel: this.$_.intersectionWith(filters.sharingLabel, extractFilterOptionsValues(this.filterOptions.sharingLabel), objIsEqual) || [],
         deleted: this.$_.intersectionWith(filters.deleted, extractFilterOptionsValues(this.filterOptionsList.deleted.values), objIsEqual) || [],
       } as any
       authorRoles.forEach((role: string) => {
@@ -787,11 +714,7 @@ export default Vue.extend({
       if (this.filters.readStatus && this.filters.readStatus.length > 0) conditions.push(new SearchConditionAnyOfSeries(this.filters.readStatus))
       if (this.filters.genre && this.filters.genre.length > 0) this.filtersMode?.genre?.allOf ? conditions.push(new SearchConditionAllOfSeries(this.filters.genre)) : conditions.push(new SearchConditionAnyOfSeries(this.filters.genre))
       if (this.filters.tag && this.filters.tag.length > 0) this.filtersMode?.tag?.allOf ? conditions.push(new SearchConditionAllOfSeries(this.filters.tag)) : conditions.push(new SearchConditionAnyOfSeries(this.filters.tag))
-      if (this.filters.language && this.filters.language.length > 0) this.filtersMode?.language?.allOf ? conditions.push(new SearchConditionAllOfSeries(this.filters.language)) : conditions.push(new SearchConditionAnyOfSeries(this.filters.language))
-      if (this.filters.publisher && this.filters.publisher.length > 0) this.filtersMode?.publisher?.allOf ? conditions.push(new SearchConditionAllOfSeries(this.filters.publisher)) : conditions.push(new SearchConditionAnyOfSeries(this.filters.publisher))
-      if (this.filters.ageRating && this.filters.ageRating.length > 0) this.filtersMode?.ageRating?.allOf ? conditions.push(new SearchConditionAllOfSeries(this.filters.ageRating)) : conditions.push(new SearchConditionAnyOfSeries(this.filters.ageRating))
       if (this.filters.releaseDate && this.filters.releaseDate.length > 0) this.filtersMode?.releaseDate?.allOf ? conditions.push(new SearchConditionAllOfSeries(this.filters.releaseDate)) : conditions.push(new SearchConditionAnyOfSeries(this.filters.releaseDate))
-      if (this.filters.sharingLabel && this.filters.sharingLabel.length > 0) this.filtersMode?.sharingLabel?.allOf ? conditions.push(new SearchConditionAllOfSeries(this.filters.sharingLabel)) : conditions.push(new SearchConditionAnyOfSeries(this.filters.sharingLabel))
       if (this.filters.complete && this.filters.complete.length > 0) conditions.push(...this.filters.complete)
       if (this.filters.oneshot && this.filters.oneshot.length > 0) conditions.push(...this.filters.oneshot)
       if (this.filters.deleted && this.filters.deleted.length > 0) conditions.push(...this.filters.deleted)

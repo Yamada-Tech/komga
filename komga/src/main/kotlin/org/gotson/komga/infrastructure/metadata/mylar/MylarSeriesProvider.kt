@@ -54,11 +54,7 @@ class MylarSeriesProvider(
           },
         summary = metadata.descriptionFormatted ?: metadata.descriptionText,
         readingDirection = null,
-        publisher = metadata.publisher,
-        ageRating = metadata.ageRating?.ageRating,
-        language = null,
         genres = null,
-        totalBookCount = metadata.totalIssues,
         collections = emptySet(),
       )
     } catch (e: Exception) {

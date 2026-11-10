@@ -203,9 +203,6 @@ export default Vue.extend({
         library: [] as NameValue[],
         genre: [] as NameValue[],
         tag: [] as NameValue[],
-        publisher: [] as NameValue[],
-        language: [] as NameValue[],
-        ageRating: [] as NameValue[],
         releaseDate: [] as NameValue[],
       },
     }
@@ -297,16 +294,6 @@ export default Vue.extend({
         status: {name: this.$t('filter.status').toString(), values: SeriesStatusKeyValue()},
         genre: {name: this.$t('filter.genre').toString(), values: this.filterOptions.genre},
         tag: {name: this.$t('filter.tag').toString(), values: this.filterOptions.tag},
-        publisher: {name: this.$t('filter.publisher').toString(), values: this.filterOptions.publisher},
-        language: {name: this.$t('filter.language').toString(), values: this.filterOptions.language},
-        ageRating: {
-          name: this.$t('filter.age_rating').toString(),
-          values: this.filterOptions.ageRating.map((x: NameValue) => ({
-              name: (x.value === 'None' ? this.$t('filter.age_rating_none').toString() : x.name),
-              value: x.value,
-            } as NameValue),
-          ),
-        },
         releaseDate: {name: this.$t('filter.release_date').toString(), values: this.filterOptions.releaseDate},
       } as FiltersOptions
       authorRoles.forEach((role: string) => {
@@ -347,33 +334,24 @@ export default Vue.extend({
         value: x.id,
       })))
 
-      const [genres, tags, publishers, languages, ageRatings, releaseDates] = await Promise.all([
+      const [genres, tags, releaseDates] = await Promise.all([
         this.$komgaReferential.getGenres(undefined, collectionId),
         this.$komgaReferential.getSeriesAndBookTags(undefined, collectionId),
-        this.$komgaReferential.getPublishers(undefined, collectionId),
-        this.$komgaReferential.getLanguages(undefined, collectionId),
-        this.$komgaReferential.getAgeRatings(undefined, collectionId),
         this.$komgaReferential.getSeriesReleaseDates(undefined, collectionId),
       ])
       this.$set(this.filterOptions, 'genre', toNameValue(genres))
       this.$set(this.filterOptions, 'tag', toNameValue(tags))
-      this.$set(this.filterOptions, 'publisher', toNameValue(publishers))
-      this.$set(this.filterOptions, 'language', (languages))
-      this.$set(this.filterOptions, 'ageRating', toNameValue(ageRatings))
       this.$set(this.filterOptions, 'releaseDate', toNameValue(releaseDates))
 
       // get filter from query params or local storage and validate with available filter values
       let activeFilters: any
-      if (route.query.status || route.query.readStatus || route.query.genre || route.query.tag || route.query.language || route.query.ageRating || route.query.library || route.query.publisher || authorRoles.some(role => role in route.query) || route.query.complete) {
+      if (route.query.status || route.query.readStatus || route.query.genre || route.query.tag || route.query.library || authorRoles.some(role => role in route.query) || route.query.complete) {
         activeFilters = {
           status: route.query.status || [],
           readStatus: route.query.readStatus || [],
           library: route.query.library || [],
           genre: route.query.genre || [],
           tag: route.query.tag || [],
-          publisher: route.query.publisher || [],
-          language: route.query.language || [],
-          ageRating: route.query.ageRating || [],
           releaseDate: route.query.releaseDate || [],
           complete: route.query.complete || [],
         }
@@ -392,9 +370,6 @@ export default Vue.extend({
         library: filters.library?.filter(x => this.filterOptions.library.map(n => n.value).includes(x)) || [],
         genre: filters.genre?.filter(x => this.filterOptions.genre.map(n => n.value).includes(x)) || [],
         tag: filters.tag?.filter(x => this.filterOptions.tag.map(n => n.value).includes(x)) || [],
-        publisher: filters.publisher?.filter(x => this.filterOptions.publisher.map(n => n.value).includes(x)) || [],
-        language: filters.language?.filter(x => this.filterOptions.language.map(n => n.value).includes(x)) || [],
-        ageRating: filters.ageRating?.filter(x => this.filterOptions.ageRating.map(n => n.value).includes(x)) || [],
         releaseDate: filters.releaseDate?.filter(x => this.filterOptions.releaseDate.map(n => n.value).includes(x)) || [],
         complete: filters.complete?.filter(x => x === 'true' || x === 'false') || [],
       } as any
@@ -461,7 +436,7 @@ export default Vue.extend({
       })
 
       const complete = parseBooleanFilter(this.filters.complete)
-      const seriesPage = await this.$komgaCollections.getSeries(collectionId, pageRequest, this.filters.library, this.filters.status, this.filters.readStatus, this.filters.genre, this.filters.tag, this.filters.language, this.filters.publisher, this.filters.ageRating, this.filters.releaseDate, authorsFilter, complete)
+      const seriesPage = await this.$komgaCollections.getSeries(collectionId, pageRequest, this.filters.library, this.filters.status, this.filters.readStatus, this.filters.genre, this.filters.tag, this.filters.releaseDate, authorsFilter, complete)
 
       this.totalPages = seriesPage.totalPages
       this.totalElements = seriesPage.totalElements

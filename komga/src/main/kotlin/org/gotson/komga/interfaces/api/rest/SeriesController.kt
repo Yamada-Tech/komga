@@ -17,7 +17,6 @@ import org.gotson.komga.application.query.UnpagedSorted
 import org.gotson.komga.application.tasks.HIGHEST_PRIORITY
 import org.gotson.komga.application.tasks.HIGH_PRIORITY
 import org.gotson.komga.application.tasks.TaskEmitter
-import org.gotson.komga.domain.model.AlternateTitle
 import org.gotson.komga.domain.model.Author
 import org.gotson.komga.domain.model.BookSearch
 import org.gotson.komga.domain.model.Dimension
@@ -142,15 +141,10 @@ class SeriesController(
     @RequestParam(name = "collection_id", required = false) collectionIds: List<String>? = null,
     @RequestParam(name = "status", required = false) metadataStatus: List<SeriesMetadata.Status>? = null,
     @RequestParam(name = "read_status", required = false) readStatus: List<ReadStatus>? = null,
-    @RequestParam(name = "publisher", required = false) publishers: List<String>? = null,
-    @RequestParam(name = "language", required = false) languages: List<String>? = null,
     @RequestParam(name = "genre", required = false) genres: List<String>? = null,
     @RequestParam(name = "tag", required = false) tags: List<String>? = null,
-    @RequestParam(name = "age_rating", required = false) ageRatings: List<String>? = null,
     @RequestParam(name = "release_year", required = false) releaseYears: List<String>? = null,
-    @RequestParam(name = "sharing_label", required = false) sharingLabels: List<String>? = null,
     @RequestParam(name = "deleted", required = false) deleted: Boolean? = null,
-    @RequestParam(name = "complete", required = false) complete: Boolean? = null,
     @RequestParam(name = "oneshot", required = false) oneshot: Boolean? = null,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) @Authors authors: List<Author>? = null,
@@ -181,13 +175,10 @@ class SeriesController(
               if (!libraryIds.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(libraryIds.map { SearchCondition.LibraryId(SearchOperator.Is(it)) }))
               if (!collectionIds.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(collectionIds.map { SearchCondition.CollectionId(SearchOperator.Is(it)) }))
               if (!metadataStatus.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(metadataStatus.map { SearchCondition.SeriesStatus(SearchOperator.Is(it)) }))
-              if (!publishers.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(publishers.map { SearchCondition.Publisher(SearchOperator.Is(it)) }))
-              if (!languages.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(languages.map { SearchCondition.Language(SearchOperator.Is(it)) }))
               if (!genres.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(genres.map { SearchCondition.Genre(SearchOperator.Is(it)) }))
               if (!tags.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(tags.map { SearchCondition.Tag(SearchOperator.Is(it)) }))
               if (!readStatus.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(readStatus.map { SearchCondition.ReadStatus(SearchOperator.Is(it)) }))
               if (!authors.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(authors.map { SearchCondition.Author(SearchOperator.Is(SearchCondition.AuthorMatch(it.name, it.role))) }))
-              if (!ageRatings.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(ageRatings.map { it.toIntOrNull()?.let { ageRating -> SearchCondition.AgeRating(SearchOperator.Is(ageRating)) } ?: SearchCondition.AgeRating(SearchOperator.IsNullT()) }))
               if (!releaseYears.isNullOrEmpty())
                 add(
                   SearchCondition.AnyOfSeries(
@@ -200,9 +191,7 @@ class SeriesController(
                   ),
                 )
 
-              if (!sharingLabels.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(sharingLabels.map { SearchCondition.SharingLabel(SearchOperator.Is(it)) }))
               oneshot?.let { add(SearchCondition.OneShot(if (it) SearchOperator.IsTrue else SearchOperator.IsFalse)) }
-              complete?.let { add(SearchCondition.Complete(if (it) SearchOperator.IsTrue else SearchOperator.IsFalse)) }
               deleted?.let { add(SearchCondition.Deleted(if (it) SearchOperator.IsTrue else SearchOperator.IsFalse)) }
             },
           ),
@@ -275,15 +264,10 @@ class SeriesController(
     @RequestParam(name = "collection_id", required = false) collectionIds: List<String>?,
     @RequestParam(name = "status", required = false) metadataStatus: List<SeriesMetadata.Status>?,
     @RequestParam(name = "read_status", required = false) readStatus: List<ReadStatus>?,
-    @RequestParam(name = "publisher", required = false) publishers: List<String>?,
-    @RequestParam(name = "language", required = false) languages: List<String>?,
     @RequestParam(name = "genre", required = false) genres: List<String>?,
     @RequestParam(name = "tag", required = false) tags: List<String>?,
-    @RequestParam(name = "age_rating", required = false) ageRatings: List<String>?,
     @RequestParam(name = "release_year", required = false) releaseYears: List<String>?,
-    @RequestParam(name = "sharing_label", required = false) sharingLabels: List<String>? = null,
     @RequestParam(name = "deleted", required = false) deleted: Boolean?,
-    @RequestParam(name = "complete", required = false) complete: Boolean?,
     @RequestParam(name = "oneshot", required = false) oneshot: Boolean? = null,
     @Parameter(hidden = true) @Authors authors: List<Author>?,
     @Parameter(hidden = true) page: Pageable,
@@ -296,13 +280,10 @@ class SeriesController(
               if (!libraryIds.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(libraryIds.map { SearchCondition.LibraryId(SearchOperator.Is(it)) }))
               if (!collectionIds.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(collectionIds.map { SearchCondition.CollectionId(SearchOperator.Is(it)) }))
               if (!metadataStatus.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(metadataStatus.map { SearchCondition.SeriesStatus(SearchOperator.Is(it)) }))
-              if (!publishers.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(publishers.map { SearchCondition.Publisher(SearchOperator.Is(it)) }))
-              if (!languages.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(languages.map { SearchCondition.Language(SearchOperator.Is(it)) }))
               if (!genres.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(genres.map { SearchCondition.Genre(SearchOperator.Is(it)) }))
               if (!tags.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(tags.map { SearchCondition.Tag(SearchOperator.Is(it)) }))
               if (!readStatus.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(readStatus.map { SearchCondition.ReadStatus(SearchOperator.Is(it)) }))
               if (!authors.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(authors.map { SearchCondition.Author(SearchOperator.Is(SearchCondition.AuthorMatch(it.name, it.role))) }))
-              if (!ageRatings.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(ageRatings.map { it.toIntOrNull()?.let { ageRating -> SearchCondition.AgeRating(SearchOperator.Is(ageRating)) } ?: SearchCondition.AgeRating(SearchOperator.IsNullT()) }))
               if (!releaseYears.isNullOrEmpty())
                 add(
                   SearchCondition.AnyOfSeries(
@@ -315,9 +296,7 @@ class SeriesController(
                   ),
                 )
 
-              if (!sharingLabels.isNullOrEmpty()) add(SearchCondition.AnyOfSeries(sharingLabels.map { SearchCondition.SharingLabel(SearchOperator.Is(it)) }))
               oneshot?.let { add(SearchCondition.OneShot(if (it) SearchOperator.IsTrue else SearchOperator.IsFalse)) }
-              complete?.let { add(SearchCondition.Complete(if (it) SearchOperator.IsTrue else SearchOperator.IsFalse)) }
               deleted?.let { add(SearchCondition.Deleted(if (it) SearchOperator.IsTrue else SearchOperator.IsFalse)) }
             },
           ),
@@ -691,14 +670,8 @@ class SeriesController(
           titleSortLock = titleSortLock ?: existing.titleSortLock,
           summary = summary ?: existing.summary,
           summaryLock = summaryLock ?: existing.summaryLock,
-          language = language ?: existing.language,
-          languageLock = languageLock ?: existing.languageLock,
           readingDirection = if (isSet("readingDirection")) readingDirection else existing.readingDirection,
           readingDirectionLock = readingDirectionLock ?: existing.readingDirectionLock,
-          publisher = publisher ?: existing.publisher,
-          publisherLock = publisherLock ?: existing.publisherLock,
-          ageRating = if (isSet("ageRating")) ageRating else existing.ageRating,
-          ageRatingLock = ageRatingLock ?: existing.ageRatingLock,
           genres =
             if (isSet("genres")) {
               if (genres != null) genres!! else emptySet()
@@ -713,29 +686,6 @@ class SeriesController(
               existing.tags
             },
           tagsLock = tagsLock ?: existing.tagsLock,
-          totalBookCount = if (isSet("totalBookCount")) totalBookCount else existing.totalBookCount,
-          totalBookCountLock = totalBookCountLock ?: existing.totalBookCountLock,
-          sharingLabels =
-            if (isSet("sharingLabels")) {
-              if (sharingLabels != null) sharingLabels!! else emptySet()
-            } else {
-              existing.sharingLabels
-            },
-          sharingLabelsLock = sharingLabelsLock ?: existing.sharingLabelsLock,
-          links =
-            if (isSet("links")) {
-              if (links != null) links!!.map { WebLink(it.label!!, URI(it.url!!)) } else emptyList()
-            } else {
-              existing.links
-            },
-          linksLock = linksLock ?: existing.linksLock,
-          alternateTitles =
-            if (isSet("alternateTitles")) {
-              if (alternateTitles != null) alternateTitles!!.map { AlternateTitle(it.label!!, it.title!!) } else emptyList()
-            } else {
-              existing.alternateTitles
-            },
-          alternateTitlesLock = alternateTitlesLock ?: existing.alternateTitlesLock,
         )
       }
     seriesMetadataRepository.update(updated)

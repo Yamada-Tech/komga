@@ -459,7 +459,6 @@ class Opds2Controller(
   fun getLibrariesBrowse(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @PathVariable(name = "id", required = false) libraryId: String?,
-    @RequestParam(name = "publisher", required = false) publishers: List<String>? = null,
     @Parameter(hidden = true) page: Pageable,
   ): FeedDto {
     val (library, authorizedLibraryIds) = checkLibraryAccess(libraryId, principal)
@@ -469,9 +468,6 @@ class Opds2Controller(
         SearchCondition.AllOfSeries(
           buildList {
             if (library != null) add(SearchCondition.LibraryId(SearchOperator.Is(library.id)))
-            if (!publishers.isNullOrEmpty()) {
-              add(SearchCondition.AllOfSeries(publishers.map { SearchCondition.Publisher(SearchOperator.Is(it)) }))
-            }
             add(SearchCondition.Deleted(SearchOperator.IsFalse))
           },
         ),
@@ -482,15 +478,6 @@ class Opds2Controller(
     val entries = seriesDtoRepository.findAll(seriesSearch, SearchContext(principal.user), pageable).map { it.toWPLinkDto() }
 
     val uriBuilder = uriBuilder("libraries${if (library != null) "/${library.id}" else ""}/browse")
-
-    val publisherLinks =
-      referentialRepository.findAllPublishers(authorizedLibraryIds).map {
-        WPLinkDto(
-          title = it,
-          href = uriBuilder.cloneBuilder().queryParam("publisher", it).toUriString(),
-          type = MEDIATYPE_OPDS_JSON_VALUE,
-        )
-      }
 
     return FeedDto(
       metadata =
@@ -510,7 +497,6 @@ class Opds2Controller(
       groups =
         listOfNotNull(
           FeedGroupDto(FeedMetadataDto("Series"), navigation = entries.content),
-          if (publisherLinks.isNotEmpty()) FeedGroupDto(FeedMetadataDto("Publisher"), navigation = publisherLinks) else null,
         ),
     )
   }

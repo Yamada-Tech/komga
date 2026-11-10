@@ -151,20 +151,6 @@
             </v-row>
 
             <v-row class="text-body-2">
-              <v-col class="py-1 pe-0" cols="auto" v-if="series.metadata && series.metadata.ageRating">
-                <v-chip label small link
-                        :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {ageRating: [new SearchConditionAgeRating(new SearchOperatorIs(series.metadata.ageRating.toString()))]}}"
-                >
-                  {{ series.metadata.ageRating }}+
-                </v-chip>
-              </v-col>
-              <v-col class="py-1 pe-0" cols="auto" v-if="series.metadata.language">
-                <v-chip label small link
-                        :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {language: [new SearchConditionLanguage(new SearchOperatorIs(series.metadata.language))]}}"
-                >
-                  {{ languageDisplay }}
-                </v-chip>
-              </v-col>
               <v-col class="py-1 pe-0" cols="auto"
                      v-if="series.metadata.readingDirection">
                 <v-chip label small>
@@ -300,22 +286,6 @@
         </v-row>
       </template>
 
-      <!--  Publisher    -->
-      <v-row v-if="series.metadata.publisher" class="align-center text-caption">
-        <v-col cols="4" sm="3" md="2" xl="1" class="py-1 text-uppercase">{{ $t('common.publisher') }}</v-col>
-        <v-col cols="8" sm="9" md="10" xl="11" class="py-1">
-          <v-chip
-            class="me-2"
-            :title="series.metadata.publisher"
-            :to="{name:'browse-libraries', params: {libraryId: series.libraryId }, query: {publisher: [new SearchConditionPublisher(new SearchOperatorIs(series.metadata.publisher))]}}"
-            label
-            small
-            outlined
-            link
-          >{{ series.metadata.publisher }}
-          </v-chip>
-        </v-col>
-      </v-row>
 
       <!--  Genres    -->
       <v-row v-if="series.metadata.genres.length > 0" class="align-center text-caption">
@@ -573,16 +543,11 @@ import CollectionsExpansionPanels from '@/components/CollectionsExpansionPanels.
 import OneshotActionsMenu from '@/components/menus/OneshotActionsMenu.vue'
 import {
   BookSearch,
-  SearchConditionAgeRating,
   SearchConditionGenre,
-  SearchConditionLanguage,
-  SearchConditionPublisher,
   SearchConditionSeriesId,
   SearchConditionTag,
   SearchOperatorIs,
 } from '@/types/komga-search'
-
-const tags = require('language-tags')
 
 export default Vue.extend({
   name: 'BrowseOneshot',
@@ -593,11 +558,8 @@ export default Vue.extend({
   },
   data: () => {
     return {
-      SearchConditionPublisher,
       SearchConditionGenre,
       SearchConditionTag,
-      SearchConditionLanguage,
-      SearchConditionAgeRating,
       SearchOperatorIs,
       MediaStatus,
       ContextOrigin,
@@ -729,9 +691,6 @@ export default Vue.extend({
     displayedRoles(): string[] {
       const allRoles = this.$_.uniq([...authorRoles, ...(this.book.metadata.authors.map(x => x.role))])
       return allRoles.filter(x => this.authorsByRole[x])
-    },
-    languageDisplay(): string {
-      return tags(this.series.metadata.language)?.language()?.descriptions()[0] || this.series.metadata.language
     },
   },
   methods: {
