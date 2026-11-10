@@ -40,7 +40,12 @@ Head over to our [website](https://komga.org) for more information.
 
 ## Develop in Komga
 
-Check the [development guidelines](./DEVELOPING.md).
+Komga is composed of 3 projects:
+- `komga`: a Spring Boot backend server that hosts the APIs, but also serves the static assets of the frontend (see [komga/README.md](./komga/README.md))
+- `komga-webui`: the legacy VueJS frontend, built at compile time and served by the backend at runtime (see [komga-webui/README.md](./komga-webui/README.md))
+- `komga-tray`: a thin desktop wrapper that displays a tray-icon
+
+Commit messages follow the [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ## Translation
 
