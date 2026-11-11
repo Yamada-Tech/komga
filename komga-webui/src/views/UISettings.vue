@@ -11,7 +11,7 @@
           hide-details
         >
           <v-radio value="alpha" :label="$t('ui_settings.series_groups.alpha')"/>
-          <v-radio value="japanese" :label="$t('ui_settings.series_groups.japanese')"/>
+          <v-radio v-if="localeSeriesGroup" :value="localeSeriesGroup.name" :label="localeSeriesGroupLabel"/>
         </v-radio-group>
       </v-col>
     </v-row>
@@ -69,8 +69,8 @@ import {
   CLIENT_SETTING,
   ClientSettingGlobalUpdateDto,
   ClientSettingsSeriesGroup,
+  getSeriesGroupsForLocale,
   SERIES_GROUP_ALPHA,
-  SERIES_GROUP_JAPANESE,
 } from '@/types/komga-clientsettings'
 
 export default Vue.extend({
@@ -99,6 +99,16 @@ export default Vue.extend({
     discardDisabled(): boolean {
       return !this.$v.form.$anyDirty
     },
+    // Additional grouping for the current UI locale (e.g. あ〜ん for Japanese), undefined if none
+    localeSeriesGroup(): ClientSettingsSeriesGroup | undefined {
+      return getSeriesGroupsForLocale(this.$i18n.locale)
+    },
+    localeSeriesGroupLabel(): string {
+      const group = this.localeSeriesGroup
+      if (!group) return ''
+      const key = `ui_settings.series_groups.${group.name}`
+      return this.$te(key) ? this.$t(key).toString() : (group.label || '')
+    },
   },
   methods: {
     async refreshSettings() {
@@ -106,7 +116,9 @@ export default Vue.extend({
       this.form.oauth2HideLogin = this.$store.state.komgaSettings.clientSettingsGlobal[CLIENT_SETTING.WEBUI_OAUTH2_HIDE_LOGIN]?.value === 'true'
       this.form.oauth2AutoLogin = this.$store.state.komgaSettings.clientSettingsGlobal[CLIENT_SETTING.WEBUI_OAUTH2_AUTO_LOGIN]?.value === 'true'
       try {
-        this.form.seriesGroups = (JSON.parse(this.$store.state.komgaSettings.clientSettingsGlobal[CLIENT_SETTING.WEBUI_SERIES_GROUPS]?.value) as ClientSettingsSeriesGroup)?.name
+        const saved = (JSON.parse(this.$store.state.komgaSettings.clientSettingsGlobal[CLIENT_SETTING.WEBUI_SERIES_GROUPS]?.value) as ClientSettingsSeriesGroup)?.name
+        // keep the saved value only if it is still offered for the current locale, fallback to alpha
+        this.form.seriesGroups = (saved && (saved === 'alpha' || saved === this.localeSeriesGroup?.name)) ? saved : 'alpha'
       } catch (_) {
       }
       this.$v.form.$reset()
@@ -125,11 +137,14 @@ export default Vue.extend({
           allowUnauthorized: true,
         }
 
-      if (this.$v.form?.seriesGroups?.$dirty)
-        newSettings[CLIENT_SETTING.WEBUI_SERIES_GROUPS] = {
-          value: JSON.stringify(this.form.seriesGroups === 'alpha' ? SERIES_GROUP_ALPHA : SERIES_GROUP_JAPANESE),
-          allowUnauthorized: false,
-        }
+      if (this.$v.form?.seriesGroups?.$dirty) {
+        const group = this.form.seriesGroups === 'alpha' ? SERIES_GROUP_ALPHA : this.localeSeriesGroup
+        if (group)
+          newSettings[CLIENT_SETTING.WEBUI_SERIES_GROUPS] = {
+            value: JSON.stringify(group),
+            allowUnauthorized: false,
+          }
+      }
 
       await this.$komgaSettings.updateClientSettingGlobal(newSettings)
 

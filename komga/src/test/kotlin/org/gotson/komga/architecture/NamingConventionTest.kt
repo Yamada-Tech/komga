@@ -36,4 +36,13 @@ class NamingConventionTest {
       .areAnnotatedWith(Controller::class.java)
       .should()
       .haveSimpleNameEndingWith("Controller")
+
+  @ArchTest
+  val testSuffixIsReservedForTests: ArchRule =
+    noClasses()
+      .should()
+      .haveSimpleNameEndingWith("Test")
+      .orShould()
+      .haveSimpleNameEndingWith("Tests")
+      .because("*Test / *Tests are executable test classes in the test sourceSet (Gradle default detection), not production code")
 }

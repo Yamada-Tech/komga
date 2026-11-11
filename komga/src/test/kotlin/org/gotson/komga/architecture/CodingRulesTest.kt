@@ -3,6 +3,7 @@ package org.gotson.komga.architecture
 import com.tngtech.archunit.core.importer.ImportOption
 import com.tngtech.archunit.junit.AnalyzeClasses
 import com.tngtech.archunit.junit.ArchTest
+import com.tngtech.archunit.lang.ArchRule
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS
 import com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS
@@ -10,6 +11,9 @@ import com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIE
 import com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING
 import com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_USE_JODATIME
 import org.gotson.komga.Application
+import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Service
 
 @AnalyzeClasses(packagesOf = [Application::class], importOptions = [ImportOption.DoNotIncludeTests::class])
 class CodingRulesTest {
@@ -33,4 +37,15 @@ class CodingRulesTest {
 class TestCodingRulesTest {
   @ArchTest
   private val noJunitAssertions = noClasses().should().dependOnClassesThat().haveFullyQualifiedName("org.junit.jupiter.api.Assertions")
+
+  @ArchTest
+  private val noSpringComponentsInTestSources: ArchRule =
+    noClasses()
+      .should()
+      .beAnnotatedWith(Component::class.java)
+      .orShould()
+      .beAnnotatedWith(Service::class.java)
+      .orShould()
+      .beAnnotatedWith(Repository::class.java)
+      .because("test helpers are wired with @MockkBean/@TestConfiguration, not scanned Spring stereotypes")
 }

@@ -88,7 +88,9 @@ server:
       - ']'
 
 management:
-  endpoints.web.exposure.include: "*"
+  # Hardening: expose only the endpoints used by the WebUI (health/info/metrics/shutdown/logfile).
+  # Do NOT widen this to "*": heapdump/env/configprops leak secrets even through the ADMIN gate.
+  endpoints.web.exposure.include: "health,info,metrics,shutdown,logfile"
   endpoint:
     configprops:
       roles: ADMIN

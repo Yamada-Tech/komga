@@ -34,6 +34,7 @@ export interface ClientSettingLibraryUpdate {
 
 export interface ClientSettingsSeriesGroup {
   name: string,
+  label?: string,
   groups: Record<string, string[]>
 }
 
@@ -71,6 +72,7 @@ export const SERIES_GROUP_ALPHA = {
 
 export const SERIES_GROUP_JAPANESE = {
   name: 'japanese',
+  label: 'あ〜ん',
   groups: {
     'あ': ['あ', 'ア'],
     'い': ['い', 'イ'],
@@ -120,6 +122,100 @@ export const SERIES_GROUP_JAPANESE = {
     'ん': ['ん', 'ン'],
   },
 } as ClientSettingsSeriesGroup
+
+// Groupes cyrilliques (russe). Ё est rattaché à Е comme dans la liste déroulante.
+export const SERIES_GROUP_CYRILLIC = {
+  name: 'cyrillic',
+  label: 'А〜Я',
+  groups: {
+    'А': ['А'],
+    'Б': ['Б'],
+    'В': ['В'],
+    'Г': ['Г'],
+    'Д': ['Д'],
+    'Е': ['Е', 'Ё'],
+    'Ж': ['Ж'],
+    'З': ['З'],
+    'И': ['И'],
+    'Й': ['Й'],
+    'К': ['К'],
+    'Л': ['Л'],
+    'М': ['М'],
+    'Н': ['Н'],
+    'О': ['О'],
+    'П': ['П'],
+    'Р': ['Р'],
+    'С': ['С'],
+    'Т': ['Т'],
+    'У': ['У'],
+    'Ф': ['Ф'],
+    'Х': ['Х'],
+    'Ц': ['Ц'],
+    'Ч': ['Ч'],
+    'Ш': ['Ш'],
+    'Щ': ['Щ'],
+    'Ъ': ['Ъ'],
+    'Ы': ['Ы'],
+    'Ь': ['Ь'],
+    'Э': ['Э'],
+    'Ю': ['Ю'],
+    'Я': ['Я'],
+  },
+} as ClientSettingsSeriesGroup
+
+// Groupes cyrilliques (ukrainien): Ґ/Є/І/Ї inclus, ъ/ы/э exclus.
+export const SERIES_GROUP_CYRILLIC_UK = {
+  name: 'cyrillic_uk',
+  label: 'А〜Я',
+  groups: {
+    'А': ['А'],
+    'Б': ['Б'],
+    'В': ['В'],
+    'Г': ['Г', 'Ґ'],
+    'Д': ['Д'],
+    'Е': ['Е', 'Є'],
+    'Ж': ['Ж'],
+    'З': ['З'],
+    'И': ['И'],
+    'І': ['І', 'Ї'],
+    'Й': ['Й'],
+    'К': ['К'],
+    'Л': ['Л'],
+    'М': ['М'],
+    'Н': ['Н'],
+    'О': ['О'],
+    'П': ['П'],
+    'Р': ['Р'],
+    'С': ['С'],
+    'Т': ['Т'],
+    'У': ['У'],
+    'Ф': ['Ф'],
+    'Х': ['Х'],
+    'Ц': ['Ц'],
+    'Ч': ['Ч'],
+    'Ш': ['Ш'],
+    'Щ': ['Щ'],
+    'Ь': ['Ь'],
+    'Ю': ['Ю'],
+    'Я': ['Я'],
+  },
+} as ClientSettingsSeriesGroup
+
+// Groupement "local" par langue de l'interface (au-delà de A-Z).
+// Les langues non listées n'ont qu'alpha :
+// - zh (chinois) : le tri par pinyin correspond déjà à A-Z
+// - ko (coréen) : les titres commencent par des syllabes complètes (가...), non filtrables par préfixe ㄱ-ㅎ
+// - th/ar/ta : non définis pour le moment (mécanisme prêt, il suffit d'ajouter une entrée ici)
+export const SERIES_GROUPS_BY_LOCALE: Record<string, ClientSettingsSeriesGroup> = {
+  ja: SERIES_GROUP_JAPANESE,
+  ru: SERIES_GROUP_CYRILLIC,
+  bg: SERIES_GROUP_CYRILLIC,
+  uk: SERIES_GROUP_CYRILLIC_UK,
+}
+
+export function getSeriesGroupsForLocale(locale: string): ClientSettingsSeriesGroup | undefined {
+  return SERIES_GROUPS_BY_LOCALE[(locale || '').split('-')[0].toLowerCase()]
+}
 
 export interface ClientSettingsRecommendedView {
   sections: ClientSettingsRecommendedViewSection[],

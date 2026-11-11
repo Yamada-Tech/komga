@@ -175,6 +175,12 @@ tasks {
   withType<Test> {
     useJUnitPlatform()
     systemProperty("spring.profiles.active", "test")
+    // Once include() is set, Gradle stops using its default test-class patterns, so the
+    // defaults (*Test / *Tests / *TestCase) are listed explicitly and the fork convention
+    // *ApiSpec is added. Applied only to the `test` task (not `benchmark`).
+    if (name == "test") {
+      include("**/*Test.class", "**/Tests.class", "**/*Tests.class", "**/*TestCase.class", "**/*ApiSpec.class")
+    }
     // pin the JVM locale: ICU collation tests (CollatorsTest) are locale sensitive and
     // would fail on machines with a Japanese locale (katakana/hiragana equal at tertiary strength)
     systemProperty("user.language", "en")
