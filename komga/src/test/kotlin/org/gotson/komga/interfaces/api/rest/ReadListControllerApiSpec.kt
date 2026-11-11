@@ -38,7 +38,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class ReadListControllerTest(
+class ReadListControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
   @Autowired private val readListLifecycle: ReadListLifecycle,
   @Autowired private val readListRepository: ReadListRepository,

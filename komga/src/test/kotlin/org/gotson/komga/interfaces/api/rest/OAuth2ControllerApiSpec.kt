@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.get
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 @ActiveProfiles("test")
-class OAuth2ControllerTest(
+class OAuth2ControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
 ) {
   @Test

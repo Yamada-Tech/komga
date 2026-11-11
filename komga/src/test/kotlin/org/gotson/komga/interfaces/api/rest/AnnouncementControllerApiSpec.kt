@@ -16,7 +16,7 @@ import java.time.ZoneOffset
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class AnnouncementControllerTest(
+class AnnouncementControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
 ) {
   @SpykBean

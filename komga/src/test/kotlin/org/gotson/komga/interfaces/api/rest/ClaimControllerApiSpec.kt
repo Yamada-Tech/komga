@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.post
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 @ActiveProfiles("test")
-class ClaimControllerTest(
+class ClaimControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
   @Autowired private val userRepository: KomgaUserRepository,
 ) {

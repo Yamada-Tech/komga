@@ -15,7 +15,7 @@ import java.nio.file.Path
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class FileSystemControllerTest(
+class FileSystemControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
 ) {
   private val route = "/api/v1/filesystem"

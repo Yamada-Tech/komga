@@ -36,7 +36,7 @@ import java.util.stream.Stream
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class BookControllerPageTest(
+class BookControllerPageApiSpec(
   @Autowired private val seriesRepository: SeriesRepository,
   @Autowired private val seriesLifecycle: SeriesLifecycle,
   @Autowired private val mediaRepository: MediaRepository,

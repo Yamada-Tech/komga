@@ -55,7 +55,7 @@ import kotlin.random.Random
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class BookControllerTest(
+class BookControllerApiSpec(
   @Autowired private val seriesRepository: SeriesRepository,
   @Autowired private val seriesMetadataRepository: SeriesMetadataRepository,
   @Autowired private val seriesLifecycle: SeriesLifecycle,

@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.get
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class ApiKeyTest(
+class ApiKeyApiSpec(
   @Autowired private val mockMvc: MockMvc,
   @Autowired private val userRepository: KomgaUserRepository,
   @Autowired private val komgaUserLifecycle: KomgaUserLifecycle,

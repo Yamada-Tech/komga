@@ -36,7 +36,7 @@ import org.springframework.test.web.servlet.post
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 @ActiveProfiles("test")
-class UserControllerTest(
+class UserControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
   @Autowired private val libraryRepository: LibraryRepository,
   @Autowired private val libraryLifecycle: LibraryLifecycle,

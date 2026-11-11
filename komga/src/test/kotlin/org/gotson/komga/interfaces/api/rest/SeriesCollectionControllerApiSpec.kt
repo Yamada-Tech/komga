@@ -28,7 +28,7 @@ import org.springframework.test.web.servlet.post
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class SeriesCollectionControllerTest(
+class SeriesCollectionControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
   @Autowired private val collectionLifecycle: SeriesCollectionLifecycle,
   @Autowired private val collectionRepository: SeriesCollectionRepository,

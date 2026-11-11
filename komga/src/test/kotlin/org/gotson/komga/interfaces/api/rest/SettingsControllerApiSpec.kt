@@ -19,7 +19,7 @@ import kotlin.time.Duration.Companion.days
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class SettingsControllerTest(
+class SettingsControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
   @Autowired private val komgaSettingsProvider: KomgaSettingsProvider,
 ) {

@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.patch
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 @ActiveProfiles("demo", "test")
-class UserControllerDemoTest(
+class UserControllerDemoApiSpec(
   @Autowired private val mockMvc: MockMvc,
 ) {
   @Test

@@ -23,7 +23,7 @@ import java.nio.file.Path
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class LibraryControllerTest(
+class LibraryControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
   @Autowired private val libraryRepository: LibraryRepository,
 ) {

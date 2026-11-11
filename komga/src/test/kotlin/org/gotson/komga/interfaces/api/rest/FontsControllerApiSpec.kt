@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.get
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class FontsControllerTest(
+class FontsControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
 ) {
   @Test

@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.patch
 
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class ClientSettingsControllerTest(
+class ClientSettingsControllerApiSpec(
   @Autowired private val mockMvc: MockMvc,
   @Autowired private val clientSettingsDtoDao: ClientSettingsDtoDao,
   @Autowired private val userRepository: KomgaUserRepository,
@@ -269,9 +269,9 @@ class ClientSettingsControllerTest(
         }
     }
 
-    private fun validKeys() = this@ClientSettingsControllerTest.validKeys()
+    private fun validKeys() = this@ClientSettingsControllerApiSpec.validKeys()
 
-    private fun invalidKeys() = this@ClientSettingsControllerTest.invalidKeys()
+    private fun invalidKeys() = this@ClientSettingsControllerApiSpec.invalidKeys()
   }
 
   @Nested
@@ -416,8 +416,8 @@ class ClientSettingsControllerTest(
         }
     }
 
-    private fun validKeys() = this@ClientSettingsControllerTest.validKeys()
+    private fun validKeys() = this@ClientSettingsControllerApiSpec.validKeys()
 
-    private fun invalidKeys() = this@ClientSettingsControllerTest.invalidKeys()
+    private fun invalidKeys() = this@ClientSettingsControllerApiSpec.invalidKeys()
   }
 }
